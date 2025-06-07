@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { X, PlusCircle, Check, ChevronsUpDown } from 'lucide-react';
+import { CardDescription } from '@/components/ui/card'; // Added import
 
 export interface Skill {
   name: string;
