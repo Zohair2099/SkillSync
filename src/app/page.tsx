@@ -76,7 +76,7 @@ export default function EmployMintPage() {
         const input: SkillBasedJobMatchingInput = {
           userSkills,
           jobTitle: jobMatchTitle,
-          jobDescription: jobMatchIdealDescription, // Renamed from jobMatchDescription to avoid conflict with AI output field
+          jobDescription: jobMatchIdealDescription, 
           country: jobMatchCountry || undefined,
           state: jobMatchState || undefined,
           minSalary: jobMatchMinSalary ? parseInt(jobMatchMinSalary) : undefined,
@@ -117,7 +117,7 @@ export default function EmployMintPage() {
       try {
         const result = await performJobFocusedSkillComparison({
           userSkills,
-          jobDescription: skillCompareJobDescription,
+          jobDescription: skillCompareJobDescription || undefined, // Pass undefined if empty
         });
         setSkillGapResult(result);
       } catch (error) {
@@ -140,6 +140,13 @@ export default function EmployMintPage() {
       }
     });
   }, [jobMatchResults, jobMatchSortOrder]);
+
+  useEffect(() => {
+    // Clear state selection if country is not USA
+    if (jobMatchCountry !== "USA") {
+      setJobMatchState("");
+    }
+  }, [jobMatchCountry]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -201,11 +208,15 @@ export default function EmployMintPage() {
                         </PopoverTrigger>
                         <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                           <Command>
-                            <CommandInput placeholder="Search or type new title..." />
+                            <CommandInput 
+                              value={jobMatchTitle} 
+                              onValueChange={setJobMatchTitle}
+                              placeholder="Search or type new title..." 
+                            />
                             <CommandList>
                               <CommandEmpty>No title found. Type to add new.</CommandEmpty>
                               <CommandGroup>
-                                {JOB_TITLES_PREDEFINED.map((title) => (
+                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).map((title) => (
                                   <CommandItem
                                     key={title}
                                     value={title}
@@ -229,10 +240,10 @@ export default function EmployMintPage() {
                       </Label>
                       <Select value={jobMatchCountry} onValueChange={setJobMatchCountry}>
                         <SelectTrigger id="jobMatchCountry" className="w-full bg-card">
-                          <SelectValue placeholder="Select Country" />
+                          <SelectValue placeholder="Any Country" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any Country</SelectItem>
+                          <SelectItem value="any-country-placeholder">Any Country</SelectItem> 
                           {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -244,10 +255,10 @@ export default function EmployMintPage() {
                         </Label>
                         <Select value={jobMatchState} onValueChange={setJobMatchState}>
                           <SelectTrigger id="jobMatchState" className="w-full bg-card">
-                            <SelectValue placeholder="Select State" />
+                            <SelectValue placeholder="Any State" />
                           </SelectTrigger>
                           <SelectContent>
-                             <SelectItem value="">Any State</SelectItem>
+                             <SelectItem value="any-state-placeholder">Any State</SelectItem>
                             {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                           </SelectContent>
                         </Select>
@@ -293,7 +304,7 @@ export default function EmployMintPage() {
                         <Label className="block text-sm font-medium text-foreground mb-1">Work Model (Optional)</Label>
                         <Select value={jobMatchWorkModel} onValueChange={(value: 'any' | 'on-site' | 'remote' | 'hybrid')=> setJobMatchWorkModel(value)}>
                             <SelectTrigger className="w-full bg-card">
-                                <SelectValue placeholder="Select Work Model" />
+                                <SelectValue placeholder="Any Work Model" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="any">Any</SelectItem>
@@ -335,10 +346,9 @@ export default function EmployMintPage() {
                           jobTitle={job.jobTitle}
                           companyName={job.companyName}
                           location={job.location}
-                          jobDescription={job.jobDescription} // This is the short description
+                          jobDescription={job.jobDescription} 
                           matchPercentage={job.matchPercentage}
                           rationale={job.rationale}
-                          // Detailed fields will be added later to JobRecommendationCard for expansion
                           responsibilities={job.responsibilities || []}
                           requiredSkills={job.requiredSkills || []}
                           preferredSkills={job.preferredSkills || []}
@@ -346,6 +356,7 @@ export default function EmployMintPage() {
                           educationLevel={job.educationLevel || ''}
                           employmentType={job.employmentType || ''}
                           salaryRange={job.salaryRange || ''}
+                          workModel={job.workModel}
                         />
                       ))}
                     </div>
@@ -407,4 +418,4 @@ export default function EmployMintPage() {
     </div>
   );
 }
-
+    
