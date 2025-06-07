@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -48,6 +49,15 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        // Added for 100% match gold color
+        yellow: {
+          DEFAULT: 'hsl(var(--yellow))', // Example HSL for gold/yellow
+          foreground: 'hsl(var(--yellow-foreground))', // Example HSL for text on gold/yellow
+          '400': 'hsl(var(--yellow-400))', // Specific shade if needed
+        },
+        orange: { // Ensuring orange is available for match percentages
+          '500': 'hsl(var(--orange-500))',
+        },
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
@@ -97,3 +107,4 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+

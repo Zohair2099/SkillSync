@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,13 +26,18 @@
     --accent: 125 39% 64%; /* Muted Green #81C784 */
     --accent-foreground: 0 0% 98%; /* White/Very Light Grey text on accent */
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84.2% 60.2%; /* Red for destructive actions / low match */
     --destructive-foreground: 0 0% 98%;
 
     --border: 214.3 31.8% 91.4%; /* Light border */
     --input: 214.3 31.8% 91.4%; /* Input border */
     --ring: 207 88% 60%; /* Ring color based on primary */
     
+    --yellow: 45 93% 57%; /* Gold/Yellow for 100% match */
+    --yellow-foreground: 45 93% 10%; /* Dark text on gold/yellow */
+    --yellow-400: 45 93% 57%; /* Specific shade for direct use */
+    --orange-500: 30 90% 55%; /* Orange for medium match */
+
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -39,7 +45,6 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Sidebar variables - can keep defaults or adjust if sidebar is used extensively */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -51,40 +56,53 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 207 88% 68%; /* Soft Blue #64B5F6 */
-    --primary-foreground: 222.2 84% 4.9%; /* Dark text on primary for dark mode */
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
+    --background: 220 13% 10%; /* Darker grey for dark mode */
+    --foreground: 0 0% 98%; /* Light text for dark mode */
+
+    --card: 220 13% 15%; /* Slightly lighter dark for cards */
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 13% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 207 80% 60%; /* Slightly adjusted blue for dark */
+    --primary-foreground: 210 40% 98%; /* Keep light text on primary */
+
+    --secondary: 220 13% 25%; 
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 220 13% 20%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 125 39% 64%; /* Muted Green #81C784 */
-    --accent-foreground: 0 0% 3.9%; /* Dark text on accent for dark mode */
-    --destructive: 0 62.8% 30.6%;
+
+    --accent: 125 50% 60%; /* Slightly adjusted green for dark */
+    --accent-foreground: 0 0% 98%; /* Keep light text on accent */
+
+    --destructive: 0 70% 55%; /* Adjusted red for dark */
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 207 88% 75%; /* Lighter ring for dark mode */
+
+    --border: 220 13% 30%; /* Darker border */
+    --input: 220 13% 28%; /* Darker input border */
+    --ring: 207 80% 65%; 
+
+    --yellow: 45 85% 55%; 
+    --yellow-foreground: 45 85% 8%; 
+    --yellow-400: 45 85% 55%;
+    --orange-500: 30 80% 50%;
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    /* Sidebar dark variables - can keep defaults or adjust */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 220 13% 12%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 207 80% 60%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 13% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 13% 25%;
+    --sidebar-ring: 207 80% 65%;
   }
 }
 
@@ -94,5 +112,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Ensure html also gets dark mode styling for consistent scrollbars etc. */
+  html.dark body {
+     @apply bg-background text-foreground;
   }
 }

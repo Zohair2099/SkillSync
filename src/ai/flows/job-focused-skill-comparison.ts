@@ -1,8 +1,10 @@
+
 // use server'
 
 /**
  * @fileOverview Compares user skills against job requirements (optional) and identifies skill gaps.
  * Provides interview tips if no gaps are found or if job description is not provided.
+ * Suggests job categories if no job description is provided.
  *
  * - jobFocusedSkillComparison - A function that analyzes job requirements against a user's skills.
  * - JobFocusedSkillComparisonInput - The input type for the jobFocusedSkillComparison function.
@@ -35,11 +37,15 @@ const JobFocusedSkillComparisonOutputSchema = z.object({
     .describe('A list of resources for learning the missing skills (if any).'),
   skillComparisonSummary: z
     .string()
-    .describe('A summary of the skill comparison between the job description (if provided) and the user skills.'),
+    .describe('A summary of the skill comparison between the job description (if provided) and the user skills. If no job description, summarize the general strength and applicability of the user skills.'),
   interviewTips: z
     .array(z.string())
     .optional()
-    .describe('A list of 3-5 helpful and actionable interview tips, provided if no skill gaps are found or if no job description was given and skills are generally strong.'),
+    .describe('A list of 3-5 helpful and actionable interview tips, provided if no significant skill gaps are found OR if no job description was given and skills are generally strong.'),
+  suggestedJobCategories: z
+    .array(z.string())
+    .optional()
+    .describe('If no job description was provided, this lists 2-3 types of job roles or career paths that might align well with the user\'s skills.')
 });
 export type JobFocusedSkillComparisonOutput = z.infer<typeof JobFocusedSkillComparisonOutputSchema>;
 
@@ -62,7 +68,7 @@ User Skills:
 Job Description:
 {{{jobDescription}}}
 {{else}}
-The user has not provided a specific job description. Please provide a general analysis of their skillset.
+The user has not provided a specific job description. Please provide a general analysis of their skillset and suggest some suitable job categories.
 {{/if}}
 
 Your tasks:
@@ -74,6 +80,9 @@ Your tasks:
     *   If no job description was provided AND the user has a reasonably strong and diverse skillset,
     Then provide a list of 3-5 helpful and actionable interview tips (e.g., "Research the company thoroughly", "Prepare STAR method stories for behavioral questions").
     *   Otherwise (if skills are missing for a provided job), do not provide interview tips (make it an empty array or omit the field).
+5.  Suggested Job Categories:
+    *   If no jobDescription was provided, suggest 2-3 types of job roles or career paths (e.g., "Data Analyst", "Frontend Developer", "Digital Marketing Specialist") that seem like a good fit for the user's skills. Keep these brief.
+    *   If a jobDescription was provided, this field should be an empty array or omitted.
 
 Structure your response according to the output schema.
 `,

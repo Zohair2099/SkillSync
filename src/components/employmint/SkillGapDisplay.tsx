@@ -1,15 +1,17 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain } from 'lucide-react';
+import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase } from 'lucide-react';
 
 interface SkillGapDisplayProps {
   missingSkills: string[];
   suggestedResources: string[];
   skillComparisonSummary: string;
   interviewTips?: string[];
+  suggestedJobCategories?: string[];
 }
 
-export function SkillGapDisplay({ missingSkills, suggestedResources, skillComparisonSummary, interviewTips }: SkillGapDisplayProps) {
+export function SkillGapDisplay({ missingSkills, suggestedResources, skillComparisonSummary, interviewTips, suggestedJobCategories }: SkillGapDisplayProps) {
   const noGapsFound = missingSkills.length === 0;
 
   return (
@@ -25,7 +27,7 @@ export function SkillGapDisplay({ missingSkills, suggestedResources, skillCompar
         {noGapsFound ? (
           <div className="text-center p-4 rounded-md bg-accent/10">
             <PartyPopper className="h-12 w-12 text-accent mx-auto mb-3" />
-            <p className="text-lg font-semibold text-accent-foreground">No significant skill gaps identified!</p>
+            <p className="text-lg font-semibold text-foreground">No significant skill gaps identified!</p>
             <p className="text-sm text-muted-foreground mt-1">
               You can apply for this job based on your current skills.
             </p>
@@ -60,6 +62,22 @@ export function SkillGapDisplay({ missingSkills, suggestedResources, skillCompar
           </div>
         )}
         
+        {suggestedJobCategories && suggestedJobCategories.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center">
+              <Briefcase className="mr-2 h-5 w-5 text-primary" />
+              Suggested Job Categories
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {suggestedJobCategories.map(category => (
+                <Badge key={category} variant="secondary" className="py-1 px-3 text-sm">
+                  {category}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {interviewTips && interviewTips.length > 0 && (
            <div>
             <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center">

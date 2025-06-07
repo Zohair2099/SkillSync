@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useTransition, useMemo } from 'react';
+import React, { useState, useTransition, useMemo, useEffect } from 'react';
 import { Header } from '@/components/employmint/Header';
 import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -11,25 +12,43 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, AlertCircle, ListFilter } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Loader2, ListFilter, ChevronsUpDown } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
-import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching'; // This is now an array
+import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 
-type JobMatchResultItem = SkillBasedJobMatchingOutput[0]; // Assuming SkillBasedJobMatchingOutput is an array
+type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
+
+// Minimal lists for demo purposes
+const COUNTRIES = ["USA", "Canada", "UK", "Germany", "India"];
+const US_STATES = ["California", "New York", "Texas", "Florida", "Illinois"];
+const JOB_TITLES_PREDEFINED = ["Software Engineer", "Product Manager", "Data Scientist", "UX Designer", "Marketing Manager", "Sales Representative", "Project Manager"];
 
 export default function EmployMintPage() {
+  // Profile State
+  const [userName, setUserName] = useState('');
+  const [userAge, setUserAge] = useState('');
   const [userSkills, setUserSkills] = useState<Skill[]>([]);
   
   // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
-  const [jobMatchDescription, setJobMatchDescription] = useState('');
+  const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
+  const [jobMatchIdealDescription, setJobMatchIdealDescription] = useState('');
+  const [jobMatchCountry, setJobMatchCountry] = useState('');
+  const [jobMatchState, setJobMatchState] = useState(''); // Relevant if country is USA, for example
+  const [jobMatchMinSalary, setJobMatchMinSalary] = useState('');
+  const [jobMatchMaxSalary, setJobMatchMaxSalary] = useState('');
+  const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
   const [jobMatchResults, setJobMatchResults] = useState<JobMatchResultItem[]>([]);
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
   
   // State for Job-Focused Skill Comparison
-  const [skillCompareDescription, setSkillCompareDescription] = useState('');
+  const [skillCompareJobDescription, setSkillCompareJobDescription] = useState('');
   const [skillGapResult, setSkillGapResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
 
   const [isJobMatchingLoading, startJobMatchingTransition] = useTransition();
@@ -43,7 +62,7 @@ export default function EmployMintPage() {
 
   const handleJobMatchSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (userSkills.length === 0 || !jobMatchTitle || !jobMatchDescription) {
+    if (userSkills.length === 0 || !jobMatchTitle || !jobMatchIdealDescription) {
       toast({
         title: "Missing Information",
         description: "Please provide your skills, a desired job title, and an ideal job description.",
@@ -54,11 +73,17 @@ export default function EmployMintPage() {
     setJobMatchResults([]);
     startJobMatchingTransition(async () => {
       try {
-        const results = await performSkillBasedJobMatching({
+        const input: SkillBasedJobMatchingInput = {
           userSkills,
           jobTitle: jobMatchTitle,
-          jobDescription: jobMatchDescription,
-        });
+          jobDescription: jobMatchIdealDescription, // Renamed from jobMatchDescription to avoid conflict with AI output field
+          country: jobMatchCountry || undefined,
+          state: jobMatchState || undefined,
+          minSalary: jobMatchMinSalary ? parseInt(jobMatchMinSalary) : undefined,
+          maxSalary: jobMatchMaxSalary ? parseInt(jobMatchMaxSalary) : undefined,
+          workModel: jobMatchWorkModel === 'any' ? undefined : jobMatchWorkModel,
+        };
+        const results = await performSkillBasedJobMatching(input);
         setJobMatchResults(results);
          if (results.length === 0) {
           toast({
@@ -79,7 +104,7 @@ export default function EmployMintPage() {
 
   const handleSkillCompareSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (userSkills.length === 0) { // Job description is now optional
+    if (userSkills.length === 0) {
       toast({
         title: "Missing Skills",
         description: "Please provide your skills.",
@@ -92,7 +117,7 @@ export default function EmployMintPage() {
       try {
         const result = await performJobFocusedSkillComparison({
           userSkills,
-          jobDescription: skillCompareDescription, // Can be empty
+          jobDescription: skillCompareJobDescription,
         });
         setSkillGapResult(result);
       } catch (error) {
@@ -123,9 +148,19 @@ export default function EmployMintPage() {
         <Card className="shadow-lg rounded-xl">
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-foreground">Your Profile</CardTitle>
-            <CardDescription>Tell us about your skills and experience to get personalized job insights.</CardDescription>
+            <CardDescription>Tell us about yourself to get personalized job insights.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="userName" className="text-sm font-medium">Name</Label>
+                <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Your Name" className="mt-1 bg-card" />
+              </div>
+              <div>
+                <Label htmlFor="userAge" className="text-sm font-medium">Age</Label>
+                <Input id="userAge" type="number" value={userAge} onChange={(e) => setUserAge(e.target.value)} placeholder="Your Age" className="mt-1 bg-card" />
+              </div>
+            </div>
             <SkillInput skills={userSkills} onSkillsChange={handleSkillsChange} />
           </CardContent>
         </Card>
@@ -141,37 +176,133 @@ export default function EmployMintPage() {
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
-                  Enter your ideal job title and description to discover potential job matches.
+                  Enter your ideal job criteria to discover potential job matches.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleJobMatchSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="jobMatchTitle" className="block text-sm font-medium text-foreground mb-1">
+                        Ideal Job Title
+                      </Label>
+                      <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openJobTitleCombobox}
+                            className="w-full justify-between text-muted-foreground bg-card"
+                            id="jobMatchTitle"
+                          >
+                            {jobMatchTitle || "Select or type job title..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                          <Command>
+                            <CommandInput placeholder="Search or type new title..." />
+                            <CommandList>
+                              <CommandEmpty>No title found. Type to add new.</CommandEmpty>
+                              <CommandGroup>
+                                {JOB_TITLES_PREDEFINED.map((title) => (
+                                  <CommandItem
+                                    key={title}
+                                    value={title}
+                                    onSelect={(currentValue) => {
+                                      setJobMatchTitle(currentValue === jobMatchTitle.toLowerCase() ? '' : currentValue);
+                                      setOpenJobTitleCombobox(false);
+                                    }}
+                                  >
+                                    {title}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div>
+                      <Label htmlFor="jobMatchCountry" className="block text-sm font-medium text-foreground mb-1">
+                        Country (Optional)
+                      </Label>
+                      <Select value={jobMatchCountry} onValueChange={setJobMatchCountry}>
+                        <SelectTrigger id="jobMatchCountry" className="w-full bg-card">
+                          <SelectValue placeholder="Select Country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Any Country</SelectItem>
+                          {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {jobMatchCountry === "USA" && (
+                       <div>
+                        <Label htmlFor="jobMatchState" className="block text-sm font-medium text-foreground mb-1">
+                          State (USA) (Optional)
+                        </Label>
+                        <Select value={jobMatchState} onValueChange={setJobMatchState}>
+                          <SelectTrigger id="jobMatchState" className="w-full bg-card">
+                            <SelectValue placeholder="Select State" />
+                          </SelectTrigger>
+                          <SelectContent>
+                             <SelectItem value="">Any State</SelectItem>
+                            {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
                   <div>
-                    <label htmlFor="jobMatchTitle" className="block text-sm font-medium text-foreground mb-1">
-                      Ideal Job Title
-                    </label>
-                    <Input
-                      id="jobMatchTitle"
-                      value={jobMatchTitle}
-                      onChange={(e) => setJobMatchTitle(e.target.value)}
-                      placeholder="e.g., Senior Software Engineer, Marketing Manager"
+                    <Label htmlFor="jobMatchIdealDescription" className="block text-sm font-medium text-foreground mb-1">
+                      Ideal Job Description / Responsibilities
+                    </Label>
+                    <Textarea
+                      id="jobMatchIdealDescription"
+                      value={jobMatchIdealDescription}
+                      onChange={(e) => setJobMatchIdealDescription(e.target.value)}
+                      placeholder="Describe your ideal role, key responsibilities, or paste a sample job description..."
+                      rows={4}
                       required
                       className="bg-card"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="jobMatchDescription" className="block text-sm font-medium text-foreground mb-1">
-                      Ideal Job Description / Responsibilities
-                    </label>
-                    <Textarea
-                      id="jobMatchDescription"
-                      value={jobMatchDescription}
-                      onChange={(e) => setJobMatchDescription(e.target.value)}
-                      placeholder="Describe your ideal role, key responsibilities, or paste a sample job description..."
-                      rows={6}
-                      required
-                      className="bg-card"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div>
+                        <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (Optional)</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={jobMatchMinSalary}
+                            onChange={(e) => setJobMatchMinSalary(e.target.value)}
+                            placeholder="Min Salary"
+                            className="bg-card"
+                          />
+                          <span>-</span>
+                          <Input
+                            type="number"
+                            value={jobMatchMaxSalary}
+                            onChange={(e) => setJobMatchMaxSalary(e.target.value)}
+                            placeholder="Max Salary"
+                            className="bg-card"
+                          />
+                        </div>
+                     </div>
+                     <div>
+                        <Label className="block text-sm font-medium text-foreground mb-1">Work Model (Optional)</Label>
+                        <Select value={jobMatchWorkModel} onValueChange={(value: 'any' | 'on-site' | 'remote' | 'hybrid')=> setJobMatchWorkModel(value)}>
+                            <SelectTrigger className="w-full bg-card">
+                                <SelectValue placeholder="Select Work Model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="any">Any</SelectItem>
+                                <SelectItem value="on-site">On-site</SelectItem>
+                                <SelectItem value="remote">Remote</SelectItem>
+                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                            </SelectContent>
+                        </Select>
+                     </div>
                   </div>
                   <Button type="submit" disabled={isJobMatchingLoading || userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
                     {isJobMatchingLoading ? (
@@ -200,13 +331,21 @@ export default function EmployMintPage() {
                     <div className="space-y-4">
                       {sortedJobMatchResults.map((job, index) => (
                         <JobRecommendationCard
-                          key={index} // Ideally use a unique ID from the job data if available
+                          key={index}
                           jobTitle={job.jobTitle}
                           companyName={job.companyName}
                           location={job.location}
-                          jobDescription={job.jobDescription}
+                          jobDescription={job.jobDescription} // This is the short description
                           matchPercentage={job.matchPercentage}
                           rationale={job.rationale}
+                          // Detailed fields will be added later to JobRecommendationCard for expansion
+                          responsibilities={job.responsibilities || []}
+                          requiredSkills={job.requiredSkills || []}
+                          preferredSkills={job.preferredSkills || []}
+                          experienceLevel={job.experienceLevel || ''}
+                          educationLevel={job.educationLevel || ''}
+                          employmentType={job.employmentType || ''}
+                          salaryRange={job.salaryRange || ''}
                         />
                       ))}
                     </div>
@@ -227,13 +366,13 @@ export default function EmployMintPage() {
               <CardContent>
                 <form onSubmit={handleSkillCompareSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="skillCompareDescription" className="block text-sm font-medium text-foreground mb-1">
+                    <Label htmlFor="skillCompareJobDescription" className="block text-sm font-medium text-foreground mb-1">
                       Job Description (Optional)
-                    </label>
+                    </Label>
                     <Textarea
-                      id="skillCompareDescription"
-                      value={skillCompareDescription}
-                      onChange={(e) => setSkillCompareDescription(e.target.value)}
+                      id="skillCompareJobDescription"
+                      value={skillCompareJobDescription}
+                      onChange={(e) => setSkillCompareJobDescription(e.target.value)}
                       placeholder="Paste a job description here to analyze against your skills, or leave blank for general advice..."
                       rows={8}
                       className="bg-card"
@@ -253,6 +392,7 @@ export default function EmployMintPage() {
                       suggestedResources={skillGapResult.suggestedResources}
                       skillComparisonSummary={skillGapResult.skillComparisonSummary}
                       interviewTips={skillGapResult.interviewTips}
+                      suggestedJobCategories={skillGapResult.suggestedJobCategories}
                     />
                   </div>
                 )}
@@ -267,3 +407,4 @@ export default function EmployMintPage() {
     </div>
   );
 }
+
