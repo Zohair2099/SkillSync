@@ -9,13 +9,14 @@ import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; // Added CardFooter
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, UserCircle, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, UserCircle, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
@@ -85,51 +86,62 @@ const JOB_TITLES_PREDEFINED = [
 
 const employMintPlusFeatures = [
   {
+    id: "skill-dev-path",
     icon: Route,
     title: "Personalized Skill Development Path",
-    description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations from platforms like Coursera, Udemy, or LinkedIn Learning to bridge the gap."
+    description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations from platforms like Coursera, Udemy, or LinkedIn Learning to bridge the gap.",
+    interactive: true,
   },
   {
+    id: "resume-builder",
     icon: FileText,
     title: "AI Resume Builder",
     description: "Automatically generate a customized resume based on your skills, experiences, and job preferences, with suggestions for improvement to help you stand out."
   },
   {
+    id: "soft-skill-assessment",
     icon: MessageSquare,
     title: "Soft Skill Assessment",
     description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement."
   },
   {
+    id: "market-trends",
     icon: BarChart3,
     title: "Real-Time Job Market Trends",
     description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields."
   },
   {
+    id: "interview-practice",
     icon: Mic,
     title: "AI Interview Practice",
     description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback."
   },
   {
+    id: "social-networking",
     icon: Share2,
     title: "Social Integration & Networking",
     description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences."
   },
   {
+    id: "company-culture",
     icon: Building,
     title: "Company Culture & Work Environment Matching",
     description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings."
   },
   {
+    id: "notifications",
     icon: Bell,
     title: "Smart Notifications & Reminders",
     description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile."
   },
   {
+    id: "app-tracker",
     icon: ClipboardCheck,
     title: "Job Application Tracker",
     description: "Track your job applications, interviews, and follow-up actions in one organized place."
   },
   {
+    id: "salary-estimator",
     icon: SalaryIcon,
     title: "AI-Based Salary Estimator",
     description: "Predict expected salary ranges based on your experience, skills, and job role using AI-powered market data."
@@ -152,13 +164,20 @@ export default function EmployMintPage() {
   const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
   
-  // State for Job-Focused Skill Comparison
+  // State for Job-Focused Skill Comparison (main tab)
   const [skillCompareJobDescription, setSkillCompareJobDescription] = useState('');
   const [skillGapResult, setSkillGapResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
 
   const [isJobMatchingLoading, startJobMatchingTransition] = useTransition();
   const [isSkillComparingLoading, startSkillComparingTransition] = useTransition();
   
+  // State for Personalized Skill Development Path Dialog
+  const [isSkillPathDialogOpen, setIsSkillPathDialogOpen] = useState(false);
+  const [skillPathJobDesc, setSkillPathJobDesc] = useState('');
+  const [skillPathResult, setSkillPathResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
+  const [isSkillPathLoading, startSkillPathTransition] = useTransition();
+
+
   const { toast } = useToast();
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
@@ -241,6 +260,35 @@ export default function EmployMintPage() {
       }
     });
   };
+  
+  const handleSkillPathSubmit = async () => {
+    if (userSkills.length === 0) {
+      toast({
+        title: "Missing Skills",
+        description: "Please add your skills in your Profile first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSkillPathResult(null);
+    startSkillPathTransition(async () => {
+      try {
+        const result = await performJobFocusedSkillComparison({
+          userSkills,
+          jobDescription: skillPathJobDesc || undefined,
+        });
+        setSkillPathResult(result);
+      } catch (error) {
+        console.error("Error generating skill path:", error);
+        toast({
+          title: "Error Generating Path",
+          description: (error as Error).message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
 
   const sortedJobMatchResults = useMemo(() => {
     return [...jobMatchResults].sort((a, b) => {
@@ -280,7 +328,7 @@ export default function EmployMintPage() {
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
                   Enter your ideal job criteria to discover potential job matches. The AI will generate example job postings based on your input.
-                  Ensure your skills are up-to-date in the Profile section (top right icon).
+                  Ensure your skills are up-to-date in your Profile (icon in header).
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -448,7 +496,7 @@ export default function EmployMintPage() {
                         <JobRecommendationCard
                           key={`${job.jobTitle}-${index}-${job.companyName}`} 
                           job={job}
-                          jobIndex={index} 
+                          jobIndex={jobMatchResults.findIndex(j => j === job)} // Find original index for context
                         />
                       ))}
                     </div>
@@ -465,7 +513,7 @@ export default function EmployMintPage() {
                 <CardDescription className="space-y-2">
                   <p>
                     This feature helps you understand how your current skillset aligns with specific job requirements or general career paths. 
-                    Your skills from the Profile section will be used for this analysis.
+                    Your skills from your Profile will be used for this analysis.
                   </p>
                   <p>
                     <strong>Option 1: Analyze a Specific Job Posting.</strong> Paste a job description from a posting you're interested in. The AI will provide a detailed analysis of matching and missing skills, along with suggested learning resources tailored to that role.
@@ -521,22 +569,85 @@ export default function EmployMintPage() {
                   <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
                 </CardTitle>
                 <CardDescription>
-                  Unlock advanced tools and personalized guidance to supercharge your career journey. (Features listed below are conceptual and coming soon!)
+                  Unlock advanced tools and personalized guidance to supercharge your career journey. (Features listed below are conceptual or provide access to existing functionalities.)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
-                  {employMintPlusFeatures.map((feature, index) => (
-                    <Card key={index} className="bg-secondary/30 hover:shadow-md transition-shadow">
+                  {employMintPlusFeatures.map((feature) => (
+                    <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
                       <CardHeader>
                         <CardTitle className="text-lg text-primary flex items-center">
                           <feature.icon className="mr-2 h-5 w-5" />
                           {feature.title}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="flex-grow">
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                       </CardContent>
+                      {feature.id === "skill-dev-path" && (
+                        <CardFooter>
+                          <Dialog open={isSkillPathDialogOpen} onOpenChange={setIsSkillPathDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+                                <Route className="mr-2 h-4 w-4"/> Get Your Path
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
+                              <DialogHeader>
+                                <DialogTitle className="font-headline text-2xl text-primary">Personalized Skill Development Path</DialogTitle>
+                                <DialogDescription>
+                                  Enter a target job description or role. The AI will analyze it against your profile skills and suggest a development path.
+                                  If you leave it blank, it will provide general career advice based on your skills.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4 flex-grow overflow-y-auto pr-2">
+                                <div>
+                                  <Label htmlFor="skillPathJobDesc" className="block text-sm font-medium text-foreground mb-1">
+                                    Target Job Description / Role (Optional)
+                                  </Label>
+                                  <Textarea
+                                    id="skillPathJobDesc"
+                                    value={skillPathJobDesc}
+                                    onChange={(e) => setSkillPathJobDesc(e.target.value)}
+                                    placeholder="e.g., 'Senior Frontend Developer at TechCorp' or paste full job description..."
+                                    rows={5}
+                                    className="bg-card"
+                                  />
+                                </div>
+                                <Button onClick={handleSkillPathSubmit} disabled={isSkillPathLoading || userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                                  {isSkillPathLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                  Generate Development Path
+                                </Button>
+                                {isSkillPathLoading && (
+                                  <div className="flex items-center justify-center py-6">
+                                      <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
+                                      <p className="text-muted-foreground">Generating your path...</p>
+                                  </div>
+                                )}
+                                {skillPathResult && !isSkillPathLoading && (
+                                  <div className="mt-6">
+                                    <SkillGapDisplay
+                                      missingSkills={skillPathResult.missingSkills}
+                                      suggestedHardSkillsResources={skillPathResult.suggestedHardSkillsResources}
+                                      skillComparisonSummary={skillPathResult.skillComparisonSummary}
+                                      interviewTips={skillPathResult.interviewTips}
+                                      suggestedJobCategories={skillPathResult.suggestedJobCategories}
+                                      suggestedSoftSkills={skillPathResult.suggestedSoftSkills}
+                                      mentorshipAdvice={skillPathResult.mentorshipAdvice}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <DialogFooter className="mt-auto pt-4 border-t">
+                                <DialogClose asChild>
+                                  <Button type="button" variant="outline">Close</Button>
+                                </DialogClose>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </CardFooter>
+                      )}
                     </Card>
                   ))}
                 </div>
