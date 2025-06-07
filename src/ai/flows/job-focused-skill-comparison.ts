@@ -3,7 +3,7 @@
 
 /**
  * @fileOverview Compares user skills against job requirements (optional) and identifies skill gaps.
- * Provides interview tips, suggests job categories (with potential salary ranges), soft skills, learning resources, and mentorship advice.
+ * Provides interview tips, suggests job categories (with potential salary ranges), soft skills, learning resources, mentorship advice, and a skill development roadmap.
  *
  * - jobFocusedSkillComparison - A function that analyzes job requirements against a user's skills.
  * - JobFocusedSkillComparisonInput - The input type for the jobFocusedSkillComparison function.
@@ -32,6 +32,12 @@ const SuggestedJobCategorySchema = z.object({
     estimatedSalaryRange: z.string().optional().describe("An estimated typical annual salary range for this category (e.g., '$70,000 - $90,000 USD'). Omit if not commonly known or too variable.")
 });
 
+const RoadmapStepSchema = z.object({
+  stepTitle: z.string().describe("A concise title for this step or topic in the roadmap (e.g., 'Master JavaScript Fundamentals')."),
+  stepDetails: z.string().describe("More detailed explanation, key concepts, or sub-tasks for this step."),
+  difficulty: z.string().optional().describe("Estimated difficulty (e.g., 'Beginner', 'Intermediate', 'Advanced', or 'Foundational').")
+});
+
 const JobFocusedSkillComparisonOutputSchema = z.object({
   missingSkills: z
     .array(z.string())
@@ -57,7 +63,11 @@ const JobFocusedSkillComparisonOutputSchema = z.object({
   mentorshipAdvice: z
     .string()
     .optional()
-    .describe("General advice (2-3 sentences) on the importance of mentorship. Suggest actionable ways to find mentors (e.g., 'Leverage LinkedIn to connect with professionals...', 'Attend industry meetups or virtual conferences...'). Optionally, mention types of thought leaders or communities (e.g., 'Follow AI experts on X/Twitter', 'Join open-source communities on GitHub').")
+    .describe("General advice (2-3 sentences) on the importance of mentorship. Suggest actionable ways to find mentors (e.g., 'Leverage LinkedIn to connect with professionals...', 'Attend industry meetups or virtual conferences...'). Optionally, mention types of thought leaders or communities (e.g., 'Follow AI experts on X/Twitter', 'Join open-source communities on GitHub')."),
+  skillDevelopmentRoadmap: z
+    .array(RoadmapStepSchema)
+    .optional()
+    .describe("A structured, ordered roadmap of 3-7 steps for acquiring missing skills or advancing in a career path, from foundational to advanced. Include if missing skills are identified or if general career advice is sought without a specific job description.")
 });
 export type JobFocusedSkillComparisonOutput = z.infer<typeof JobFocusedSkillComparisonOutputSchema>;
 
@@ -97,6 +107,12 @@ Your tasks are to provide:
     *   If a jobDescription WAS provided, this field should be an empty array or omitted.
 6.  **Suggested Soft Skills**: (Optional) Provide a list of 2-4 relevant soft skills with a brief (1-sentence) explanation of their importance in a professional context or for the type of role implied. Examples: "Problem-Solving: Demonstrate your ability to analyze complex issues and devise effective solutions.", "Adaptability: Show your capacity to adjust to new challenges and work environments effectively."
 7.  **Mentorship Advice**: (Optional) Provide actionable advice (2-3 sentences) on finding mentors and the value of networking. Examples: "Seek mentors on LinkedIn by searching for professionals in your target roles and sending personalized connection requests.", "Attend virtual industry events or webinars to learn from experts and expand your network.", "Follow influential figures and communities in fields like [User's Field, if inferable, e.g., 'UX Design'] on platforms such as Medium or X (formerly Twitter) for insights."
+8.  **Skill Development Roadmap**: (Optional) If missing skills are identified OR if general career advice is being provided (no job description), generate a structured, step-by-step roadmap to guide the user.
+    *   The roadmap should consist of 3-7 logical steps, ordered from foundational/easiest to more advanced/hardest (or a logical learning progression).
+    *   For each step, provide a clear 'stepTitle' (e.g., "Master JavaScript Fundamentals", "Build a Portfolio Project with React", "Learn Advanced Python for Data Science").
+    *   Also provide 'stepDetails' with a brief explanation or key sub-topics for that step.
+    *   Optionally, indicate a 'difficulty' (e.g., "Beginner", "Intermediate", "Advanced", "Foundational") for each step.
+    *   This roadmap should be practical and actionable. Focus on skills relevant to the identified gaps or the user's general profile. If no specific skills are missing (e.g., user is well-qualified for a job or has very strong general skills), this roadmap can focus on general career advancement or specialization within their field.
 
 Structure your response strictly according to the output schema. Ensure all fields are populated appropriately based on the context (job description provided or not).
 `,

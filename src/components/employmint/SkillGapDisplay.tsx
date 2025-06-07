@@ -1,12 +1,18 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info } from 'lucide-react'; // Added DollarSign, Info
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'; // Added Accordion
+import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface SuggestedJobCategory {
   categoryName: string;
   estimatedSalaryRange?: string;
+}
+
+interface RoadmapStep {
+  stepTitle: string;
+  stepDetails: string;
+  difficulty?: string;
 }
 
 interface SkillGapDisplayProps {
@@ -14,9 +20,10 @@ interface SkillGapDisplayProps {
   suggestedHardSkillsResources: string[]; 
   skillComparisonSummary: string;
   interviewTips?: string[];
-  suggestedJobCategories?: SuggestedJobCategory[]; // Updated type
+  suggestedJobCategories?: SuggestedJobCategory[];
   suggestedSoftSkills?: string[]; 
-  mentorshipAdvice?: string; 
+  mentorshipAdvice?: string;
+  skillDevelopmentRoadmap?: RoadmapStep[];
 }
 
 export function SkillGapDisplay({ 
@@ -26,7 +33,8 @@ export function SkillGapDisplay({
   interviewTips, 
   suggestedJobCategories,
   suggestedSoftSkills,
-  mentorshipAdvice 
+  mentorshipAdvice,
+  skillDevelopmentRoadmap
 }: SkillGapDisplayProps) {
   const noGapsFound = !missingSkills || missingSkills.length === 0;
   const isGeneralAnalysis = !skillComparisonSummary.toLowerCase().includes("specific job") && (suggestedJobCategories && suggestedJobCategories.length > 0);
@@ -66,6 +74,37 @@ export function SkillGapDisplay({
               </div>
             </div>
           )
+        )}
+
+        {skillDevelopmentRoadmap && skillDevelopmentRoadmap.length > 0 && (
+          <Card className="bg-secondary/30 mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center text-primary">
+                <Map className="mr-2 h-5 w-5" />
+                Your Development Roadmap
+              </CardTitle>
+              <CardDescription>
+                A step-by-step guide to help you acquire necessary skills or advance your career.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {skillDevelopmentRoadmap.map((step, index) => (
+                <div key={index} className="p-3 border rounded-md bg-card shadow-sm">
+                  <div className="flex justify-between items-start mb-1">
+                    <h4 className="font-semibold text-md text-foreground">
+                      {`${index + 1}. ${step.stepTitle}`}
+                    </h4>
+                    {step.difficulty && (
+                      <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        {step.difficulty}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{step.stepDetails}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         )}
 
         {suggestedHardSkillsResources && suggestedHardSkillsResources.length > 0 && (

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowLeft, Brain } from 'lucide-react';
+import { Loader2, ArrowLeft, Brain, Download } from 'lucide-react';
 import { performJobFocusedSkillComparison } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
@@ -41,10 +41,10 @@ export default function PersonalizedSkillPathPage() {
           jobDescription: jobDescription || undefined,
         });
         setSkillPathResult(result);
-        if (!result.missingSkills?.length && !result.suggestedJobCategories?.length) {
+        if (!result.missingSkills?.length && !result.suggestedJobCategories?.length && !result.skillDevelopmentRoadmap?.length) {
             toast({
                 title: "Analysis Complete",
-                description: "General career advice provided. No specific skill gaps for the input or strong alignment found.",
+                description: "General career advice provided. No specific skill gaps for the input or strong alignment found for a detailed roadmap.",
             });
         }
       } catch (error) {
@@ -56,6 +56,18 @@ export default function PersonalizedSkillPathPage() {
         });
       }
     });
+  };
+
+  const handleDownloadPdf = () => {
+    // Placeholder for PDF generation. 
+    // In a real app, this could use window.print() with print-specific CSS,
+    // or a library like jsPDF + html2canvas.
+    toast({
+      title: "PDF Download (Placeholder)",
+      description: "This feature will be implemented soon. For now, you can use your browser's print to PDF function.",
+    });
+    // Example: window.print(); 
+    // (Requires careful CSS @media print styling for good results)
   };
 
   return (
@@ -76,8 +88,8 @@ export default function PersonalizedSkillPathPage() {
               <Brain className="mr-3 h-8 w-8" /> Personalized Skill Development Path
             </CardTitle>
             <CardDescription>
-              Enter a target job description or role below. The AI will analyze it against your profile skills (from the Profile page) and suggest a development path.
-              If you leave the field blank, it will provide general career advice based on your current skills.
+              Enter a target job description or role below. The AI will analyze it against your profile skills (from the Profile page) and suggest a development path including a step-by-step roadmap.
+              If you leave the field blank, it will provide general career advice and a generic roadmap based on your current skills.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -112,15 +124,21 @@ export default function PersonalizedSkillPathPage() {
 
           {skillPathResult && !isLoading && (
             <CardFooter className="flex flex-col items-start p-6 border-t">
-              <h3 className="text-xl font-semibold text-foreground mb-4">Your Personalized Path & Advice:</h3>
+              <div className="w-full flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-foreground">Your Personalized Path & Advice:</h3>
+                <Button variant="outline" onClick={handleDownloadPdf}>
+                  <Download className="mr-2 h-4 w-4" /> Download as PDF (Placeholder)
+                </Button>
+              </div>
               <SkillGapDisplay
-                missingSkills={skillPathResult.missingSkills}
-                suggestedHardSkillsResources={skillPathResult.suggestedHardSkillsResources}
-                skillComparisonSummary={skillPathResult.skillComparisonSummary}
+                missingSkills={skillPathResult.missingSkills || []}
+                suggestedHardSkillsResources={skillPathResult.suggestedHardSkillsResources || []}
+                skillComparisonSummary={skillPathResult.skillComparisonSummary || "Analysis summary pending."}
                 interviewTips={skillPathResult.interviewTips}
                 suggestedJobCategories={skillPathResult.suggestedJobCategories}
                 suggestedSoftSkills={skillPathResult.suggestedSoftSkills}
                 mentorshipAdvice={skillPathResult.mentorshipAdvice}
+                skillDevelopmentRoadmap={skillPathResult.skillDevelopmentRoadmap}
               />
             </CardFooter>
           )}
@@ -132,3 +150,4 @@ export default function PersonalizedSkillPathPage() {
     </div>
   );
 }
+
