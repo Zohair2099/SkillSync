@@ -16,7 +16,8 @@ import { ArrowLeft, Building2, LocateFixed, DollarSign, BriefcaseBusiness, Check
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
+import Link from 'next/link';
+import { cn } from "@/lib/utils"; // Added import
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -222,8 +223,7 @@ export default function JobDetailsPage() {
               </div>
             )}
             
-            {/* Combined Required and Preferred Skills if job.requiredSkills exists from matching AI */}
-             {(job.requiredSkills && job.requiredSkills.length > 0) || (job.preferredSkills && job.preferredSkills.length > 0) ? (
+            {(job.requiredSkills && job.requiredSkills.length > 0) || (job.preferredSkills && job.preferredSkills.length > 0) ? (
               <div>
                 <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center"><CheckCircle className="mr-2 h-5 w-5 text-primary" />Key Skills</h3>
                 {job.requiredSkills && job.requiredSkills.length > 0 && (
@@ -275,7 +275,6 @@ export default function JobDetailsPage() {
           </CardContent>
         </Card>
         
-        {/* Skill Comparison Section */}
         <Card className="shadow-xl rounded-xl">
           <CardHeader>
             <CardTitle className="font-headline text-2xl text-primary flex items-center">
