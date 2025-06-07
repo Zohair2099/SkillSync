@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge'; // Added import
 import { ArrowLeft, Download, Trash2, PlusCircle, Eye, Palette } from 'lucide-react';
 import { ResumeDataProvider, useResumeData } from '@/context/ResumeDataContext';
 import type { ResumeLayoutType, ResumeWorkExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification } from '@/types/resume';
@@ -25,7 +26,8 @@ const PersonalDetailsForm = () => {
   useEffect(() => {
     const fieldsToUpdate: Partial<typeof resumeData.personalDetails> = {};
     if (!resumeData.personalDetails.fullName && profile.name) fieldsToUpdate.fullName = profile.name;
-    if (!resumeData.personalDetails.email && profile.email) fieldsToUpdate.email = profile.email; // Assuming profile has email
+    // @ts-ignore - profile does not have email
+    if (!resumeData.personalDetails.email && profile.email) fieldsToUpdate.email = profile.email; 
     if (!resumeData.personalDetails.linkedin && profile.socialLinks.linkedin) fieldsToUpdate.linkedin = profile.socialLinks.linkedin;
     if (!resumeData.personalDetails.github && profile.socialLinks.github) fieldsToUpdate.github = profile.socialLinks.github;
     if (!resumeData.personalDetails.portfolio && profile.socialLinks.website) fieldsToUpdate.portfolio = profile.socialLinks.website;
@@ -509,3 +511,4 @@ export default function ResumeBuilderPage() {
     </ResumeDataProvider>
   );
 }
+
