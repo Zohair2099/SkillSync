@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
+import Link from 'next/link'; // Added Link import
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UploadCloud, Linkedin, Github, XCircleIcon, Globe } from 'lucide-react'; // XCircleIcon for X.com, Globe for generic website
+import { UploadCloud, Linkedin, Github, XCircleIcon, Globe, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
 
@@ -144,8 +145,14 @@ export default function ProfilePage() {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="border-t pt-6">
-            <Button onClick={handleSaveProfile} size="lg" className="w-full md:w-auto ml-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+          <CardFooter className="border-t pt-6 flex justify-between items-center"> {/* Updated for flex layout */}
+            <Link href="/" passHref>
+              <Button variant="outline" size="lg" className="w-full md:w-auto">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Go Back to Home
+              </Button>
+            </Link>
+            <Button onClick={handleSaveProfile} size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               Save Profile
             </Button>
           </CardFooter>
