@@ -2,27 +2,26 @@
 'use client';
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
-import Link from 'next/link'; 
-import { Header } from '@/components/employmint/Header'; 
+import Link from 'next/link';
+import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; // Added CardFooter
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, UserCircle, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info } from 'lucide-react';
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
-import { useProfile } from '@/context/ProfileContext'; 
+import { useProfile } from '@/context/ProfileContext';
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -31,25 +30,25 @@ const US_STATES = ["California", "New York", "Texas", "Florida", "Illinois", "Wa
 
 const JOB_TITLES_PREDEFINED = [
   // Tech - Software & Engineering
-  "Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", 
+  "Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer",
   "Mobile App Developer (iOS/Android)", "DevOps Engineer", "Site Reliability Engineer (SRE)",
-  "Cloud Engineer (AWS/Azure/GCP)", "Cybersecurity Analyst", "Security Engineer", 
+  "Cloud Engineer (AWS/Azure/GCP)", "Cybersecurity Analyst", "Security Engineer",
   "Data Scientist", "Machine Learning Engineer", "AI Engineer", "Data Analyst", "Business Intelligence Analyst",
-  "Database Administrator (DBA)", "Network Engineer", "Systems Administrator", 
+  "Database Administrator (DBA)", "Network Engineer", "Systems Administrator",
   "QA Engineer/Software Tester", "Embedded Systems Engineer", "Game Developer", "Blockchain Developer",
   // Tech - Product & Design
   "Product Manager", "Technical Product Manager", "UX Designer", "UI Designer", "Product Designer",
   "UX Researcher", "Interaction Designer", "Graphic Designer", "Motion Designer", "UI/UX Developer",
   // Business & Management
-  "Project Manager", "Program Manager", "Operations Manager", "Business Analyst", 
-  "Management Consultant", "Financial Analyst", "Accountant", "Investment Banker", 
-  "Human Resources Manager", "Recruiter/Talent Acquisition Specialist", "Marketing Manager", 
+  "Project Manager", "Program Manager", "Operations Manager", "Business Analyst",
+  "Management Consultant", "Financial Analyst", "Accountant", "Investment Banker",
+  "Human Resources Manager", "Recruiter/Talent Acquisition Specialist", "Marketing Manager",
   "Digital Marketing Specialist", "SEO Specialist", "Content Marketing Manager", "Social Media Manager",
   "Sales Representative", "Account Executive", "Sales Manager", "Customer Success Manager",
   "Supply Chain Manager", "Logistics Coordinator", "Business Development Manager", "Chief Executive Officer (CEO)",
   "Chief Operating Officer (COO)", "Chief Financial Officer (CFO)", "Chief Technology Officer (CTO)",
   // Creative & Media
-  "Writer/Editor", "Journalist", "Copywriter", "Technical Writer", "Video Editor", 
+  "Writer/Editor", "Journalist", "Copywriter", "Technical Writer", "Video Editor",
   "Photographer", "Illustrator", "Animator", "Art Director", "Public Relations Specialist",
   "Content Strategist", "Videographer", "Sound Designer", "Game Designer",
   // Healthcare
@@ -91,6 +90,7 @@ const employMintPlusFeatures = [
     title: "Personalized Skill Development Path",
     description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations from platforms like Coursera, Udemy, or LinkedIn Learning to bridge the gap.",
     interactive: true,
+    href: "/personalized-skill-path"
   },
   {
     id: "resume-builder",
@@ -150,32 +150,26 @@ const employMintPlusFeatures = [
 
 
 export default function EmployMintPage() {
-  const { profile } = useProfile(); 
-  const userSkills = profile.skills; 
+  const { profile } = useProfile();
+  const userSkills = profile.skills;
 
   // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
   const [jobMatchIdealDescription, setJobMatchIdealDescription] = useState('');
   const [jobMatchCountry, setJobMatchCountry] = useState('');
-  const [jobMatchState, setJobMatchState] = useState(''); 
+  const [jobMatchState, setJobMatchState] = useState('');
   const [jobMatchMinSalary, setJobMatchMinSalary] = useState('');
   const [jobMatchMaxSalary, setJobMatchMaxSalary] = useState('');
   const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
-  
+
   // State for Job-Focused Skill Comparison (main tab)
   const [skillCompareJobDescription, setSkillCompareJobDescription] = useState('');
   const [skillGapResult, setSkillGapResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
 
   const [isJobMatchingLoading, startJobMatchingTransition] = useTransition();
   const [isSkillComparingLoading, startSkillComparingTransition] = useTransition();
-  
-  // State for Personalized Skill Development Path Dialog
-  const [isSkillPathDialogOpen, setIsSkillPathDialogOpen] = useState(false);
-  const [skillPathJobDesc, setSkillPathJobDesc] = useState('');
-  const [skillPathResult, setSkillPathResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
-  const [isSkillPathLoading, startSkillPathTransition] = useTransition();
 
 
   const { toast } = useToast();
@@ -206,7 +200,7 @@ export default function EmployMintPage() {
         const input: SkillBasedJobMatchingInput = {
           userSkills,
           jobTitle: jobMatchTitle,
-          jobDescription: jobMatchIdealDescription, 
+          jobDescription: jobMatchIdealDescription,
           country: jobMatchCountry === 'any-country-placeholder' || !jobMatchCountry ? undefined : jobMatchCountry,
           state: jobMatchState === 'any-state-placeholder' || !jobMatchState ? undefined : jobMatchState,
           minSalary: jobMatchMinSalary ? parseInt(jobMatchMinSalary) : undefined,
@@ -247,41 +241,13 @@ export default function EmployMintPage() {
       try {
         const result = await performJobFocusedSkillComparison({
           userSkills,
-          jobDescription: skillCompareJobDescription || undefined, 
+          jobDescription: skillCompareJobDescription || undefined,
         });
         setSkillGapResult(result);
       } catch (error) {
         console.error(error);
         toast({
           title: "Error Analyzing Skills",
-          description: (error as Error).message || "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-    });
-  };
-  
-  const handleSkillPathSubmit = async () => {
-    if (userSkills.length === 0) {
-      toast({
-        title: "Missing Skills",
-        description: "Please add your skills in your Profile first.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setSkillPathResult(null);
-    startSkillPathTransition(async () => {
-      try {
-        const result = await performJobFocusedSkillComparison({
-          userSkills,
-          jobDescription: skillPathJobDesc || undefined,
-        });
-        setSkillPathResult(result);
-      } catch (error) {
-        console.error("Error generating skill path:", error);
-        toast({
-          title: "Error Generating Path",
           description: (error as Error).message || "An unexpected error occurred.",
           variant: "destructive",
         });
@@ -321,7 +287,7 @@ export default function EmployMintPage() {
             <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="mr-2 h-4 w-4 inline-block"/>Analyze Job Fit</TabsTrigger>
             <TabsTrigger value="employmint-plus" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Plus className="mr-2 h-4 w-4 inline-block"/>EmployMint+</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
@@ -353,8 +319,8 @@ export default function EmployMintPage() {
                         </PopoverTrigger>
                         <PopoverContent className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto">
                           <Command>
-                            <CommandInput 
-                              value={jobMatchTitle} 
+                            <CommandInput
+                              value={jobMatchTitle}
                               onValueChange={(search) => {
                                 const exists = JOB_TITLES_PREDEFINED.some(title => title.toLowerCase() === search.toLowerCase());
                                 if (exists) {
@@ -363,12 +329,12 @@ export default function EmployMintPage() {
                                    setJobMatchTitle(search);
                                 }
                               }}
-                              placeholder="Search or type new title..." 
+                              placeholder="Search or type new title..."
                             />
                             <CommandList>
                               <CommandEmpty>No title found. Type to add new.</CommandEmpty>
                               <CommandGroup>
-                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => ( 
+                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => (
                                   <CommandItem
                                     key={title}
                                     value={title}
@@ -395,7 +361,7 @@ export default function EmployMintPage() {
                           <SelectValue placeholder="Any Country" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="any-country-placeholder">Any Country</SelectItem> 
+                          <SelectItem value="any-country-placeholder">Any Country</SelectItem>
                           {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -494,7 +460,7 @@ export default function EmployMintPage() {
                     <div className="space-y-4">
                       {sortedJobMatchResults.map((job, index) => (
                         <JobRecommendationCard
-                          key={`${job.jobTitle}-${index}-${job.companyName}`} 
+                          key={`${job.jobTitle}-${index}-${job.companyName}`}
                           job={job}
                           jobIndex={jobMatchResults.findIndex(j => j === job)} // Find original index for context
                         />
@@ -512,14 +478,14 @@ export default function EmployMintPage() {
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
                 <CardDescription className="space-y-2">
                   <p>
-                    This feature helps you understand how your current skillset aligns with specific job requirements or general career paths. 
+                    This feature helps you understand how your current skillset aligns with specific job requirements or general career paths.
                     Your skills from your Profile will be used for this analysis.
                   </p>
                   <p>
                     <strong>Option 1: Analyze a Specific Job Posting.</strong> Paste a job description from a posting you're interested in. The AI will provide a detailed analysis of matching and missing skills, along with suggested learning resources tailored to that role.
                   </p>
                    <p>
-                    <strong>Option 2: General Career Guidance.</strong> Leave the job description blank. The AI will then provide a general assessment of your skills (from your Profile), 
+                    <strong>Option 2: General Career Guidance.</strong> Leave the job description blank. The AI will then provide a general assessment of your skills (from your Profile),
                     suggest suitable job categories you might excel in (potentially with salary insights), and offer interview tips and mentorship advice to help you prepare for your next opportunity.
                   </p>
                 </CardDescription>
@@ -585,67 +551,13 @@ export default function EmployMintPage() {
                       <CardContent className="flex-grow">
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                       </CardContent>
-                      {feature.id === "skill-dev-path" && (
+                      {feature.interactive && feature.href && (
                         <CardFooter>
-                          <Dialog open={isSkillPathDialogOpen} onOpenChange={setIsSkillPathDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
-                                <Route className="mr-2 h-4 w-4"/> Get Your Path
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-                              <DialogHeader>
-                                <DialogTitle className="font-headline text-2xl text-primary">Personalized Skill Development Path</DialogTitle>
-                                <DialogDescription>
-                                  Enter a target job description or role. The AI will analyze it against your profile skills and suggest a development path.
-                                  If you leave it blank, it will provide general career advice based on your skills.
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4 py-4 flex-grow overflow-y-auto pr-2">
-                                <div>
-                                  <Label htmlFor="skillPathJobDesc" className="block text-sm font-medium text-foreground mb-1">
-                                    Target Job Description / Role (Optional)
-                                  </Label>
-                                  <Textarea
-                                    id="skillPathJobDesc"
-                                    value={skillPathJobDesc}
-                                    onChange={(e) => setSkillPathJobDesc(e.target.value)}
-                                    placeholder="e.g., 'Senior Frontend Developer at TechCorp' or paste full job description..."
-                                    rows={5}
-                                    className="bg-card"
-                                  />
-                                </div>
-                                <Button onClick={handleSkillPathSubmit} disabled={isSkillPathLoading || userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                                  {isSkillPathLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                  Generate Development Path
-                                </Button>
-                                {isSkillPathLoading && (
-                                  <div className="flex items-center justify-center py-6">
-                                      <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
-                                      <p className="text-muted-foreground">Generating your path...</p>
-                                  </div>
-                                )}
-                                {skillPathResult && !isSkillPathLoading && (
-                                  <div className="mt-6">
-                                    <SkillGapDisplay
-                                      missingSkills={skillPathResult.missingSkills}
-                                      suggestedHardSkillsResources={skillPathResult.suggestedHardSkillsResources}
-                                      skillComparisonSummary={skillPathResult.skillComparisonSummary}
-                                      interviewTips={skillPathResult.interviewTips}
-                                      suggestedJobCategories={skillPathResult.suggestedJobCategories}
-                                      suggestedSoftSkills={skillPathResult.suggestedSoftSkills}
-                                      mentorshipAdvice={skillPathResult.mentorshipAdvice}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                              <DialogFooter className="mt-auto pt-4 border-t">
-                                <DialogClose asChild>
-                                  <Button type="button" variant="outline">Close</Button>
-                                </DialogClose>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
+                          <Link href={feature.href} passHref className="w-full">
+                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+                              <Route className="mr-2 h-4 w-4"/> Get Your Path
+                            </Button>
+                          </Link>
                         </CardFooter>
                       )}
                     </Card>
@@ -662,4 +574,3 @@ export default function EmployMintPage() {
     </div>
   );
 }
-
