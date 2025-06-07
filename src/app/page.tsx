@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useState, useTransition, useMemo, useEffect } from 'react';
+import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/employmint/Header';
 import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -12,22 +13,62 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown } from 'lucide-react';
+import { Loader2, ListFilter, ChevronsUpDown, User, Briefcase, Brain, HelpCircle } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
+import { JobResultsContext } from '@/context/JobResultsContext';
+
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
 // Minimal lists for demo purposes
-const COUNTRIES = ["USA", "Canada", "UK", "Germany", "India"];
-const US_STATES = ["California", "New York", "Texas", "Florida", "Illinois"];
-const JOB_TITLES_PREDEFINED = ["Software Engineer", "Product Manager", "Data Scientist", "UX Designer", "Marketing Manager", "Sales Representative", "Project Manager"];
+const COUNTRIES = ["USA", "Canada", "UK", "Germany", "India", "Australia", "France", "Japan", "Brazil", "Netherlands"];
+const US_STATES = ["California", "New York", "Texas", "Florida", "Illinois", "Washington", "Massachusetts", "Georgia", "North Carolina", "Virginia"];
+
+const JOB_TITLES_PREDEFINED = [
+  // Tech - Software & Engineering
+  "Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", 
+  "Mobile App Developer (iOS/Android)", "DevOps Engineer", "Site Reliability Engineer (SRE)",
+  "Cloud Engineer (AWS/Azure/GCP)", "Cybersecurity Analyst", "Security Engineer", 
+  "Data Scientist", "Machine Learning Engineer", "AI Engineer", "Data Analyst", "Business Intelligence Analyst",
+  "Database Administrator (DBA)", "Network Engineer", "Systems Administrator", 
+  "QA Engineer/Software Tester", "Embedded Systems Engineer", "Game Developer", "Blockchain Developer",
+  // Tech - Product & Design
+  "Product Manager", "Technical Product Manager", "UX Designer", "UI Designer", "Product Designer",
+  "UX Researcher", "Interaction Designer", "Graphic Designer", "Motion Designer",
+  // Business & Management
+  "Project Manager", "Program Manager", "Operations Manager", "Business Analyst", 
+  "Management Consultant", "Financial Analyst", "Accountant", "Investment Banker", 
+  "Human Resources Manager", "Recruiter/Talent Acquisition Specialist", "Marketing Manager", 
+  "Digital Marketing Specialist", "SEO Specialist", "Content Marketing Manager", "Social Media Manager",
+  "Sales Representative", "Account Executive", "Sales Manager", "Customer Success Manager",
+  "Supply Chain Manager", "Logistics Coordinator", "Business Development Manager", "Chief Executive Officer (CEO)",
+  "Chief Operating Officer (COO)", "Chief Financial Officer (CFO)", "Chief Technology Officer (CTO)",
+  // Creative & Media
+  "Writer/Editor", "Journalist", "Copywriter", "Technical Writer", "Video Editor", 
+  "Photographer", "Illustrator", "Animator", "Art Director", "Public Relations Specialist",
+  // Healthcare
+  "Registered Nurse (RN)", "Doctor/Physician", "Pharmacist", "Medical Assistant", "Physical Therapist",
+  "Occupational Therapist", "Lab Technician", "Healthcare Administrator", "Medical Researcher",
+  // Education
+  "Teacher (K-12)", "Professor/Lecturer", "Instructional Designer", "Curriculum Developer", "Academic Advisor",
+  // Trades & Skilled Labor
+  "Electrician", "Plumber", "HVAC Technician", "Carpenter", "Welder", "Mechanic",
+  // Legal
+  "Lawyer/Attorney", "Paralegal", "Legal Secretary",
+  // Science & Research
+  "Research Scientist", "Biologist", "Chemist", "Physicist", "Environmental Scientist",
+  // Hospitality & Service
+  "Restaurant Manager", "Chef", "Hotel Manager", "Event Planner", "Customer Service Representative",
+  // Other
+  "Architect", "Real Estate Agent", "Pilot", "Librarian", "Social Worker", "Psychologist", "Urban Planner"
+];
+
 
 export default function EmployMintPage() {
   // Profile State
@@ -40,11 +81,11 @@ export default function EmployMintPage() {
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
   const [jobMatchIdealDescription, setJobMatchIdealDescription] = useState('');
   const [jobMatchCountry, setJobMatchCountry] = useState('');
-  const [jobMatchState, setJobMatchState] = useState(''); // Relevant if country is USA, for example
+  const [jobMatchState, setJobMatchState] = useState(''); 
   const [jobMatchMinSalary, setJobMatchMinSalary] = useState('');
   const [jobMatchMaxSalary, setJobMatchMaxSalary] = useState('');
   const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
-  const [jobMatchResults, setJobMatchResults] = useState<JobMatchResultItem[]>([]);
+  // const [jobMatchResults, setJobMatchResults] = useState<JobMatchResultItem[]>([]); // Moved to context
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
   
   // State for Job-Focused Skill Comparison
@@ -55,6 +96,8 @@ export default function EmployMintPage() {
   const [isSkillComparingLoading, startSkillComparingTransition] = useTransition();
   
   const { toast } = useToast();
+  const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
+
 
   const handleSkillsChange = (newSkills: Skill[]) => {
     setUserSkills(newSkills);
@@ -70,21 +113,21 @@ export default function EmployMintPage() {
       });
       return;
     }
-    setJobMatchResults([]);
+    setJobMatchResults([]); // Clear previous results from context
     startJobMatchingTransition(async () => {
       try {
         const input: SkillBasedJobMatchingInput = {
           userSkills,
           jobTitle: jobMatchTitle,
           jobDescription: jobMatchIdealDescription, 
-          country: jobMatchCountry || undefined,
-          state: jobMatchState || undefined,
+          country: jobMatchCountry === 'any-country-placeholder' ? undefined : jobMatchCountry || undefined,
+          state: jobMatchState === 'any-state-placeholder' ? undefined : jobMatchState || undefined,
           minSalary: jobMatchMinSalary ? parseInt(jobMatchMinSalary) : undefined,
           maxSalary: jobMatchMaxSalary ? parseInt(jobMatchMaxSalary) : undefined,
           workModel: jobMatchWorkModel === 'any' ? undefined : jobMatchWorkModel,
         };
         const results = await performSkillBasedJobMatching(input);
-        setJobMatchResults(results);
+        setJobMatchResults(results); // Set results in context
          if (results.length === 0) {
           toast({
             title: "No Jobs Found",
@@ -117,7 +160,7 @@ export default function EmployMintPage() {
       try {
         const result = await performJobFocusedSkillComparison({
           userSkills,
-          jobDescription: skillCompareJobDescription || undefined, // Pass undefined if empty
+          jobDescription: skillCompareJobDescription || undefined, 
         });
         setSkillGapResult(result);
       } catch (error) {
@@ -142,7 +185,6 @@ export default function EmployMintPage() {
   }, [jobMatchResults, jobMatchSortOrder]);
 
   useEffect(() => {
-    // Clear state selection if country is not USA
     if (jobMatchCountry !== "USA") {
       setJobMatchState("");
     }
@@ -152,38 +194,45 @@ export default function EmployMintPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
-        <Card className="shadow-lg rounded-xl">
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl text-foreground">Your Profile</CardTitle>
-            <CardDescription>Tell us about yourself to get personalized job insights.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="userName" className="text-sm font-medium">Name</Label>
-                <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Your Name" className="mt-1 bg-card" />
-              </div>
-              <div>
-                <Label htmlFor="userAge" className="text-sm font-medium">Age</Label>
-                <Input id="userAge" type="number" value={userAge} onChange={(e) => setUserAge(e.target.value)} placeholder="Your Age" className="mt-1 bg-card" />
-              </div>
-            </div>
-            <SkillInput skills={userSkills} onSkillsChange={handleSkillsChange} />
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="job-matcher" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted p-1 rounded-lg">
-            <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Find Matching Jobs</TabsTrigger>
-            <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analyze Job Fit</TabsTrigger>
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-muted p-1 rounded-lg mb-6">
+            <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><User className="mr-2 h-4 w-4 inline-block"/>Profile</TabsTrigger>
+            <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Briefcase className="mr-2 h-4 w-4 inline-block"/>Find Matching Jobs</TabsTrigger>
+            <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="mr-2 h-4 w-4 inline-block"/>Analyze Job Fit</TabsTrigger>
+            <TabsTrigger value="more-help" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HelpCircle className="mr-2 h-4 w-4 inline-block"/>More Help</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="profile">
+            <Card className="shadow-lg rounded-xl">
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl text-foreground">Your Profile</CardTitle>
+                <CardDescription>Tell us about yourself to get personalized job insights.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="userName" className="text-sm font-medium">Name</Label>
+                    <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Your Name" className="mt-1 bg-card" />
+                  </div>
+                  <div>
+                    <Label htmlFor="userAge" className="text-sm font-medium">Age</Label>
+                    <Input id="userAge" type="number" value={userAge} onChange={(e) => setUserAge(e.target.value)} placeholder="Your Age" className="mt-1 bg-card" />
+                  </div>
+                </div>
+                <SkillInput skills={userSkills} onSkillsChange={handleSkillsChange} />
+                 <CardDescription className="text-xs pt-2">
+                  Tip: Categorizing skills into 'Hard Skills' and 'Soft Skills' can further refine your job matches and analysis. This feature will be available in a future update.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </TabsContent>
           
           <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
-                  Enter your ideal job criteria to discover potential job matches.
+                  Enter your ideal job criteria to discover potential job matches. The AI will generate example job postings based on your input.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -206,11 +255,18 @@ export default function EmployMintPage() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto">
                           <Command>
                             <CommandInput 
                               value={jobMatchTitle} 
-                              onValueChange={setJobMatchTitle}
+                              onValueChange={(search) => {
+                                const exists = JOB_TITLES_PREDEFINED.some(title => title.toLowerCase() === search.toLowerCase());
+                                if (exists) {
+                                  setJobMatchTitle(JOB_TITLES_PREDEFINED.find(title => title.toLowerCase() === search.toLowerCase())!);
+                                } else {
+                                   setJobMatchTitle(search);
+                                }
+                              }}
                               placeholder="Search or type new title..." 
                             />
                             <CommandList>
@@ -221,7 +277,7 @@ export default function EmployMintPage() {
                                     key={title}
                                     value={title}
                                     onSelect={(currentValue) => {
-                                      setJobMatchTitle(currentValue === jobMatchTitle.toLowerCase() ? '' : currentValue);
+                                      setJobMatchTitle(currentValue === jobMatchTitle ? '' : currentValue);
                                       setOpenJobTitleCombobox(false);
                                     }}
                                   >
@@ -281,7 +337,7 @@ export default function EmployMintPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div>
-                        <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (Optional)</Label>
+                        <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Optional)</Label>
                         <div className="flex items-center gap-2">
                           <Input
                             type="number"
@@ -322,7 +378,7 @@ export default function EmployMintPage() {
                     Find Matching Jobs
                   </Button>
                 </form>
-                {jobMatchResults.length > 0 && !isJobMatchingLoading && (
+                {sortedJobMatchResults.length > 0 && !isJobMatchingLoading && (
                   <div className="mt-8">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-headline text-foreground">Job Recommendations</h3>
@@ -342,24 +398,15 @@ export default function EmployMintPage() {
                     <div className="space-y-4">
                       {sortedJobMatchResults.map((job, index) => (
                         <JobRecommendationCard
-                          key={index}
-                          jobTitle={job.jobTitle}
-                          companyName={job.companyName}
-                          location={job.location}
-                          jobDescription={job.jobDescription} 
-                          matchPercentage={job.matchPercentage}
-                          rationale={job.rationale}
-                          responsibilities={job.responsibilities || []}
-                          requiredSkills={job.requiredSkills || []}
-                          preferredSkills={job.preferredSkills || []}
-                          experienceLevel={job.experienceLevel || ''}
-                          educationLevel={job.educationLevel || ''}
-                          employmentType={job.employmentType || ''}
-                          salaryRange={job.salaryRange || ''}
-                          workModel={job.workModel}
+                          key={`${job.jobTitle}-${index}`} // Ensure unique key
+                          job={job}
+                          jobIndex={index} // Pass index for navigation
                         />
                       ))}
                     </div>
+                     <CardDescription className="text-xs pt-4">
+                      Note: The skill comparison table on the detailed job page will be implemented in a future update.
+                    </CardDescription>
                   </div>
                 )}
               </CardContent>
@@ -371,7 +418,10 @@ export default function EmployMintPage() {
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
                 <CardDescription>
-                  Assess your readiness for a specific job (optional) or get general feedback on your skills.
+                  This feature helps you understand how your current skillset aligns with specific job requirements or general career paths. 
+                  Paste a job description from a posting you're interested in to get a detailed analysis of matching and missing skills, along with suggested learning resources. 
+                  If you don't have a specific job in mind, leave the job description blank. The AI will then provide a general assessment of your skills, 
+                  suggest suitable job categories you might excel in, and offer interview tips to help you prepare for your next opportunity.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -400,13 +450,28 @@ export default function EmployMintPage() {
                   <div className="mt-8">
                     <SkillGapDisplay
                       missingSkills={skillGapResult.missingSkills}
-                      suggestedResources={skillGapResult.suggestedResources}
+                      suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources}
                       skillComparisonSummary={skillGapResult.skillComparisonSummary}
                       interviewTips={skillGapResult.interviewTips}
                       suggestedJobCategories={skillGapResult.suggestedJobCategories}
+                      suggestedSoftSkills={skillGapResult.suggestedSoftSkills}
+                      mentorshipAdvice={skillGapResult.mentorshipAdvice}
                     />
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="more-help">
+            <Card className="shadow-lg rounded-xl">
+              <CardHeader>
+                <CardTitle className="font-headline text-2xl text-foreground">More Help & Resources</CardTitle>
+                <CardDescription>
+                  This section will be updated with more tools and resources to aid your career journey. Stay tuned!
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">Content coming soon...</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -418,4 +483,3 @@ export default function EmployMintPage() {
     </div>
   );
 }
-    
