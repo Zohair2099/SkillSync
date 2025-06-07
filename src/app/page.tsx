@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
-import Link from 'next/link';
-import { Header } from '@/components/employmint/Header';
-import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
+import Link from 'next/link'; // Keep if needed elsewhere, but tabs are primary nav now
+import { Header } from '@/components/employmint/Header'; // Main app header
+// Removed SkillInput from here as it's on profile page
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
 import { Button } from '@/components/ui/button';
@@ -16,17 +16,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, User, Briefcase, Brain, HelpCircle } from 'lucide-react';
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Sparkles, UserCircle } from 'lucide-react'; // UserCircle for profile tab, Sparkles for EmployMint+
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
-
+import { useProfile } from '@/context/ProfileContext'; // Import useProfile
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
-// Minimal lists for demo purposes
 const COUNTRIES = ["USA", "Canada", "UK", "Germany", "India", "Australia", "France", "Japan", "Brazil", "Netherlands"];
 const US_STATES = ["California", "New York", "Texas", "Florida", "Illinois", "Washington", "Massachusetts", "Georgia", "North Carolina", "Virginia"];
 
@@ -40,7 +39,7 @@ const JOB_TITLES_PREDEFINED = [
   "QA Engineer/Software Tester", "Embedded Systems Engineer", "Game Developer", "Blockchain Developer",
   // Tech - Product & Design
   "Product Manager", "Technical Product Manager", "UX Designer", "UI Designer", "Product Designer",
-  "UX Researcher", "Interaction Designer", "Graphic Designer", "Motion Designer",
+  "UX Researcher", "Interaction Designer", "Graphic Designer", "Motion Designer", "UI/UX Developer",
   // Business & Management
   "Project Manager", "Program Manager", "Operations Manager", "Business Analyst", 
   "Management Consultant", "Financial Analyst", "Accountant", "Investment Banker", 
@@ -52,30 +51,44 @@ const JOB_TITLES_PREDEFINED = [
   // Creative & Media
   "Writer/Editor", "Journalist", "Copywriter", "Technical Writer", "Video Editor", 
   "Photographer", "Illustrator", "Animator", "Art Director", "Public Relations Specialist",
+  "Content Strategist", "Videographer", "Sound Designer", "Game Designer",
   // Healthcare
   "Registered Nurse (RN)", "Doctor/Physician", "Pharmacist", "Medical Assistant", "Physical Therapist",
   "Occupational Therapist", "Lab Technician", "Healthcare Administrator", "Medical Researcher",
+  "Dental Hygienist", "Radiologic Technologist", "Clinical Research Coordinator", "Speech-Language Pathologist",
   // Education
   "Teacher (K-12)", "Professor/Lecturer", "Instructional Designer", "Curriculum Developer", "Academic Advisor",
+  "School Counselor", "Corporate Trainer", "Education Administrator", "Librarian",
   // Trades & Skilled Labor
   "Electrician", "Plumber", "HVAC Technician", "Carpenter", "Welder", "Mechanic",
+  "Machinist", "Construction Manager", "Heavy Equipment Operator", "Automotive Technician",
   // Legal
-  "Lawyer/Attorney", "Paralegal", "Legal Secretary",
+  "Lawyer/Attorney", "Paralegal", "Legal Secretary", "Compliance Officer", "Mediator",
   // Science & Research
   "Research Scientist", "Biologist", "Chemist", "Physicist", "Environmental Scientist",
+  "Geologist", "Statistician", "Mathematician", "Astronomer",
   // Hospitality & Service
   "Restaurant Manager", "Chef", "Hotel Manager", "Event Planner", "Customer Service Representative",
+  "Flight Attendant", "Travel Agent", "Barista", "Concierge",
+  // Finance & Economics
+  "Economist", "Actuary", "Auditor", "Insurance Underwriter", "Loan Officer",
+  // Arts & Culture
+  "Museum Curator", "Archivist", "Conservator", "Musician", "Actor",
+  // Sports & Fitness
+  "Personal Trainer", "Coach", "Athletic Director", "Fitness Instructor",
+  // Government & Public Service
+  "Police Officer", "Firefighter", "Social Worker", "Urban Planner", "Policy Analyst",
+  // Agriculture & Environment
+  "Farmer/Agricultural Manager", "Forester", "Conservation Scientist", "Horticulturist",
   // Other
-  "Architect", "Real Estate Agent", "Pilot", "Librarian", "Social Worker", "Psychologist", "Urban Planner"
+  "Architect", "Real Estate Agent", "Pilot", "Psychologist", "Surveyor", "Interior Designer"
 ];
 
 
 export default function EmployMintPage() {
-  // Profile State
-  const [userName, setUserName] = useState('');
-  const [userAge, setUserAge] = useState('');
-  const [userSkills, setUserSkills] = useState<Skill[]>([]);
-  
+  const { profile } = useProfile(); // Get profile from context
+  const userSkills = profile.skills; // Use skills from context
+
   // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -85,7 +98,6 @@ export default function EmployMintPage() {
   const [jobMatchMinSalary, setJobMatchMinSalary] = useState('');
   const [jobMatchMaxSalary, setJobMatchMaxSalary] = useState('');
   const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
-  // const [jobMatchResults, setJobMatchResults] = useState<JobMatchResultItem[]>([]); // Moved to context
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
   
   // State for Job-Focused Skill Comparison
@@ -99,35 +111,39 @@ export default function EmployMintPage() {
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
 
-  const handleSkillsChange = (newSkills: Skill[]) => {
-    setUserSkills(newSkills);
-  };
-
   const handleJobMatchSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (userSkills.length === 0 || !jobMatchTitle || !jobMatchIdealDescription) {
+    if (userSkills.length === 0) {
       toast({
-        title: "Missing Information",
-        description: "Please provide your skills, a desired job title, and an ideal job description.",
+        title: "Missing Skills",
+        description: "Please add your skills in the Profile section first.",
         variant: "destructive",
       });
       return;
     }
-    setJobMatchResults([]); // Clear previous results from context
+    if (!jobMatchTitle || !jobMatchIdealDescription) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide an ideal job title and description.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setJobMatchResults([]);
     startJobMatchingTransition(async () => {
       try {
         const input: SkillBasedJobMatchingInput = {
           userSkills,
           jobTitle: jobMatchTitle,
           jobDescription: jobMatchIdealDescription, 
-          country: jobMatchCountry === 'any-country-placeholder' ? undefined : jobMatchCountry || undefined,
-          state: jobMatchState === 'any-state-placeholder' ? undefined : jobMatchState || undefined,
+          country: jobMatchCountry === 'any-country-placeholder' || !jobMatchCountry ? undefined : jobMatchCountry,
+          state: jobMatchState === 'any-state-placeholder' || !jobMatchState ? undefined : jobMatchState,
           minSalary: jobMatchMinSalary ? parseInt(jobMatchMinSalary) : undefined,
           maxSalary: jobMatchMaxSalary ? parseInt(jobMatchMaxSalary) : undefined,
           workModel: jobMatchWorkModel === 'any' ? undefined : jobMatchWorkModel,
         };
         const results = await performSkillBasedJobMatching(input);
-        setJobMatchResults(results); // Set results in context
+        setJobMatchResults(results);
          if (results.length === 0) {
           toast({
             title: "No Jobs Found",
@@ -150,7 +166,7 @@ export default function EmployMintPage() {
     if (userSkills.length === 0) {
       toast({
         title: "Missing Skills",
-        description: "Please provide your skills.",
+        description: "Please add your skills in the Profile section first.",
         variant: "destructive",
       });
       return;
@@ -190,42 +206,23 @@ export default function EmployMintPage() {
     }
   }, [jobMatchCountry]);
 
+  // Effect to load profile skills when component mounts or profile changes
+  useEffect(() => {
+    // userSkills are now directly from profile context
+  }, [profile.skills]);
+
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-muted p-1 rounded-lg mb-6">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><User className="mr-2 h-4 w-4 inline-block"/>Profile</TabsTrigger>
+        <Tabs defaultValue="job-matcher" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6">
+            {/* Profile Tab is now an icon in the header */}
             <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Briefcase className="mr-2 h-4 w-4 inline-block"/>Find Matching Jobs</TabsTrigger>
             <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="mr-2 h-4 w-4 inline-block"/>Analyze Job Fit</TabsTrigger>
-            <TabsTrigger value="more-help" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HelpCircle className="mr-2 h-4 w-4 inline-block"/>More Help</TabsTrigger>
+            <TabsTrigger value="employmint-plus" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Sparkles className="mr-2 h-4 w-4 inline-block"/>EmployMint+</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="profile">
-            <Card className="shadow-lg rounded-xl">
-              <CardHeader>
-                <CardTitle className="font-headline text-2xl text-foreground">Your Profile</CardTitle>
-                <CardDescription>Tell us about yourself to get personalized job insights.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="userName" className="text-sm font-medium">Name</Label>
-                    <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Your Name" className="mt-1 bg-card" />
-                  </div>
-                  <div>
-                    <Label htmlFor="userAge" className="text-sm font-medium">Age</Label>
-                    <Input id="userAge" type="number" value={userAge} onChange={(e) => setUserAge(e.target.value)} placeholder="Your Age" className="mt-1 bg-card" />
-                  </div>
-                </div>
-                <SkillInput skills={userSkills} onSkillsChange={handleSkillsChange} />
-                 <CardDescription className="text-xs pt-2">
-                  Tip: Categorizing skills into 'Hard Skills' and 'Soft Skills' can further refine your job matches and analysis. This feature will be available in a future update.
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </TabsContent>
           
           <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
@@ -233,6 +230,7 @@ export default function EmployMintPage() {
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
                   Enter your ideal job criteria to discover potential job matches. The AI will generate example job postings based on your input.
+                  Ensure your skills are up-to-date in the Profile section (top right icon).
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -272,7 +270,7 @@ export default function EmployMintPage() {
                             <CommandList>
                               <CommandEmpty>No title found. Type to add new.</CommandEmpty>
                               <CommandGroup>
-                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).map((title) => (
+                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => ( // Limit initial display for performance
                                   <CommandItem
                                     key={title}
                                     value={title}
@@ -398,9 +396,9 @@ export default function EmployMintPage() {
                     <div className="space-y-4">
                       {sortedJobMatchResults.map((job, index) => (
                         <JobRecommendationCard
-                          key={`${job.jobTitle}-${index}`} // Ensure unique key
+                          key={`${job.jobTitle}-${index}-${job.companyName}`} 
                           job={job}
-                          jobIndex={index} // Pass index for navigation
+                          jobIndex={index} 
                         />
                       ))}
                     </div>
@@ -417,11 +415,18 @@ export default function EmployMintPage() {
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
-                <CardDescription>
-                  This feature helps you understand how your current skillset aligns with specific job requirements or general career paths. 
-                  Paste a job description from a posting you're interested in to get a detailed analysis of matching and missing skills, along with suggested learning resources. 
-                  If you don't have a specific job in mind, leave the job description blank. The AI will then provide a general assessment of your skills, 
-                  suggest suitable job categories you might excel in, and offer interview tips to help you prepare for your next opportunity.
+                <CardDescription className="space-y-2">
+                  <p>
+                    This feature helps you understand how your current skillset aligns with specific job requirements or general career paths. 
+                    Your skills from the Profile section will be used for this analysis.
+                  </p>
+                  <p>
+                    <strong>Option 1: Analyze a Specific Job Posting.</strong> Paste a job description from a posting you're interested in. The AI will provide a detailed analysis of matching and missing skills, along with suggested learning resources tailored to that role.
+                  </p>
+                   <p>
+                    <strong>Option 2: General Career Guidance.</strong> Leave the job description blank. The AI will then provide a general assessment of your skills (from your Profile), 
+                    suggest suitable job categories you might excel in (potentially with salary insights), and offer interview tips and mentorship advice to help you prepare for your next opportunity.
+                  </p>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -462,16 +467,21 @@ export default function EmployMintPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="more-help">
+          <TabsContent value="employmint-plus">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl text-foreground">More Help & Resources</CardTitle>
+                <CardTitle className="font-headline text-2xl text-foreground">EmployMint+</CardTitle>
                 <CardDescription>
-                  This section will be updated with more tools and resources to aid your career journey. Stay tuned!
+                  Unlock advanced features, premium resources, and personalized coaching with EmployMint+. (Coming Soon!)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Content coming soon...</p>
+                <p className="text-muted-foreground">More details about premium features will be available here soon. Stay tuned for exciting updates!</p>
+                {/* Placeholder for future premium content image */}
+                <div className="mt-6 p-8 bg-secondary rounded-lg flex flex-col items-center justify-center">
+                    <Sparkles className="w-16 h-16 text-primary mb-4"/>
+                    <p className="text-lg font-semibold text-foreground">Supercharge Your Career Journey!</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -483,3 +493,4 @@ export default function EmployMintPage() {
     </div>
   );
 }
+

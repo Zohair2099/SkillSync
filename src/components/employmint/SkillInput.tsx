@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -27,7 +28,8 @@ const PREDEFINED_SKILLS: string[] = [
   'Spring Boot', 'Kubernetes', 'Docker', 'Terraform', 'Ansible', 'Power BI', 
   'Tableau', 'Salesforce', 'Digital Marketing', 'SEO/SEM', 'Content Creation', 
   'Product Management', 'Business Analysis', 'Financial Modeling', 'Customer Service', 
-  'Leadership', 'Teamwork'
+  'Leadership', 'Teamwork', 'Public Speaking', 'Negotiation', 'Critical Thinking',
+  'Adaptability', 'Creativity', 'Time Management', 'Emotional Intelligence'
 ];
 
 
@@ -37,18 +39,12 @@ export function SkillInput({ skills, onSkillsChange }: SkillInputProps) {
   const [currentExperience, setCurrentExperience] = useState('');
 
   const handleAddSkill = () => {
-    if (selectedSkillName.trim() && !skills.find(s => s.name === selectedSkillName.trim())) {
+    if (selectedSkillName.trim() && !skills.find(s => s.name.toLowerCase() === selectedSkillName.trim().toLowerCase())) {
       onSkillsChange([...skills, { name: selectedSkillName.trim(), experience: currentExperience.trim() }]);
       setSelectedSkillName('');
       setCurrentExperience('');
     }
     setOpenCombobox(false);
-  };
-
-  const handleSelectSkill = (skillName: string) => {
-    setSelectedSkillName(skillName);
-    // Optionally, close combobox here or wait for experience input
-    // setOpenCombobox(false); // Keep open to input experience or use a modal
   };
   
   const handleUpdateExperience = (skillName: string, experience: string) => {
@@ -63,102 +59,125 @@ export function SkillInput({ skills, onSkillsChange }: SkillInputProps) {
     onSkillsChange(skills.filter(skill => skill.name !== skillToRemove));
   };
 
+  const isSkillSelected = (skillName: string) => {
+    return skills.some(s => s.name.toLowerCase() === skillName.toLowerCase());
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-end gap-2">
-        <div className="flex-grow">
-          <label htmlFor="skill-combobox" className="block text-sm font-medium text-foreground mb-1">
-            Add Skill
-          </label>
-          <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={openCombobox}
-                className="w-full justify-between text-muted-foreground"
-                id="skill-combobox"
-              >
-                {selectedSkillName
-                  ? PREDEFINED_SKILLS.find((skill) => skill.toLowerCase() === selectedSkillName.toLowerCase()) || "Select or type skill..."
-                  : "Select or type skill..."}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-              <Command>
-                <CommandInput placeholder="Search or type new skill..." />
-                <CommandList>
-                  <CommandEmpty>No skill found. Type to add new.</CommandEmpty>
-                  <CommandGroup>
-                    {PREDEFINED_SKILLS.map((skill) => (
+      <div>
+        <label htmlFor="skill-combobox" className="block text-lg font-semibold text-foreground mb-2">
+          Your Skills
+        </label>
+        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={openCombobox}
+              className="w-full justify-between text-muted-foreground bg-card text-base py-6"
+              id="skill-combobox"
+            >
+              {selectedSkillName
+                ? PREDEFINED_SKILLS.find((skill) => skill.toLowerCase() === selectedSkillName.toLowerCase()) || selectedSkillName
+                : "Select or type skill..."}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+            <Command>
+              <CommandInput 
+                placeholder="Search or type new skill..."
+                value={selectedSkillName}
+                onValueChange={setSelectedSkillName}
+              />
+              <CommandList>
+                <CommandEmpty>{selectedSkillName.trim() ? `No skill found. Press Add to create "${selectedSkillName}".` : "Type to search or add a new skill."}</CommandEmpty>
+                <CommandGroup>
+                  {PREDEFINED_SKILLS.map((skill) => {
+                    const alreadySelected = isSkillSelected(skill);
+                    return (
                       <CommandItem
                         key={skill}
                         value={skill}
                         onSelect={(currentValue) => {
-                          setSelectedSkillName(currentValue === selectedSkillName.toLowerCase() ? '' : currentValue);
-                          // Do not close on select, allow experience input
+                           if (!alreadySelected) {
+                            setSelectedSkillName(currentValue === selectedSkillName.toLowerCase() ? '' : currentValue);
+                           }
                         }}
+                        disabled={alreadySelected}
+                        className={alreadySelected ? "opacity-50 cursor-not-allowed" : ""}
                       >
                         <Check
-                          className={`mr-2 h-4 w-4 ${selectedSkillName.toLowerCase() === skill.toLowerCase() ? 'opacity-100' : 'opacity-0'}`}
+                          className={`mr-2 h-4 w-4 ${selectedSkillName.toLowerCase() === skill.toLowerCase() && !alreadySelected ? 'opacity-100' : 'opacity-0'}`}
                         />
                         {skill}
+                        {alreadySelected && <span className="ml-auto text-xs text-muted-foreground">(Added)</span>}
                       </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-              {selectedSkillName && (
-                 <div className="p-2 border-t">
-                   <Input
-                     type="text" // Changed to text to allow "1-2" or "2+" etc. but will treat as number for AI
-                     placeholder="Years of experience (optional)"
-                     value={currentExperience}
-                     onChange={(e) => setCurrentExperience(e.target.value)}
-                     className="h-8 text-sm"
-                   />
-                 </div>
-              )}
-              <div className="p-2 border-t">
-                 <Button onClick={handleAddSkill} className="w-full" size="sm" disabled={!selectedSkillName.trim()}>
-                   <PlusCircle className="mr-2 h-4 w-4" /> Add Skill
-                 </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+            {selectedSkillName && !isSkillSelected(selectedSkillName) && (
+               <div className="p-2 border-t">
+                 <Input
+                   type="text" 
+                   placeholder="Years of experience (e.g., 2, 5+, 0-1)"
+                   value={currentExperience}
+                   onChange={(e) => setCurrentExperience(e.target.value)}
+                   className="h-8 text-sm"
+                 />
+               </div>
+            )}
+            <div className="p-2 border-t">
+               <Button 
+                onClick={handleAddSkill} 
+                className="w-full" 
+                size="sm" 
+                disabled={!selectedSkillName.trim() || isSkillSelected(selectedSkillName)}
+               >
+                 <PlusCircle className="mr-2 h-4 w-4" /> Add Skill to Profile
+               </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-foreground">Your Added Skills:</h3>
+        <h3 className="text-base font-medium text-muted-foreground">Your Added Skills:</h3>
         {skills.length === 0 && (
-          <p className="text-xs text-muted-foreground">No skills added yet.</p>
+          <p className="text-sm text-muted-foreground">No skills added yet. Use the input above.</p>
         )}
         <div className="flex flex-wrap gap-2">
           {skills.map(skill => (
-            <Badge key={skill.name} variant="secondary" className="py-1 px-3 text-sm items-center group">
-              {skill.name}
+            <Badge key={skill.name} variant="secondary" className="py-2 px-3 text-base items-center group">
+              <span>{skill.name}</span>
               <Input 
                 type="text"
                 placeholder="Yrs"
                 value={skill.experience}
                 onChange={(e) => handleUpdateExperience(skill.name, e.target.value)}
-                className="h-6 w-12 ml-2 text-xs px-1 bg-background group-hover:border-primary"
+                className="h-7 w-16 ml-2 text-sm px-2 bg-background group-hover:border-primary focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                 aria-label={`Years of experience for ${skill.name}`}
               />
               <button
                 type="button"
                 onClick={() => handleRemoveSkill(skill.name)}
-                className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                className="ml-2 rounded-full hover:bg-destructive/20 p-1"
                 aria-label={`Remove ${skill.name}`}
               >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4 text-destructive hover:text-destructive-foreground" />
               </button>
             </Badge>
           ))}
         </div>
       </div>
+      {/* Placeholder for Hard/Soft skill categorization UI - to be implemented next */}
+      <CardDescription className="text-xs pt-2">
+        Tip: Categorizing skills into 'Hard Skills' and 'Soft Skills' can further refine your job matches and analysis. This feature will be available in a future update.
+      </CardDescription>
     </div>
   );
 }
+
