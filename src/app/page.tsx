@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useMemo } from 'react';
 import { Header } from '@/components/employmint/Header';
-import { SkillInput } from '@/components/employmint/SkillInput';
+import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
 import { Button } from '@/components/ui/button';
@@ -10,24 +10,23 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, AlertCircle, ListFilter } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
-import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
+import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching'; // This is now an array
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 
-
-interface JobMatchResult extends SkillBasedJobMatchingOutput {
-  jobTitleDisplay: string;
-}
+type JobMatchResultItem = SkillBasedJobMatchingOutput[0]; // Assuming SkillBasedJobMatchingOutput is an array
 
 export default function EmployMintPage() {
-  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [userSkills, setUserSkills] = useState<Skill[]>([]);
   
   // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [jobMatchDescription, setJobMatchDescription] = useState('');
-  const [jobMatchResult, setJobMatchResult] = useState<JobMatchResult | null>(null);
+  const [jobMatchResults, setJobMatchResults] = useState<JobMatchResultItem[]>([]);
+  const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
   
   // State for Job-Focused Skill Comparison
   const [skillCompareDescription, setSkillCompareDescription] = useState('');
@@ -38,7 +37,7 @@ export default function EmployMintPage() {
   
   const { toast } = useToast();
 
-  const handleSkillsChange = (newSkills: string[]) => {
+  const handleSkillsChange = (newSkills: Skill[]) => {
     setUserSkills(newSkills);
   };
 
@@ -47,24 +46,30 @@ export default function EmployMintPage() {
     if (userSkills.length === 0 || !jobMatchTitle || !jobMatchDescription) {
       toast({
         title: "Missing Information",
-        description: "Please provide your skills, job title, and job description.",
+        description: "Please provide your skills, a desired job title, and an ideal job description.",
         variant: "destructive",
       });
       return;
     }
-    setJobMatchResult(null);
+    setJobMatchResults([]);
     startJobMatchingTransition(async () => {
       try {
-        const result = await performSkillBasedJobMatching({
+        const results = await performSkillBasedJobMatching({
           userSkills,
           jobTitle: jobMatchTitle,
           jobDescription: jobMatchDescription,
         });
-        setJobMatchResult({...result, jobTitleDisplay: jobMatchTitle});
+        setJobMatchResults(results);
+         if (results.length === 0) {
+          toast({
+            title: "No Jobs Found",
+            description: "We couldn't find any job matches based on your criteria. Try broadening your search.",
+          });
+        }
       } catch (error) {
         console.error(error);
         toast({
-          title: "Error Matching Job",
+          title: "Error Matching Jobs",
           description: (error as Error).message || "An unexpected error occurred.",
           variant: "destructive",
         });
@@ -74,10 +79,10 @@ export default function EmployMintPage() {
 
   const handleSkillCompareSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (userSkills.length === 0 || !skillCompareDescription) {
+    if (userSkills.length === 0) { // Job description is now optional
       toast({
-        title: "Missing Information",
-        description: "Please provide your skills and the job description.",
+        title: "Missing Skills",
+        description: "Please provide your skills.",
         variant: "destructive",
       });
       return;
@@ -87,7 +92,7 @@ export default function EmployMintPage() {
       try {
         const result = await performJobFocusedSkillComparison({
           userSkills,
-          jobDescription: skillCompareDescription,
+          jobDescription: skillCompareDescription, // Can be empty
         });
         setSkillGapResult(result);
       } catch (error) {
@@ -101,14 +106,24 @@ export default function EmployMintPage() {
     });
   };
 
+  const sortedJobMatchResults = useMemo(() => {
+    return [...jobMatchResults].sort((a, b) => {
+      if (jobMatchSortOrder === 'highest') {
+        return b.matchPercentage - a.matchPercentage;
+      } else {
+        return a.matchPercentage - b.matchPercentage;
+      }
+    });
+  }, [jobMatchResults, jobMatchSortOrder]);
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
-        <Card className="shadow-md">
+        <Card className="shadow-lg rounded-xl">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Your Profile</CardTitle>
-            <CardDescription>Start by telling us about your skills.</CardDescription>
+            <CardTitle className="font-headline text-2xl text-foreground">Your Profile</CardTitle>
+            <CardDescription>Tell us about your skills and experience to get personalized job insights.</CardDescription>
           </CardHeader>
           <CardContent>
             <SkillInput skills={userSkills} onSkillsChange={handleSkillsChange} />
@@ -116,60 +131,85 @@ export default function EmployMintPage() {
         </Card>
 
         <Tabs defaultValue="job-matcher" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="job-matcher">Find Matching Jobs</TabsTrigger>
-            <TabsTrigger value="job-analyzer">Analyze Job Fit</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-muted p-1 rounded-lg">
+            <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Find Matching Jobs</TabsTrigger>
+            <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analyze Job Fit</TabsTrigger>
           </TabsList>
           
           <TabsContent value="job-matcher">
-            <Card className="shadow-md">
+            <Card className="shadow-lg rounded-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl">Skill-Based Job Matching</CardTitle>
+                <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
-                  Enter a job title and description to see how well your skills match.
+                  Enter your ideal job title and description to discover potential job matches.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleJobMatchSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="jobMatchTitle" className="block text-sm font-medium text-foreground mb-1">
-                      Job Title
+                      Ideal Job Title
                     </label>
                     <Input
                       id="jobMatchTitle"
                       value={jobMatchTitle}
                       onChange={(e) => setJobMatchTitle(e.target.value)}
-                      placeholder="e.g., Senior Software Engineer"
+                      placeholder="e.g., Senior Software Engineer, Marketing Manager"
                       required
+                      className="bg-card"
                     />
                   </div>
                   <div>
                     <label htmlFor="jobMatchDescription" className="block text-sm font-medium text-foreground mb-1">
-                      Job Description
+                      Ideal Job Description / Responsibilities
                     </label>
                     <Textarea
                       id="jobMatchDescription"
                       value={jobMatchDescription}
                       onChange={(e) => setJobMatchDescription(e.target.value)}
-                      placeholder="Paste the job description here..."
-                      rows={8}
+                      placeholder="Describe your ideal role, key responsibilities, or paste a sample job description..."
+                      rows={6}
                       required
+                      className="bg-card"
                     />
                   </div>
-                  <Button type="submit" disabled={isJobMatchingLoading} className="w-full md:w-auto">
+                  <Button type="submit" disabled={isJobMatchingLoading || userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
                     {isJobMatchingLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Match Skills to Job
+                    Find Matching Jobs
                   </Button>
                 </form>
-                {jobMatchResult && !isJobMatchingLoading && (
+                {jobMatchResults.length > 0 && !isJobMatchingLoading && (
                   <div className="mt-8">
-                    <JobRecommendationCard
-                      jobTitle={jobMatchResult.jobTitleDisplay}
-                      matchPercentage={jobMatchResult.matchPercentage}
-                      rationale={jobMatchResult.rationale}
-                    />
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-headline text-foreground">Job Recommendations</h3>
+                      <div className="flex items-center gap-2">
+                        <ListFilter className="h-5 w-5 text-muted-foreground" />
+                        <Select value={jobMatchSortOrder} onValueChange={(value: 'highest' | 'lowest') => setJobMatchSortOrder(value)}>
+                          <SelectTrigger className="w-[180px] bg-card">
+                            <SelectValue placeholder="Sort by" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="highest">Highest Match</SelectItem>
+                            <SelectItem value="lowest">Lowest Match</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {sortedJobMatchResults.map((job, index) => (
+                        <JobRecommendationCard
+                          key={index} // Ideally use a unique ID from the job data if available
+                          jobTitle={job.jobTitle}
+                          companyName={job.companyName}
+                          location={job.location}
+                          jobDescription={job.jobDescription}
+                          matchPercentage={job.matchPercentage}
+                          rationale={job.rationale}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -177,33 +217,33 @@ export default function EmployMintPage() {
           </TabsContent>
 
           <TabsContent value="job-analyzer">
-            <Card className="shadow-md">
+            <Card className="shadow-lg rounded-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl">Job-Focused Skill Comparison</CardTitle>
+                <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
                 <CardDescription>
-                  Assess your readiness for a job and get learning suggestions for any skill gaps.
+                  Assess your readiness for a specific job (optional) or get general feedback on your skills.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSkillCompareSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="skillCompareDescription" className="block text-sm font-medium text-foreground mb-1">
-                      Job Description
+                      Job Description (Optional)
                     </label>
                     <Textarea
                       id="skillCompareDescription"
                       value={skillCompareDescription}
                       onChange={(e) => setSkillCompareDescription(e.target.value)}
-                      placeholder="Paste the job description here..."
+                      placeholder="Paste a job description here to analyze against your skills, or leave blank for general advice..."
                       rows={8}
-                      required
+                      className="bg-card"
                     />
                   </div>
-                  <Button type="submit" disabled={isSkillComparingLoading} className="w-full md:w-auto">
+                  <Button type="submit" disabled={isSkillComparingLoading || userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
                     {isSkillComparingLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Analyze Skill Gaps
+                    Analyze Skills
                   </Button>
                 </form>
                 {skillGapResult && !isSkillComparingLoading && (
@@ -212,6 +252,7 @@ export default function EmployMintPage() {
                       missingSkills={skillGapResult.missingSkills}
                       suggestedResources={skillGapResult.suggestedResources}
                       skillComparisonSummary={skillGapResult.skillComparisonSummary}
+                      interviewTips={skillGapResult.interviewTips}
                     />
                   </div>
                 )}
@@ -220,8 +261,8 @@ export default function EmployMintPage() {
           </TabsContent>
         </Tabs>
       </main>
-      <footer className="text-center p-4 text-sm text-muted-foreground border-t">
-        © {new Date().getFullYear()} EmployMint. All rights reserved.
+      <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
+        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
     </div>
   );
