@@ -12,12 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge'; // Added import
+import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Download, Trash2, PlusCircle, Eye, Palette } from 'lucide-react';
 import { ResumeDataProvider, useResumeData } from '@/context/ResumeDataContext';
 import type { ResumeLayoutType, ResumeWorkExperience, ResumeEducation, ResumeSkill, ResumeProject, ResumeCertification } from '@/types/resume';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/context/ProfileContext';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const PersonalDetailsForm = () => {
   const { resumeData, updatePersonalDetails } = useResumeData();
@@ -170,17 +172,15 @@ const EducationForm = () => {
 };
 
 const SkillsForm = () => {
-  const { resumeData, addSkill, removeSkill, setResumeData } = useResumeData(); // Use setResumeData for prefill
+  const { resumeData, addSkill, removeSkill, setResumeData } = useResumeData(); 
   const { profile } = useProfile();
 
   useEffect(() => {
     if (resumeData.skills.length === 0 && profile.skills.length > 0) {
       const profileSkillsToResumeSkills: ResumeSkill[] = profile.skills.map(s => ({
-        id: s.name, // Use name as temp ID, context will assign uuid
+        id: s.name, 
         name: s.name,
-        // level: undefined, // Or map experience to a level if desired
       }));
-      // This will trigger addSkill which assigns uuid
       profileSkillsToResumeSkills.forEach(ps => {
         if(!resumeData.skills.find(rs => rs.name === ps.name)) {
            addSkill({name: ps.name});
@@ -232,7 +232,6 @@ const SkillsForm = () => {
 
 const ProjectsForm = () => {
   const { resumeData, addProject, updateProject, removeProject } = useResumeData();
-  // For simplicity, responsibilities/tech will be a single textarea, split by newline in preview
   return (
     <Card className="border-none shadow-none">
       <CardContent className="space-y-6 pt-6">
@@ -285,15 +284,21 @@ const LayoutSelectorAndPreview = () => {
   ];
 
   const renderPreview = () => {
-    // Basic HTML structure for preview, actual styling depends on selectedLayout and print CSS
     return (
-      <div className="border p-6 h-[600px] overflow-y-auto bg-white text-black font-sans text-xs print:h-auto print:overflow-visible print:border-none print:p-0 print:text-[10pt]">
+      <div id="resume-preview-content" className="border p-6 h-[600px] overflow-y-auto bg-white text-black font-sans text-xs print:h-auto print:overflow-visible print:border-none print:p-0 print:text-[10pt]">
         <style jsx global>{`
           @media print {
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0; padding:0; }
-            .resume-preview-container { margin: 0; padding: 20px; border: none; box-shadow: none; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0; padding:0; background-color: white !important; color: black !important; }
+            .resume-preview-container { margin: 0; padding: 20px; border: none; box-shadow: none; background-color: white !important; color: black !important; }
             .no-print { display: none !important; }
             /* Add more print-specific styles based on layout */
+            h1, h2, h3, p, li, a, span { color: black !important; }
+            .text-gray-800 { color: #2d3748 !important; }
+            .text-gray-700 { color: #4a5568 !important; }
+            .text-gray-600 { color: #718096 !important; }
+            .text-gray-500 { color: #a0aec0 !important; }
+            .border-gray-400 { border-color: #cbd5e0 !important; }
+            .text-blue-600 { color: #3182ce !important; }
           }
         `}</style>
         <div className="resume-preview-container">
@@ -425,15 +430,69 @@ const LayoutSelectorAndPreview = () => {
 function ResumeBuilderPageContent() {
   const { toast } = useToast();
 
-  const handleDownloadPdf = () => {
-    toast({
-      title: "Download Resume (Print)",
-      description: "Your browser's print dialog will open. Choose 'Save as PDF'. For best results, ensure background graphics are enabled in print settings and margins are set to 'None' or 'Minimum'.",
-      duration: 5000,
-    });
-    setTimeout(() => {
-      window.print();
-    }, 300);
+  const handleDownloadPdf = async () => {
+    const input = document.getElementById('resume-preview-content');
+    if (!input) {
+      toast({
+        title: "Error Downloading PDF",
+        description: "Could not find the resume content to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Ensure background color of the preview is white for html2canvas
+      input.style.backgroundColor = 'white';
+      const canvas = await html2canvas(input, {
+        scale: 2, // Increase scale for better quality
+        useCORS: true, // If using external images
+        backgroundColor: '#ffffff', // Explicitly set background for canvas
+      });
+      input.style.backgroundColor = ''; // Reset background color
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4', // Standard A4 size
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // The canvas from html2canvas might have different dimensions than the PDF page
+      // We want to scale the image to fit the A4 page, maintaining aspect ratio
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = imgProps.width;
+      const imgHeight = imgProps.height;
+
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      
+      const newImgWidth = imgWidth * ratio;
+      const newImgHeight = imgHeight * ratio;
+
+      // Center the image on the PDF page (optional, can adjust x, y for margins)
+      const x = (pdfWidth - newImgWidth) / 2;
+      const y = (pdfHeight - newImgHeight) / 2; // Centering vertically too
+      // Or const y = 0; for top alignment
+
+      pdf.addImage(imgData, 'PNG', x, y, newImgWidth, newImgHeight);
+      pdf.save('resume.pdf');
+
+      toast({
+        title: "Resume Downloaded",
+        description: "Your resume has been downloaded as resume.pdf.",
+      });
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Error Downloading PDF",
+        description: "An unexpected error occurred while generating the PDF.",
+        variant: "destructive",
+      });
+    }
   };
 
   const defaultAccordionItems = ["item-personal", "item-experience", "item-education", "item-skills"];
@@ -511,4 +570,3 @@ export default function ResumeBuilderPage() {
     </ResumeDataProvider>
   );
 }
-

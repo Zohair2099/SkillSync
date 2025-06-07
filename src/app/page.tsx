@@ -88,65 +88,87 @@ const employMintPlusFeatures = [
     id: "skill-dev-path",
     icon: Route,
     title: "Personalized Skill Development Path",
-    description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations from platforms like Coursera, Udemy, or LinkedIn Learning to bridge the gap.",
-    interactive: true,
-    href: "/personalized-skill-path"
+    description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations to bridge the gap.",
+    href: "/personalized-skill-path",
+    actionText: "Get Your Path",
   },
   {
     id: "resume-builder",
     icon: FileText,
     title: "Resume Builder",
     description: "Craft a professional resume by entering your details and choosing from various layouts. Download as PDF.",
-    interactive: true,
-    href: "/resume-builder"
+    href: "/resume-builder",
+    actionText: "Build Your Resume",
   },
   {
     id: "soft-skill-assessment",
     icon: MessageSquare,
     title: "Soft Skill Assessment",
-    description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement."
+    description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement.",
+    href: "#", 
+    actionText: "Assess Skills (Soon)",
+    conceptual: true,
   },
   {
     id: "market-trends",
     icon: BarChart3,
     title: "Real-Time Job Market Trends",
-    description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields."
+    description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields.",
+    href: "#",
+    actionText: "View Trends (Soon)",
+    conceptual: true,
   },
   {
     id: "interview-practice",
     icon: Mic,
     title: "AI Interview Practice",
-    description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback."
+    description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback.",
+    href: "/interview-practice",
+    actionText: "Start Practice",
   },
   {
     id: "social-networking",
     icon: Share2,
     title: "Social Integration & Networking",
-    description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences."
+    description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences.",
+    href: "#",
+    actionText: "Connect (Soon)",
+    conceptual: true,
   },
   {
     id: "company-culture",
     icon: Building,
     title: "Company Culture & Work Environment Matching",
-    description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings."
+    description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings.",
+    href: "#",
+    actionText: "Find Matches (Soon)",
+    conceptual: true,
   },
   {
     id: "notifications",
     icon: Bell,
     title: "Smart Notifications & Reminders",
-    description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile."
+    description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile.",
+    href: "#",
+    actionText: "Set Up Alerts (Soon)",
+    conceptual: true,
   },
   {
     id: "app-tracker",
     icon: ClipboardCheck,
     title: "Job Application Tracker",
-    description: "Track your job applications, interviews, and follow-up actions in one organized place."
+    description: "Track your job applications, interviews, and follow-up actions in one organized place.",
+    href: "/application-tracker",
+    actionText: "Track Applications",
   },
   {
     id: "salary-estimator",
     icon: SalaryIcon,
     title: "AI-Based Salary Estimator",
-    description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data."
+    description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
+    href: "#",
+    actionText: "Estimate Salary (Soon)",
+    conceptual: true,
   }
 ];
 
@@ -273,11 +295,10 @@ export default function EmployMintPage() {
   }, [jobMatchCountry]);
 
 
-  const handleEmployMintPlusFeatureClick = (featureId: string) => {
-    // This function can be used for non-navigation interactive features in the future
+  const handleConceptualFeatureClick = (title: string) => {
     toast({
-        title: "Feature Clicked (Conceptual)",
-        description: `You clicked on ${featureId}. This feature is currently conceptual.`,
+        title: `${title}`,
+        description: `This feature is coming soon! Stay tuned for updates.`,
     });
   };
 
@@ -557,24 +578,24 @@ export default function EmployMintPage() {
                       <CardContent className="flex-grow">
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                       </CardContent>
-                      {feature.interactive && (
-                        <CardFooter>
-                          {feature.href ? (
-                            <Link href={feature.href} passHref className="w-full">
-                              <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
-                                <feature.icon className="mr-2 h-4 w-4"/>
-                                {feature.id === 'resume-builder' ? 'Build Your Resume' :
-                                 feature.id === 'skill-dev-path' ? 'Get Your Path' :
-                                 'Explore Feature'}
-                              </Button>
-                            </Link>
-                          ) : (
-                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={() => handleEmployMintPlusFeatureClick(feature.id)}>
-                              <feature.icon className="mr-2 h-4 w-4"/> Explore Feature (Conceptual)
+                      <CardFooter>
+                        {feature.href && feature.href !== "#" ? (
+                          <Link href={feature.href} passHref className="w-full">
+                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+                              <feature.icon className="mr-2 h-4 w-4"/>
+                              {feature.actionText || 'Explore Feature'}
                             </Button>
-                          )}
-                        </CardFooter>
-                      )}
+                          </Link>
+                        ) : (
+                          <Button 
+                            className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground" 
+                            onClick={() => feature.conceptual && handleConceptualFeatureClick(feature.title)}
+                            disabled={!feature.conceptual}
+                          >
+                            <feature.icon className="mr-2 h-4 w-4"/> {feature.actionText || 'Explore (Conceptual)'}
+                          </Button>
+                        )}
+                      </CardFooter>
                     </Card>
                   ))}
                 </div>
