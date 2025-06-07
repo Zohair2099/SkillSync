@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info } from 'lucide-react';
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info, Puzzle, GraduationCap } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
@@ -95,8 +95,10 @@ const employMintPlusFeatures = [
   {
     id: "resume-builder",
     icon: FileText,
-    title: "AI Resume Builder",
-    description: "Automatically generate a customized resume based on your skills, experiences, and job preferences, with suggestions for improvement to help you stand out."
+    title: "Resume Builder",
+    description: "Craft a professional resume by entering your details and choosing from various layouts. Download as PDF.",
+    interactive: true,
+    href: "/resume-builder"
   },
   {
     id: "soft-skill-assessment",
@@ -144,7 +146,7 @@ const employMintPlusFeatures = [
     id: "salary-estimator",
     icon: SalaryIcon,
     title: "AI-Based Salary Estimator",
-    description: "Predict expected salary ranges based on your experience, skills, and job role using AI-powered market data."
+    description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data."
   }
 ];
 
@@ -153,7 +155,6 @@ export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
 
-  // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
   const [jobMatchIdealDescription, setJobMatchIdealDescription] = useState('');
@@ -164,7 +165,6 @@ export default function EmployMintPage() {
   const [jobMatchWorkModel, setJobMatchWorkModel] = useState<'any' | 'on-site' | 'remote' | 'hybrid'>('any');
   const [jobMatchSortOrder, setJobMatchSortOrder] = useState<'highest' | 'lowest'>('highest');
 
-  // State for Job-Focused Skill Comparison (main tab)
   const [skillCompareJobDescription, setSkillCompareJobDescription] = useState('');
   const [skillGapResult, setSkillGapResult] = useState<JobFocusedSkillComparisonOutput | null>(null);
 
@@ -272,9 +272,14 @@ export default function EmployMintPage() {
     }
   }, [jobMatchCountry]);
 
-  useEffect(() => {
-    // userSkills are now directly from profile context
-  }, [profile.skills]);
+
+  const handleEmployMintPlusFeatureClick = (featureId: string) => {
+    // This function can be used for non-navigation interactive features in the future
+    toast({
+        title: "Feature Clicked (Conceptual)",
+        description: `You clicked on ${featureId}. This feature is currently conceptual.`,
+    });
+  };
 
 
   return (
@@ -462,7 +467,7 @@ export default function EmployMintPage() {
                         <JobRecommendationCard
                           key={`${job.jobTitle}-${index}-${job.companyName}`}
                           job={job}
-                          jobIndex={jobMatchResults.findIndex(j => j === job)} // Find original index for context
+                          jobIndex={jobMatchResults.findIndex(j => j === job)} 
                         />
                       ))}
                     </div>
@@ -515,13 +520,14 @@ export default function EmployMintPage() {
                 {skillGapResult && !isSkillComparingLoading && (
                   <div className="mt-8">
                     <SkillGapDisplay
-                      missingSkills={skillGapResult.missingSkills}
-                      suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources}
-                      skillComparisonSummary={skillGapResult.skillComparisonSummary}
+                      missingSkills={skillGapResult.missingSkills || []}
+                      suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []}
+                      skillComparisonSummary={skillGapResult.skillComparisonSummary || "Analysis complete."}
                       interviewTips={skillGapResult.interviewTips}
                       suggestedJobCategories={skillGapResult.suggestedJobCategories}
                       suggestedSoftSkills={skillGapResult.suggestedSoftSkills}
                       mentorshipAdvice={skillGapResult.mentorshipAdvice}
+                      skillDevelopmentRoadmap={skillGapResult.skillDevelopmentRoadmap}
                     />
                   </div>
                 )}
@@ -535,7 +541,7 @@ export default function EmployMintPage() {
                   <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
                 </CardTitle>
                 <CardDescription>
-                  Unlock advanced tools and personalized guidance to supercharge your career journey. (Features listed below are conceptual or provide access to existing functionalities.)
+                  Unlock advanced tools and personalized guidance to supercharge your career journey.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -551,13 +557,22 @@ export default function EmployMintPage() {
                       <CardContent className="flex-grow">
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                       </CardContent>
-                      {feature.interactive && feature.href && (
+                      {feature.interactive && (
                         <CardFooter>
-                          <Link href={feature.href} passHref className="w-full">
-                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
-                              <Route className="mr-2 h-4 w-4"/> Get Your Path
+                          {feature.href ? (
+                            <Link href={feature.href} passHref className="w-full">
+                              <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+                                <feature.icon className="mr-2 h-4 w-4"/>
+                                {feature.id === 'resume-builder' ? 'Build Your Resume' :
+                                 feature.id === 'skill-dev-path' ? 'Get Your Path' :
+                                 'Explore Feature'}
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={() => handleEmployMintPlusFeatureClick(feature.id)}>
+                              <feature.icon className="mr-2 h-4 w-4"/> Explore Feature (Conceptual)
                             </Button>
-                          </Link>
+                          )}
                         </CardFooter>
                       )}
                     </Card>
