@@ -51,11 +51,11 @@ export default {
         ring: 'hsl(var(--ring))',
         // Added for 100% match gold color
         yellow: {
-          DEFAULT: 'hsl(var(--yellow))', // Example HSL for gold/yellow
-          foreground: 'hsl(var(--yellow-foreground))', // Example HSL for text on gold/yellow
-          '400': 'hsl(var(--yellow-400))', // Specific shade if needed
+          DEFAULT: 'hsl(var(--yellow))', 
+          foreground: 'hsl(var(--yellow-foreground))', 
+          '400': 'hsl(var(--yellow-400))', 
         },
-        orange: { // Ensuring orange is available for match percentages
+        orange: { 
           '500': 'hsl(var(--orange-500))',
         },
         chart: {
@@ -98,10 +98,15 @@ export default {
             height: '0',
           },
         },
+        'fade-in-slide-from-right': { // For tab content
+          '0%': { opacity: '0', transform: 'translateX(10px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in-slide-from-right': 'fade-in-slide-from-right 0.3s ease-out forwards', // For tab content
       },
     },
   },
