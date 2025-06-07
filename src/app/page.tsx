@@ -2,9 +2,8 @@
 'use client';
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
-import Link from 'next/link'; // Keep if needed elsewhere, but tabs are primary nav now
-import { Header } from '@/components/employmint/Header'; // Main app header
-// Removed SkillInput from here as it's on profile page
+import Link from 'next/link'; 
+import { Header } from '@/components/employmint/Header'; 
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
 import { Button } from '@/components/ui/button';
@@ -16,13 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Sparkles, UserCircle } from 'lucide-react'; // UserCircle for profile tab, Sparkles for EmployMint+
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, UserCircle, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
-import { useProfile } from '@/context/ProfileContext'; // Import useProfile
+import { useProfile } from '@/context/ProfileContext'; 
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -84,10 +83,63 @@ const JOB_TITLES_PREDEFINED = [
   "Architect", "Real Estate Agent", "Pilot", "Psychologist", "Surveyor", "Interior Designer"
 ];
 
+const employMintPlusFeatures = [
+  {
+    icon: Route,
+    title: "Personalized Skill Development Path",
+    description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations from platforms like Coursera, Udemy, or LinkedIn Learning to bridge the gap."
+  },
+  {
+    icon: FileText,
+    title: "AI Resume Builder",
+    description: "Automatically generate a customized resume based on your skills, experiences, and job preferences, with suggestions for improvement to help you stand out."
+  },
+  {
+    icon: MessageSquare,
+    title: "Soft Skill Assessment",
+    description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement."
+  },
+  {
+    icon: BarChart3,
+    title: "Real-Time Job Market Trends",
+    description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields."
+  },
+  {
+    icon: Mic,
+    title: "AI Interview Practice",
+    description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback."
+  },
+  {
+    icon: Share2,
+    title: "Social Integration & Networking",
+    description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences."
+  },
+  {
+    icon: Building,
+    title: "Company Culture & Work Environment Matching",
+    description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings."
+  },
+  {
+    icon: Bell,
+    title: "Smart Notifications & Reminders",
+    description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile."
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Job Application Tracker",
+    description: "Track your job applications, interviews, and follow-up actions in one organized place."
+  },
+  {
+    icon: SalaryIcon,
+    title: "AI-Based Salary Estimator",
+    description: "Predict expected salary ranges based on your experience, skills, and job role using AI-powered market data."
+  }
+];
+
 
 export default function EmployMintPage() {
-  const { profile } = useProfile(); // Get profile from context
-  const userSkills = profile.skills; // Use skills from context
+  const { profile } = useProfile(); 
+  const userSkills = profile.skills; 
 
   // State for Skill-Based Job Matching
   const [jobMatchTitle, setJobMatchTitle] = useState('');
@@ -206,7 +258,6 @@ export default function EmployMintPage() {
     }
   }, [jobMatchCountry]);
 
-  // Effect to load profile skills when component mounts or profile changes
   useEffect(() => {
     // userSkills are now directly from profile context
   }, [profile.skills]);
@@ -218,10 +269,9 @@ export default function EmployMintPage() {
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
         <Tabs defaultValue="job-matcher" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6">
-            {/* Profile Tab is now an icon in the header */}
             <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Briefcase className="mr-2 h-4 w-4 inline-block"/>Find Matching Jobs</TabsTrigger>
             <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="mr-2 h-4 w-4 inline-block"/>Analyze Job Fit</TabsTrigger>
-            <TabsTrigger value="employmint-plus" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Sparkles className="mr-2 h-4 w-4 inline-block"/>EmployMint+</TabsTrigger>
+            <TabsTrigger value="employmint-plus" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Plus className="mr-2 h-4 w-4 inline-block"/>EmployMint+</TabsTrigger>
           </TabsList>
           
           <TabsContent value="job-matcher">
@@ -270,7 +320,7 @@ export default function EmployMintPage() {
                             <CommandList>
                               <CommandEmpty>No title found. Type to add new.</CommandEmpty>
                               <CommandGroup>
-                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => ( // Limit initial display for performance
+                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => ( 
                                   <CommandItem
                                     key={title}
                                     value={title}
@@ -402,9 +452,6 @@ export default function EmployMintPage() {
                         />
                       ))}
                     </div>
-                     <CardDescription className="text-xs pt-4">
-                      Note: The skill comparison table on the detailed job page will be implemented in a future update.
-                    </CardDescription>
                   </div>
                 )}
               </CardContent>
@@ -470,17 +517,28 @@ export default function EmployMintPage() {
           <TabsContent value="employmint-plus">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl text-foreground">EmployMint+</CardTitle>
+                <CardTitle className="font-headline text-2xl text-foreground flex items-center">
+                  <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
+                </CardTitle>
                 <CardDescription>
-                  Unlock advanced features, premium resources, and personalized coaching with EmployMint+. (Coming Soon!)
+                  Unlock advanced tools and personalized guidance to supercharge your career journey. (Features listed below are conceptual and coming soon!)
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">More details about premium features will be available here soon. Stay tuned for exciting updates!</p>
-                {/* Placeholder for future premium content image */}
-                <div className="mt-6 p-8 bg-secondary rounded-lg flex flex-col items-center justify-center">
-                    <Sparkles className="w-16 h-16 text-primary mb-4"/>
-                    <p className="text-lg font-semibold text-foreground">Supercharge Your Career Journey!</p>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {employMintPlusFeatures.map((feature, index) => (
+                    <Card key={index} className="bg-secondary/30 hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <CardTitle className="text-lg text-primary flex items-center">
+                          <feature.icon className="mr-2 h-5 w-5" />
+                          {feature.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">{feature.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </CardContent>
             </Card>
