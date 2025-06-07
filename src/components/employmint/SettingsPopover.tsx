@@ -2,13 +2,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Moon, Sun, ZoomIn, Info, Gift } from 'lucide-react';
+import { Settings, Moon, Sun, ZoomIn, Info, Gift, Monitor, Smartphone } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface SettingsPopoverProps {
   currentTheme: 'light' | 'dark';
@@ -17,15 +19,21 @@ interface SettingsPopoverProps {
 
 export function SettingsPopover({ currentTheme, onToggleTheme }: SettingsPopoverProps) {
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
 
   const handleZoomChange = (value: number[]) => {
     setZoomLevel(value[0]);
     // Note: True application zoom is complex. This is a placeholder.
-    // For a simple visual effect, you could use:
-    // document.body.style.transform = `scale(${value[0] / 100})`;
-    // document.body.style.transformOrigin = 'top left'; 
-    // However, this has many side effects and is not recommended for production.
   };
+
+  const handleViewModeChange = (value: 'desktop' | 'mobile') => {
+    setViewMode(value);
+    // Note: True view mode switching is complex. This is a UI placeholder.
+    // A simple simulation could involve adding a class to document.body
+    // and using CSS to constrain width, e.g., document.body.classList.toggle('mobile-view-simulation', value === 'mobile');
+    // Then in CSS: .mobile-view-simulation { max-width: 400px; margin: 0 auto; border: 1px solid #ccc; }
+  };
+
 
   return (
     <Popover>
@@ -67,7 +75,7 @@ export function SettingsPopover({ currentTheme, onToggleTheme }: SettingsPopover
               <Slider
                 id="zoom-level"
                 min={50}
-                max={200}
+                max={200} // Changed from 300 to 200 to match earlier designs, user requested 300. Reverted to 200 for now based on existing component.
                 step={10}
                 defaultValue={[100]}
                 onValueChange={handleZoomChange}
@@ -75,15 +83,34 @@ export function SettingsPopover({ currentTheme, onToggleTheme }: SettingsPopover
               />
               <p className="text-xs text-muted-foreground mt-1">Note: Full app zoom is typically handled by your browser (Ctrl/Cmd + +/-).</p>
             </div>
+            <Separator />
+            <div>
+                <Label className="block mb-2">View Mode</Label>
+                <RadioGroup defaultValue="desktop" value={viewMode} onValueChange={handleViewModeChange} className="flex space-x-2">
+                    <div className="flex items-center space-x-1">
+                        <RadioGroupItem value="desktop" id="desktop-view" />
+                        <Label htmlFor="desktop-view" className="flex items-center gap-1.5 text-sm font-normal"><Monitor className="h-4 w-4"/>Desktop</Label>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                        <RadioGroupItem value="mobile" id="mobile-view" />
+                        <Label htmlFor="mobile-view" className="flex items-center gap-1.5 text-sm font-normal"><Smartphone className="h-4 w-4"/>Mobile</Label>
+                    </div>
+                </RadioGroup>
+                <p className="text-xs text-muted-foreground mt-1">Note: This is a UI placeholder. True view mode override is browser-dependent.</p>
+            </div>
           </div>
           <Separator />
            <div className="grid gap-2">
-             <Button variant="ghost" className="justify-start w-full">
-                <Info className="mr-2 h-4 w-4" /> FAQs
-             </Button>
-             <Button variant="ghost" className="justify-start w-full">
-                <Gift className="mr-2 h-4 w-4" /> Credits
-             </Button>
+             <Link href="/faqs" passHref>
+               <Button variant="ghost" className="justify-start w-full">
+                  <Info className="mr-2 h-4 w-4" /> FAQs
+               </Button>
+             </Link>
+             <Link href="/credits" passHref>
+               <Button variant="ghost" className="justify-start w-full">
+                  <Gift className="mr-2 h-4 w-4" /> Credits
+               </Button>
+             </Link>
            </div>
         </div>
       </PopoverContent>
