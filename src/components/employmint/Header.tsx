@@ -6,6 +6,7 @@ import { Briefcase, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useAppearance } from '@/context/AppearanceContext'; 
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode } = useAppearance();
@@ -20,11 +21,13 @@ export function Header() {
           </h1>
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/profile" passHref>
-            <Button variant="ghost" size="icon" aria-label="User Profile">
-              <UserCircle className="h-6 w-6" />
-            </Button>
-          </Link>
+          {viewMode === 'desktop' && ( // Only show in desktop view
+            <Link href="/profile" passHref>
+              <Button variant="ghost" size="icon" aria-label="User Profile">
+                <UserCircle className="h-6 w-6" />
+              </Button>
+            </Link>
+          )}
           <SettingsPopover 
             currentTheme={theme} 
             onToggleTheme={toggleTheme}

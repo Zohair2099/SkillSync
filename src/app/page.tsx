@@ -3,6 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation'; // Added
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -15,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List, UserCircle } from 'lucide-react'; // Added UserCircle
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
@@ -182,6 +183,7 @@ export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
   const { viewMode } = useAppearance(); 
+  const pathname = usePathname(); // Added
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -321,13 +323,13 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" // Increased padding for taller tabs
+        viewMode === 'mobile' && "pb-24" 
       )}>
         <Tabs defaultValue="job-matcher" className="w-full">
           <TabsList className={cn(
             "text-muted-foreground",
             viewMode === 'mobile'
-                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-3 h-20 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
+                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-4 h-20 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
                 : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
           )}>
             {tabDefinitions.map(tab => (
@@ -354,6 +356,19 @@ export default function EmployMintPage() {
                 )}
               </TabsTrigger>
             ))}
+            {/* Profile Tab for Mobile View */}
+            {viewMode === 'mobile' && (
+              <Link
+                href="/profile"
+                className={cn(
+                  "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none text-muted-foreground",
+                  pathname === '/profile' && "mobile-tab-profile-active bg-primary"
+                )}
+              >
+                <UserCircle className={cn("h-5 w-5")} />
+                <span className={cn("text-xs order-first mb-1 font-medium")}>Profile</span>
+              </Link>
+            )}
           </TabsList>
 
           <TabsContent value="job-matcher">
@@ -681,14 +696,17 @@ export default function EmployMintPage() {
       </footer>
       <style jsx global>{`
         /* Custom style for active tab inner shadow on mobile */
-        [data-state="active"][style*="--tab-active-shadow"] {
-          box-shadow: inset 0 3px 0 0 hsl(var(--primary)) !important; /* Increased thickness */
+        .fixed .data-\\[state\\=active\\][style*="--tab-active-shadow"],
+        .fixed .mobile-tab-profile-active {
+          box-shadow: inset 0 3px 0 0 hsl(var(--primary)) !important;
         }
         /* Apply primary-foreground color to text and icon of active mobile tab specifically */
-        .fixed .data-\\[state\\=active\\] span, .fixed .data-\\[state\\=active\\] svg {
+        .fixed .data-\\[state\\=active\\] span, .fixed .data-\\[state\\=active\\] svg,
+        .fixed .mobile-tab-profile-active span, .fixed .mobile-tab-profile-active svg {
             color: hsl(var(--primary-foreground)) !important;
         }
       `}</style>
     </div>
   );
 }
+
