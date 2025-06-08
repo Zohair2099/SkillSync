@@ -53,7 +53,7 @@ export function SettingsPopover({
           <Settings className="h-6 w-6" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
+      <PopoverContent className="w-80 max-h-[600px] overflow-y-auto" align="end">
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none font-headline">Settings</h4>
