@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowLeft, Share2, Linkedin, Users, Edit3, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Share2, Linkedin, Users, Edit3, MessageSquare, Lightbulb } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 export default function SocialNetworkingPage() {
@@ -67,14 +67,27 @@ export default function SocialNetworkingPage() {
               </ul>
               <Link href="/community-forum" passHref>
                 <Button variant="secondary" className="w-full">
-                  <MessageSquare className="mr-2 h-4 w-4" /> Go to Community Forum (Coming Soon)
+                  <MessageSquare className="mr-2 h-4 w-4" /> Go to Community Forum (Interactive Demo)
                 </Button>
               </Link>
+            </div>
+            <Separator />
+            <div className="text-center space-y-4 pt-4">
+                <div className="flex justify-center items-center text-lg font-semibold text-foreground mb-2">
+                    <Lightbulb className="h-6 w-6 text-primary mr-2" />
+                    <span>Advanced Networking Features</span>
+                </div>
+                <p className="text-muted-foreground">
+                    Features like direct mentor matching within EmployMint, advanced professional networking tools, and deeper integrations with platforms like LinkedIn are planned for future updates.
+                </p>
+                <div className="p-8 border-2 border-dashed border-border rounded-lg bg-muted/50">
+                    <p className="text-lg font-semibold text-foreground">More Networking Features Coming Soon!</p>
+                </div>
             </div>
           </CardContent>
            <CardFooter className="text-center mt-4">
             <p className="text-xs text-muted-foreground mx-auto">
-              EmployMint aims to foster connections. Actual integration with social platforms for automated posting or data import is a future consideration.
+              EmployMint aims to foster connections. Deeper integration with social platforms for automated actions is a future consideration.
             </p>
           </CardFooter>
         </Card>
