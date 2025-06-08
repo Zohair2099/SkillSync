@@ -23,6 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
+import { useAppearance } from '@/context/AppearanceContext'; // Import useAppearance
+import { cn } from '@/lib/utils'; // Import cn for conditional classes
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -133,7 +135,7 @@ const employMintPlusFeatures = [
     href: "/social-networking",
     actionText: "Connect & Network",
   },
-  {
+   {
     id: "community-forum",
     icon: Users,
     title: "Community Forum",
@@ -179,6 +181,7 @@ const employMintPlusFeatures = [
 export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
+  const { viewMode } = useAppearance(); // Get viewMode
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -297,15 +300,52 @@ export default function EmployMintPage() {
     }
   }, [jobMatchCountry]);
 
+  const tabDefinitions = [
+    { value: "job-matcher", title: "Find Matching Jobs", icon: Briefcase },
+    { value: "job-analyzer", title: "Analyze Job Fit", icon: Brain },
+    { value: "employmint-plus", title: "EmployMint+", icon: Plus },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
+      <main className={cn(
+        "flex-grow container mx-auto px-4 py-8 space-y-8",
+        viewMode === 'mobile' && "pb-20" // Add padding for bottom tabs
+      )}>
         <Tabs defaultValue="job-matcher" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6">
-            <TabsTrigger value="job-matcher" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Briefcase className="mr-2 h-4 w-4 inline-block"/>Find Matching Jobs</TabsTrigger>
-            <TabsTrigger value="job-analyzer" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="mr-2 h-4 w-4 inline-block"/>Analyze Job Fit</TabsTrigger>
-            <TabsTrigger value="employmint-plus" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Plus className="mr-2 h-4 w-4 inline-block"/>EmployMint+</TabsTrigger>
+          <TabsList className={cn(
+             // Common classes
+             "text-muted-foreground",
+            viewMode === 'mobile'
+                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-3 h-16 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" // Mobile: fixed bottom bar
+                : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" // Desktop: regular tabs list
+          )}>
+            {tabDefinitions.map(tab => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className={cn(
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                    viewMode === 'mobile'
+                        ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary" // Mobile specific trigger style
+                        : "rounded-sm" // Desktop specific trigger style
+                )}
+                style={viewMode === 'mobile' && { boxShadow: 'var(--tab-active-shadow, none)' } as React.CSSProperties}
+
+              >
+                {viewMode === 'mobile' ? (
+                    <>
+                        <span className="text-xs order-first mb-0.5">{tab.title.split(' ')[0]}</span> 
+                        <tab.icon className="h-5 w-5" />
+                    </>
+                ) : (
+                    <>
+                        <tab.icon className="mr-2 h-4 w-4 inline-block"/>{tab.title}
+                    </>
+                )}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="job-matcher">
@@ -597,7 +637,12 @@ export default function EmployMintPage() {
       <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
+      <style jsx global>{`
+        /* Custom style for active tab inner shadow on mobile */
+        [data-state="active"][style*="--tab-active-shadow"] {
+          box-shadow: inset 0 2px 0 0 hsl(var(--primary)) !important;
+        }
+      `}</style>
     </div>
   );
 }
-
