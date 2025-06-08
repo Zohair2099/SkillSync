@@ -329,7 +329,7 @@ export default function EmployMintPage() {
           <TabsList className={cn(
             "text-muted-foreground",
             viewMode === 'mobile'
-                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-4 h-20 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
+                ? "fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 h-20 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
                 : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
           )}>
             {tabDefinitions.map(tab => (
@@ -701,8 +701,10 @@ export default function EmployMintPage() {
           box-shadow: inset 0 3px 0 0 hsl(var(--primary)) !important;
         }
         /* Apply primary-foreground color to text and icon of active mobile tab specifically */
-        .fixed .data-\\[state\\=active\\] span, .fixed .data-\\[state\\=active\\] svg,
-        .fixed .mobile-tab-profile-active span, .fixed .mobile-tab-profile-active svg {
+        .fixed .data-\\[state\\=active\\] span, 
+        .fixed .data-\\[state\\=active\\] svg,
+        .fixed .mobile-tab-profile-active span, 
+        .fixed .mobile-tab-profile-active svg {
             color: hsl(var(--primary-foreground)) !important;
         }
       `}</style>
