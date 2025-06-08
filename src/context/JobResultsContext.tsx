@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
+import type { SkillBasedJobMatchingOutput } from '@/app/actions'; // Changed import path
 import React, { createContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
