@@ -3,6 +3,7 @@
 
 import { skillBasedJobMatching, SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import { jobFocusedSkillComparison, JobFocusedSkillComparisonInput, JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
+import { assessSoftSkills, SoftSkillAssessmentInput, SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
 
 export async function performSkillBasedJobMatching(input: SkillBasedJobMatchingInput): Promise<SkillBasedJobMatchingOutput> {
   try {
@@ -41,5 +42,17 @@ export async function performJobFocusedSkillComparison(input: JobFocusedSkillCom
    {
     console.error('Error in jobFocusedSkillComparison:', error);
     throw new Error('Failed to compare skills for the job. Please try again.');
+  }
+}
+
+export async function performSoftSkillAssessment(input: SoftSkillAssessmentInput): Promise<SoftSkillAssessmentOutput> {
+  try {
+    // Validate answers: ensure no answer is empty, though the AI might handle it.
+    // For now, we'll pass them as is.
+    const result = await assessSoftSkills(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performSoftSkillAssessment:', error);
+    throw new Error('Failed to assess soft skills. Please try again.');
   }
 }
