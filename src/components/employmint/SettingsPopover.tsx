@@ -17,20 +17,22 @@ interface SettingsPopoverProps {
   onToggleTheme: () => void;
   currentZoomLevel: number;
   onZoomChange: (level: number) => void;
+  currentViewMode: 'desktop' | 'mobile';
+  onViewModeChange: (mode: 'desktop' | 'mobile') => void;
 }
 
-export function SettingsPopover({ currentTheme, onToggleTheme, currentZoomLevel, onZoomChange }: SettingsPopoverProps) {
-  const [viewMode, setViewMode] = React.useState<'desktop' | 'mobile'>('desktop');
+export function SettingsPopover({ 
+  currentTheme, 
+  onToggleTheme, 
+  currentZoomLevel, 
+  onZoomChange,
+  currentViewMode,
+  onViewModeChange
+}: SettingsPopoverProps) {
 
   const handleZoomChange = (value: number[]) => {
     onZoomChange(value[0]);
   };
-
-  const handleViewModeChange = (value: 'desktop' | 'mobile') => {
-    setViewMode(value);
-    // Note: True view mode switching is complex. This is a UI placeholder.
-  };
-
 
   return (
     <Popover>
@@ -80,8 +82,12 @@ export function SettingsPopover({ currentTheme, onToggleTheme, currentZoomLevel,
             </div>
             <Separator />
             <div>
-                <Label className="block mb-2">View Mode (Conceptual)</Label>
-                <RadioGroup defaultValue="desktop" value={viewMode} onValueChange={handleViewModeChange} className="flex space-x-2">
+                <Label className="block mb-2">View Mode</Label>
+                <RadioGroup 
+                  value={currentViewMode} 
+                  onValueChange={(value: 'desktop' | 'mobile') => onViewModeChange(value)} 
+                  className="flex space-x-2"
+                >
                     <div className="flex items-center space-x-1">
                         <RadioGroupItem value="desktop" id="desktop-view" />
                         <Label htmlFor="desktop-view" className="flex items-center gap-1.5 text-sm font-normal"><Monitor className="h-4 w-4"/>Desktop</Label>
@@ -91,7 +97,7 @@ export function SettingsPopover({ currentTheme, onToggleTheme, currentZoomLevel,
                         <Label htmlFor="mobile-view" className="flex items-center gap-1.5 text-sm font-normal"><Smartphone className="h-4 w-4"/>Mobile</Label>
                     </div>
                 </RadioGroup>
-                <p className="text-xs text-muted-foreground mt-1">Note: This is a UI placeholder. True view mode override is browser-dependent.</p>
+                <p className="text-xs text-muted-foreground mt-1">Simulates a narrower viewport for mobile view. Actual mobile rendering may vary.</p>
             </div>
           </div>
           <Separator />

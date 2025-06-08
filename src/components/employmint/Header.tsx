@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { Briefcase, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
-import { useAppearance } from '@/context/AppearanceContext'; // Use the new context
+import { useAppearance } from '@/context/AppearanceContext'; 
 
 export function Header() {
-  const { theme, toggleTheme, zoomLevel, setZoomLevel } = useAppearance();
+  const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode } = useAppearance();
 
   return (
     <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50">
@@ -30,6 +30,8 @@ export function Header() {
             onToggleTheme={toggleTheme}
             currentZoomLevel={zoomLevel}
             onZoomChange={setZoomLevel}
+            currentViewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         </div>
       </div>
