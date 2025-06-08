@@ -137,7 +137,7 @@ const employMintPlusFeatures = [
     id: "community-forum",
     icon: Users,
     title: "Community Forum",
-    description: "Join discussions, share tips, and network with other EmployMint users. (Coming Soon)",
+    description: "Join discussions, share tips, and network with other EmployMint users.",
     href: "/community-forum",
     actionText: "Join the Discussion",
   },
