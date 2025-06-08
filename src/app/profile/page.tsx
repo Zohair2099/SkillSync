@@ -42,8 +42,7 @@ export default function ProfilePage() {
   const [twitter, setTwitter] = useState(profile.socialLinks.twitter);
   const [website, setWebsite] = useState(profile.socialLinks.website);
 
-  const [showFirstResetDialog, setShowFirstResetDialog] = useState(false);
-  const [showSecondResetDialog, setShowSecondResetDialog] = useState(false);
+  const [showResetConfirmationDialog, setShowResetConfirmationDialog] = useState(false);
 
   const LOCAL_STORAGE_KEYS_TO_RESET = [
     'employmint-user-profile',
@@ -52,9 +51,6 @@ export default function ProfilePage() {
     'employmint-view-mode',
     'employmint-color-palette',
     // Add any other app-specific localStorage keys here if they exist.
-    // ResumeDataContext doesn't use localStorage directly, its state is in memory.
-    // JobResultsContext is also in-memory.
-    // A reload will reset these in-memory contexts by re-initializing their providers.
   ];
 
   useEffect(() => {
@@ -118,11 +114,11 @@ export default function ProfilePage() {
         description: "All application data has been cleared. The app will now reload.",
         variant: "destructive"
       });
+      setShowResetConfirmationDialog(false); 
       setTimeout(() => {
         window.location.reload();
-      }, 700); // Delay reload slightly
+      }, 700); 
     }
-    setShowSecondResetDialog(false); 
   };
 
 
@@ -200,7 +196,11 @@ export default function ProfilePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="destructive" className="w-full" onClick={() => setShowFirstResetDialog(true)}>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => setShowResetConfirmationDialog(true)}
+                  >
                      Reset All App Data
                   </Button>
                 </CardContent>
@@ -221,47 +221,33 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
 
-        {/* First Confirmation Dialog */}
-        <AlertDialog open={showFirstResetDialog} onOpenChange={setShowFirstResetDialog}>
+        <AlertDialog open={showResetConfirmationDialog} onOpenChange={setShowResetConfirmationDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure you want to reset?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will erase all your settings, profile data, and skill lists stored by EmployMint in this browser. This action is not reversible.
+              <AlertDialogTitle className="text-destructive flex items-center">
+                <Trash className="mr-2 h-5 w-5"/>FINAL WARNING: Confirm Reset
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>You are about to permanently erase ALL EmployMint application data from this browser. This includes:</p>
+                <ul className="list-disc list-inside pl-4 text-sm">
+                    <li>Your profile information (name, age, picture)</li>
+                    <li>All added skills and their experience levels</li>
+                    <li>All social media links</li>
+                    <li>Custom appearance settings (theme, zoom, color palette)</li>
+                    <li>Any saved job matches or analysis results (if applicable in future)</li>
+                    <li>Any resume data you've entered</li>
+                </ul>
+                <p className="font-semibold">This action CANNOT BE UNDONE. The application will reload after the reset.</p>
+                <p>Are you absolutely sure you want to proceed?</p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowFirstResetDialog(false)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setShowFirstResetDialog(false);
-                  setShowSecondResetDialog(true);
-                }}
-                // Default styling for AlertDialogAction is fine here
-              >
-                Proceed
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Second (Final) Confirmation Dialog */}
-        <AlertDialog open={showSecondResetDialog} onOpenChange={setShowSecondResetDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-destructive flex items-center"><Trash className="mr-2 h-5 w-5"/>FINAL WARNING: Confirm Reset</AlertDialogTitle>
-              <AlertDialogDescription>
-                You are about to delete ALL EmployMint application data permanently from this browser. There is no going back.
-                Are you absolutely sure you want to proceed?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowSecondResetDialog(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel onClick={() => setShowResetConfirmationDialog(false)}>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleFullAppReset}
                 className={buttonVariants({ variant: "destructive" })}
               >
-                Yes, Delete All My Data
+                Yes, Delete All My Data & Reset App
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
