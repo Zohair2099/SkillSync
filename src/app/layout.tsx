@@ -7,6 +7,7 @@ import { ProfileProvider } from '@/context/ProfileContext';
 import { ResumeDataProvider } from '@/context/ResumeDataContext';
 import { AppearanceProvider } from '@/context/AppearanceContext';
 import MainContentWrapper from '@/components/layout/MainContentWrapper';
+import { MobileBottomNavigation } from '@/components/layout/MobileBottomNavigation'; // Added import
 
 export const metadata: Metadata = {
   title: 'EmployMint',
@@ -34,6 +35,7 @@ export default function RootLayout({
                 <MainContentWrapper>
                   {children}
                 </MainContentWrapper>
+                <MobileBottomNavigation /> 
               </ResumeDataProvider>
             </JobResultsProvider>
           </ProfileProvider>

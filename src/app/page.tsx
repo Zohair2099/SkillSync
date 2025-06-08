@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // Added
+import { usePathname, useSearchParams, useRouter } from 'next/navigation'; // Added useSearchParams and useRouter
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List, UserCircle } from 'lucide-react'; // Added UserCircle
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
@@ -178,12 +178,16 @@ const employMintPlusFeatures = [
   }
 ];
 
+// Define the tab values that correspond to URL hashes
+const HOME_PAGE_TAB_VALUES = ["job-matcher", "job-analyzer", "employmint-plus"];
 
 export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
   const { viewMode } = useAppearance(); 
-  const pathname = usePathname(); // Added
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -206,6 +210,24 @@ export default function EmployMintPage() {
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
   const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
+  const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_VALUES[0]);
+
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (HOME_PAGE_TAB_VALUES.includes(hash)) {
+      setActiveTab(hash);
+    } else {
+      setActiveTab(HOME_PAGE_TAB_VALUES[0]); // Default to first tab
+    }
+  }, [searchParams]); // Re-check on searchParams change (though hash isn't in searchParams directly)
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    if (HOME_PAGE_TAB_VALUES.includes(value)) {
+      router.replace(`/#${value}`, { scroll: false });
+    }
+  };
+
 
   useEffect(() => {
     if (viewMode === 'mobile') {
@@ -312,7 +334,7 @@ export default function EmployMintPage() {
     }
   }, [jobMatchCountry]);
 
-  const tabDefinitions = [
+  const desktopTabDefinitions = [
     { value: "job-matcher", title: "Find Matching Jobs", icon: Briefcase },
     { value: "job-analyzer", title: "Analyze Job Fit", icon: Brain },
     { value: "employmint-plus", title: "EmployMint+", icon: Plus },
@@ -323,61 +345,37 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" 
+        viewMode === 'mobile' && "pb-24" // Padding for the global mobile bottom nav
       )}>
-        <Tabs defaultValue="job-matcher" className="w-full">
-          <TabsList className={cn(
-            "text-muted-foreground",
-            viewMode === 'mobile'
-                ? "fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 h-20 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
-                : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
-          )}>
-            {tabDefinitions.map(tab => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  viewMode === 'mobile'
-                      ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary" 
-                      : "rounded-sm" 
-                )}
-                style={viewMode === 'mobile' && { boxShadow: 'var(--tab-active-shadow, none)' } as React.CSSProperties}
-              >
-                {viewMode === 'mobile' ? (
-                    <>
-                        <tab.icon className={cn("h-5 w-5")} />
-                        <span className={cn("text-xs order-first mb-1 font-medium")}>{tab.title.split(' ')[0]}</span> 
-                    </>
-                ) : (
-                    <>
-                        <tab.icon className="mr-2 h-4 w-4 inline-block"/>{tab.title}
-                    </>
-                )}
-              </TabsTrigger>
-            ))}
-            {/* Profile Tab for Mobile View */}
-            {viewMode === 'mobile' && (
-              <Link
-                href="/profile"
-                className={cn(
-                  "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none text-muted-foreground",
-                  pathname === '/profile' && "mobile-tab-profile-active bg-primary"
-                )}
-              >
-                <UserCircle className={cn("h-5 w-5")} />
-                <span className={cn("text-xs order-first mb-1 font-medium")}>Profile</span>
-              </Link>
-            )}
-          </TabsList>
+        {/* Tabs are only for desktop view now */}
+        {viewMode === 'desktop' && (
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className={cn(
+              "text-muted-foreground",
+              "grid w-full grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
+            )}>
+              {desktopTabDefinitions.map(tab => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={cn(
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                    "rounded-sm" 
+                  )}
+                >
+                  <tab.icon className="mr-2 h-4 w-4 inline-block"/>{tab.title}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          <TabsContent value="job-matcher">
+            {/* TabsContent remains the same, controlled by activeTab state */}
+            <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                 <CardDescription>
                   Enter your ideal job criteria to discover potential job matches. The AI will generate example job postings based on your input.
-                  Ensure your skills are up-to-date in your Profile (icon in header).
+                  Ensure your skills are up-to-date in your Profile.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -625,46 +623,19 @@ export default function EmployMintPage() {
                   <CardTitle className="font-headline text-2xl text-foreground flex items-center">
                     <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
                   </CardTitle>
-                  {viewMode === 'mobile' && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant={employMintPlusLayout === 'list' ? 'secondary' : 'ghost'}
-                        size="icon"
-                        onClick={() => setEmployMintPlusLayout('list')}
-                        aria-label="List view"
-                        className={employMintPlusLayout === 'list' ? 'bg-primary/20 text-primary' : ''}
-                      >
-                        <List className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        variant={employMintPlusLayout === 'grid' ? 'secondary' : 'ghost'}
-                        size="icon"
-                        onClick={() => setEmployMintPlusLayout('grid')}
-                        aria-label="Grid view"
-                        className={employMintPlusLayout === 'grid' ? 'bg-primary/20 text-primary' : ''}
-                      >
-                        <LayoutGrid className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  )}
+                  {/* Layout toggle removed for desktop view, only applies to mobile */}
                 </div>
                 <CardDescription>
                   Unlock advanced tools and personalized guidance to supercharge your career journey.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className={cn(
-                  viewMode === 'mobile' && employMintPlusLayout === 'list'
-                    ? 'space-y-4' 
-                    : 'grid md:grid-cols-2 gap-6' 
-                )}>
+                 {/* Desktop layout remains grid */}
+                <div className='grid md:grid-cols-2 gap-6'>
                   {employMintPlusFeatures.map((feature) => (
                     <Card 
                       key={feature.id} 
-                      className={cn(
-                        "bg-secondary/30 hover:shadow-md transition-shadow flex flex-col",
-                        viewMode === 'mobile' && employMintPlusLayout === 'list' && 'w-full' 
-                      )}
+                      className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col"
                     >
                       <CardHeader>
                         <CardTitle className="text-lg text-primary flex items-center">
@@ -689,26 +660,173 @@ export default function EmployMintPage() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        )}
+
+        {/* Content for Mobile View - Render based on activeTab, but without Radix Tabs wrapper */}
+        {viewMode === 'mobile' && (
+          <>
+            {activeTab === 'job-matcher' && (
+                <Card className="shadow-lg rounded-xl">
+                <CardHeader>
+                  <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
+                  <CardDescription>
+                    Enter your ideal job criteria. Ensure skills are up-to-date in Profile.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isJobMatchingLoading ? (
+                    <LoadingIndicator loadingText="Finding matching jobs..." />
+                  ) : (
+                    <>
+                      <form onSubmit={handleJobMatchSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 gap-4"> {/* Single column for mobile */}
+                          <div>
+                            <Label htmlFor="jobMatchTitleMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Title</Label>
+                            <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" role="combobox" aria-expanded={openJobTitleCombobox} className="w-full justify-between text-muted-foreground bg-card" id="jobMatchTitleMobile">
+                                {jobMatchTitle || "Select or type job title..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto">
+                              <Command>
+                                <CommandInput value={jobMatchTitle} onValueChange={(search) => { const exists = JOB_TITLES_PREDEFINED.some(title => title.toLowerCase() === search.toLowerCase()); if (exists) {setJobMatchTitle(JOB_TITLES_PREDEFINED.find(title => title.toLowerCase() === search.toLowerCase())!);} else {setJobMatchTitle(search);}}} placeholder="Search or type new title..."/>
+                                <CommandList><CommandEmpty>No title found. Type to add new.</CommandEmpty>
+                                  <CommandGroup>
+                                    {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => (<CommandItem key={title} value={title} onSelect={(currentValue) => {setJobMatchTitle(currentValue === jobMatchTitle ? '' : currentValue); setOpenJobTitleCombobox(false);}}>{title}</CommandItem>))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          </div>
+                          <div>
+                            <Label htmlFor="jobMatchCountryMobile" className="block text-sm font-medium text-foreground mb-1">Country (Optional)</Label>
+                            <Select value={jobMatchCountry} onValueChange={setJobMatchCountry}>
+                              <SelectTrigger id="jobMatchCountryMobile" className="w-full bg-card"><SelectValue placeholder="Any Country" /></SelectTrigger>
+                              <SelectContent><SelectItem value="any-country-placeholder">Any Country</SelectItem>{COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                          {jobMatchCountry === "USA" && (
+                            <div>
+                              <Label htmlFor="jobMatchStateMobile" className="block text-sm font-medium text-foreground mb-1">State (USA) (Optional)</Label>
+                              <Select value={jobMatchState} onValueChange={setJobMatchState}>
+                                <SelectTrigger id="jobMatchStateMobile" className="w-full bg-card"><SelectValue placeholder="Any State" /></SelectTrigger>
+                                <SelectContent><SelectItem value="any-state-placeholder">Any State</SelectItem>{US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Label htmlFor="jobMatchIdealDescriptionMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Description</Label>
+                          <Textarea id="jobMatchIdealDescriptionMobile" value={jobMatchIdealDescription} onChange={(e) => setJobMatchIdealDescription(e.target.value)} placeholder="Describe your ideal role..." rows={4} required className="bg-card"/>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4"> {/* Single column for mobile */}
+                          <div>
+                            <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Opt.)</Label>
+                            <div className="flex items-center gap-2">
+                              <Input type="number" value={jobMatchMinSalary} onChange={(e) => setJobMatchMinSalary(e.target.value)} placeholder="Min" className="bg-card"/>
+                              <span>-</span>
+                              <Input type="number" value={jobMatchMaxSalary} onChange={(e) => setJobMatchMaxSalary(e.target.value)} placeholder="Max" className="bg-card"/>
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="block text-sm font-medium text-foreground mb-1">Work Model (Opt.)</Label>
+                            <Select value={jobMatchWorkModel} onValueChange={(value: 'any' | 'on-site' | 'remote' | 'hybrid') => setJobMatchWorkModel(value)}>
+                              <SelectTrigger className="w-full bg-card"><SelectValue placeholder="Any Work Model" /></SelectTrigger>
+                              <SelectContent><SelectItem value="any">Any</SelectItem><SelectItem value="on-site">On-site</SelectItem><SelectItem value="remote">Remote</SelectItem><SelectItem value="hybrid">Hybrid</SelectItem></SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <Button type="submit" disabled={userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Find Matching Jobs</Button>
+                      </form>
+                      {sortedJobMatchResults.length > 0 && (
+                        <div className="mt-8">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-headline text-foreground">Recommendations</h3>
+                            <Select value={jobMatchSortOrder} onValueChange={(value: 'highest' | 'lowest') => setJobMatchSortOrder(value)}>
+                              <SelectTrigger className="w-[150px] bg-card text-xs"><SelectValue placeholder="Sort by" /></SelectTrigger>
+                              <SelectContent><SelectItem value="highest">Highest Match</SelectItem><SelectItem value="lowest">Lowest Match</SelectItem></SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-4">
+                            {sortedJobMatchResults.map((job, index) => (<JobRecommendationCard key={`${job.jobTitle}-${index}-${job.companyName}`} job={job} jobIndex={jobMatchResults.findIndex(j => j === job)}/> ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+            {activeTab === 'job-analyzer' && (
+                 <Card className="shadow-lg rounded-xl">
+                 <CardHeader>
+                   <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
+                   <CardDescription className="space-y-2 text-sm">
+                     <p>Paste a job description or leave blank for general advice based on your profile skills.</p>
+                   </CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   {isSkillComparingLoading ? (
+                     <LoadingIndicator loadingText="Analyzing your skills..." />
+                   ) : (
+                     <>
+                       <form onSubmit={handleSkillCompareSubmit} className="space-y-6">
+                         <div>
+                           <Label htmlFor="skillCompareJobDescriptionMobile" className="block text-sm font-medium text-foreground mb-1">Job Description (Optional)</Label>
+                           <Textarea id="skillCompareJobDescriptionMobile" value={skillCompareJobDescription} onChange={(e) => setSkillCompareJobDescription(e.target.value)} placeholder="Paste job description or leave blank..." rows={8} className="bg-card"/>
+                         </div>
+                         <Button type="submit" disabled={userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Analyze Skills</Button>
+                       </form>
+                       {skillGapResult && (
+                         <div className="mt-8">
+                           <SkillGapDisplay missingSkills={skillGapResult.missingSkills || []} suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []} skillComparisonSummary={skillGapResult.skillComparisonSummary || "Analysis complete."} interviewTips={skillGapResult.interviewTips} suggestedJobCategories={skillGapResult.suggestedJobCategories} suggestedSoftSkills={skillGapResult.suggestedSoftSkills} mentorshipAdvice={skillGapResult.mentorshipAdvice} skillDevelopmentRoadmap={skillGapResult.skillDevelopmentRoadmap} />
+                         </div>
+                       )}
+                     </>
+                   )}
+                 </CardContent>
+               </Card>
+            )}
+            {activeTab === 'employmint-plus' && (
+               <Card className="shadow-lg rounded-xl">
+               <CardHeader>
+                 <div className="flex justify-between items-center">
+                   <CardTitle className="font-headline text-2xl text-foreground flex items-center"><Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features</CardTitle>
+                   <div className="flex gap-1">
+                     <Button variant={employMintPlusLayout === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEmployMintPlusLayout('list')} aria-label="List view" className={employMintPlusLayout === 'list' ? 'bg-primary/20 text-primary' : ''}><List className="h-5 w-5" /></Button>
+                     <Button variant={employMintPlusLayout === 'grid' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEmployMintPlusLayout('grid')} aria-label="Grid view" className={employMintPlusLayout === 'grid' ? 'bg-primary/20 text-primary' : ''}><LayoutGrid className="h-5 w-5" /></Button>
+                   </div>
+                 </div>
+                 <CardDescription>Unlock advanced tools for your career journey.</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}> {/* Simplified grid for mobile, or list */}
+                   {employMintPlusFeatures.map((feature) => (
+                     <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
+                       <CardHeader><CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle></CardHeader>
+                       <CardContent className="flex-grow"><p className="text-sm text-muted-foreground">{feature.description}</p></CardContent>
+                       <CardFooter>
+                         <Link href={feature.href} passHref className="w-full">
+                           <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground"><feature.icon className="mr-2 h-4 w-4"/>{feature.actionText || 'Explore Feature'}</Button>
+                         </Link>
+                       </CardFooter>
+                     </Card>
+                   ))}
+                 </div>
+               </CardContent>
+             </Card>
+            )}
+          </>
+        )}
       </main>
       <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
-      <style jsx global>{`
-        /* Custom style for active tab inner shadow on mobile */
-        .fixed .data-\\[state\\=active\\][style*="--tab-active-shadow"],
-        .fixed .mobile-tab-profile-active {
-          box-shadow: inset 0 3px 0 0 hsl(var(--primary)) !important;
-        }
-        /* Apply primary-foreground color to text and icon of active mobile tab specifically */
-        .fixed .data-\\[state\\=active\\] span, 
-        .fixed .data-\\[state\\=active\\] svg,
-        .fixed .mobile-tab-profile-active span, 
-        .fixed .mobile-tab-profile-active svg {
-            color: hsl(var(--primary-foreground)) !important;
-        }
-      `}</style>
+      {/* Removed style jsx global block as it's now in MobileBottomNavigation */}
     </div>
   );
 }
-
