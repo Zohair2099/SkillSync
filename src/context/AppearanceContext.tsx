@@ -21,6 +21,41 @@ interface AppearanceContextType {
 
 const AppearanceContext = createContext<AppearanceContextType | undefined>(undefined);
 
+// Helper functions for Fullscreen API
+function requestFullscreen(element: HTMLElement) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen().catch(err => console.warn(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`));
+  } else if ((element as any).mozRequestFullScreen) { // Firefox
+    (element as any).mozRequestFullScreen();
+  } else if ((element as any).webkitRequestFullscreen) { // Chrome, Safari and Opera
+    (element as any).webkitRequestFullscreen();
+  } else if ((element as any).msRequestFullscreen) { // IE/Edge
+    (element as any).msRequestFullscreen();
+  }
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen().catch(err => console.warn(`Error attempting to disable full-screen mode: ${err.message} (${err.name})`));
+  } else if ((document as any).mozCancelFullScreen) { // Firefox
+    (document as any).mozCancelFullScreen();
+  } else if ((document as any).webkitExitFullscreen) { // Chrome, Safari and Opera
+    (document as any).webkitExitFullscreen();
+  } else if ((document as any).msExitFullscreen) { // IE/Edge
+    (document as any).msExitFullscreen();
+  }
+}
+
+function isFullscreen(): boolean {
+  return !!(
+    document.fullscreenElement ||
+    (document as any).mozFullScreenElement ||
+    (document as any).webkitFullscreenElement ||
+    (document as any).msFullscreenElement
+  );
+}
+
+
 export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>('light');
   const [zoomLevel, setZoomLevelState] = useState<number>(100);
@@ -56,6 +91,8 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
     const localViewMode = localStorage.getItem(LOCAL_STORAGE_VIEW_MODE_KEY) as ViewMode | null;
     if (localViewMode) {
       setViewModeState(localViewMode);
+      // Note: We don't trigger fullscreen on initial load based on stored preference,
+      // only on explicit user interaction via setViewMode.
     }
 
   }, []);
@@ -82,7 +119,45 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
   const setViewMode = useCallback((mode: ViewMode) => {
     setViewModeState(mode);
     localStorage.setItem(LOCAL_STORAGE_VIEW_MODE_KEY, mode);
+
+    if (typeof window !== 'undefined' && document.documentElement) {
+        if (mode === 'mobile') {
+          if (!isFullscreen()) {
+            requestFullscreen(document.documentElement);
+          }
+        } else if (mode === 'desktop') {
+          if (isFullscreen()) {
+            exitFullscreen();
+          }
+        }
+      }
   }, []);
+
+  // Listen for fullscreen changes triggered by browser (e.g., Esc key)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!isFullscreen() && viewMode === 'mobile') {
+        // If fullscreen was exited externally while in mobile view mode,
+        // you might want to revert viewMode to 'desktop', or just let it be.
+        // For now, we'll just log it. If desired, we can change viewModeState here.
+        // setViewModeState('desktop'); // Example: revert to desktop if fullscreen exited
+        console.log("Fullscreen exited, current view mode is still mobile.");
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [viewMode]);
+
 
   return (
     <AppearanceContext.Provider value={{ theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode }}>
@@ -98,4 +173,3 @@ export const useAppearance = () => {
   }
   return context;
 };
-
