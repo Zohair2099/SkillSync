@@ -1,12 +1,13 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { ArrowLeft, Users, MessageSquareText, Lightbulb, Briefcase } from 'lucide-react';
 
 interface MockPost {
@@ -15,6 +16,8 @@ interface MockPost {
   author: string;
   replies: number;
   lastActivity: string;
+  content: string; // Added for detailed view
+  categoryName: string; // Added for context in dialog
 }
 
 interface MockCategory {
@@ -32,8 +35,24 @@ const mockForumData: MockCategory[] = [
     description: 'Share your interview stories, ask for advice, and help others prepare.',
     icon: MessageSquareText,
     posts: [
-      { id: 'post1', title: "My FAANG On-Site Loop - What to Expect (Software Engineer)", author: 'UserAlex', replies: 12, lastActivity: '2h ago' },
-      { id: 'post2', title: "Behavioral Questions: Best way to use STAR method?", author: 'UserSarah', replies: 7, lastActivity: '5h ago' },
+      { 
+        id: 'post1', 
+        title: "My FAANG On-Site Loop - What to Expect (Software Engineer)", 
+        author: 'UserAlex', 
+        replies: 12, 
+        lastActivity: '2h ago',
+        categoryName: 'Interview Experiences & Tips',
+        content: "Hey everyone,\n\nI just had my on-site loop at a major tech company (think FAANG) for a Software Engineer L4 role and wanted to share my experience to help others prepare.\n\n**Day Structure:**\n- Morning: 2 coding rounds (45 mins each). Focus was heavily on data structures (trees, graphs, hashmaps) and algorithms (dynamic programming, sorting).\n- Afternoon: 1 system design round (60 mins) - asked to design a basic URL shortener, and 1 behavioral round (45 mins) with a hiring manager focusing on leadership principles and past project experiences.\n\n**Key Takeaways:**\n- Practice LeetCode mediums/hards consistently. Don't just solve, understand the patterns.\n- Be able to articulate your thought process clearly, even if you don't arrive at the perfect solution immediately.\n- For system design, discuss trade-offs, scalability, and potential bottlenecks. Start high-level and dive deeper as requested.\n- Prepare STAR method examples for behavioral questions.\n\nOverall, it was challenging but fair. Preparation is key! Good luck to everyone else interviewing!"
+      },
+      { 
+        id: 'post2', 
+        title: "Behavioral Questions: Best way to use STAR method?", 
+        author: 'UserSarah', 
+        replies: 7, 
+        lastActivity: '5h ago',
+        categoryName: 'Interview Experiences & Tips',
+        content: "Hi all,\n\nI'm preparing for some upcoming interviews and keep hearing about the STAR method for behavioral questions (Situation, Task, Action, Result).\n\nDoes anyone have tips on how to effectively structure answers using this method without sounding too robotic?\n\nSpecifically, I'm wondering:\n- How much detail to go into for each part?\n- How to choose the best examples from my experience?\n- Common pitfalls to avoid?\n\nAny advice or examples would be greatly appreciated!\n\nThanks!" 
+      },
     ],
   },
   {
@@ -42,8 +61,24 @@ const mockForumData: MockCategory[] = [
     description: 'Discuss learning resources, courses, and strategies for upskilling.',
     icon: Lightbulb,
     posts: [
-      { id: 'post3', title: "Best Online Courses for Advanced Python in 2024?", author: 'DevGuru', replies: 22, lastActivity: '1d ago' },
-      { id: 'post4', title: "Looking for project ideas to practice DevOps skills", author: 'CloudNewbie', replies: 5, lastActivity: '3d ago' },
+      { 
+        id: 'post3', 
+        title: "Best Online Courses for Advanced Python in 2024?", 
+        author: 'DevGuru', 
+        replies: 22, 
+        lastActivity: '1d ago',
+        categoryName: 'Skill Development & Learning',
+        content: "Hello Pythonistas,\n\nI've been working with Python for a few years, mainly for web development with Django and some basic scripting. I'm looking to deepen my understanding of more advanced Python concepts.\n\nWhat are your recommendations for online courses or resources in 2024 that cover topics like:\n- Metaprogramming and decorators\n- Concurrency and asynchronous programming (asyncio)\n- Performance optimization and Cython\n- Advanced data structures and algorithms in Python\n- Design patterns in Python\n\nPaid or free resources are welcome. I'm looking for something comprehensive and up-to-date. Thanks in advance!" 
+      },
+      { 
+        id: 'post4', 
+        title: "Looking for project ideas to practice DevOps skills", 
+        author: 'CloudNewbie', 
+        replies: 5, 
+        lastActivity: '3d ago',
+        categoryName: 'Skill Development & Learning',
+        content: "Hey folks,\n\nI'm trying to transition into a DevOps role and have been learning tools like Docker, Kubernetes, Jenkins, and Terraform. I'm looking for some practical project ideas (small to medium complexity) where I can apply these skills.\n\nIdeally, something that would look good on a portfolio.\n\nSome initial thoughts I had:\n- CI/CD pipeline for a sample web application.\n- Deploying a microservices app on Kubernetes.\n- Setting up infrastructure as code with Terraform for a cloud provider.\n\nAny other suggestions or resources for finding good DevOps projects?\n\nCheers!" 
+      },
     ],
   },
   {
@@ -52,13 +87,27 @@ const mockForumData: MockCategory[] = [
     description: 'Networking, resume building, cover letters, and navigating the job market.',
     icon: Briefcase,
     posts: [
-        { id: 'post5', title: "Effective networking strategies for introverts?", author: 'QuietAchiever', replies: 15, lastActivity: '6h ago'},
+        { 
+          id: 'post5', 
+          title: "Effective networking strategies for introverts?", 
+          author: 'QuietAchiever', 
+          replies: 15, 
+          lastActivity: '6h ago',
+          categoryName: 'Job Search Strategies',
+          content: "Hi everyone,\n\nAs an introvert, networking events and reaching out to strangers online feel incredibly daunting to me, but I know it's crucial for job searching and career growth.\n\nDoes anyone have tips or strategies for networking that are more introvert-friendly?\n\nThings I'm struggling with:\n- Initiating conversations at events.\n- Following up without feeling like I'm bothering people.\n- Building meaningful connections rather than just collecting contacts.\n\nI'd love to hear what has worked for other introverts out there. Thanks!"
+        },
     ],
   },
 ];
 
 
 export default function CommunityForumPage() {
+  const [selectedPost, setSelectedPost] = useState<MockPost | null>(null);
+
+  const handlePostClick = (post: MockPost) => {
+    setSelectedPost(post);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -81,19 +130,11 @@ export default function CommunityForumPage() {
               Connect with peers, share experiences, and grow your network.
             </CardDescription>
              <p className="mt-2 text-sm text-destructive font-semibold">
-                This feature is currently under development. Below is a visual concept.
+                This feature is currently under development. Below is an interactive visual concept.
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             
-            <div className="p-6 border-2 border-dashed border-border rounded-lg bg-muted/30 text-center">
-              <h2 className="text-xl font-semibold text-foreground mb-2">Forum Access - Coming Soon!</h2>
-              <p className="text-muted-foreground">
-                We're working hard to build a vibrant and supportive space for all EmployMint users.
-                You'll soon be able to join discussions, ask career-related questions, and more.
-              </p>
-            </div>
-
             <Accordion type="multiple" className="w-full space-y-3">
               {mockForumData.map((category) => (
                 <AccordionItem value={category.id} key={category.id} className="border-b-0">
@@ -107,7 +148,15 @@ export default function CommunityForumPage() {
                      <AccordionContent className="px-6 pb-4 space-y-3">
                        <p className="text-sm text-muted-foreground mb-3">{category.description}</p>
                        {category.posts.map((post) => (
-                         <div key={post.id} className="p-3 border rounded-md bg-secondary/50 hover:shadow-sm transition-shadow cursor-not-allowed opacity-70">
+                         <div 
+                           key={post.id} 
+                           className="p-3 border rounded-md bg-secondary/50 hover:shadow-sm hover:bg-secondary/70 transition-shadow cursor-pointer"
+                           onClick={() => handlePostClick(post)}
+                           role="button"
+                           tabIndex={0}
+                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handlePostClick(post);}}
+                           aria-label={`View details for post: ${post.title}`}
+                          >
                            <h4 className="font-medium text-foreground">{post.title}</h4>
                            <div className="text-xs text-muted-foreground mt-1 flex justify-between">
                              <span>by {post.author}</span>
@@ -134,6 +183,30 @@ export default function CommunityForumPage() {
             </p>
           </CardFooter>
         </Card>
+
+        {selectedPost && (
+          <Dialog open={!!selectedPost} onOpenChange={(isOpen) => { if (!isOpen) setSelectedPost(null); }}>
+            <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="text-primary text-xl sm:text-2xl">{selectedPost.title}</DialogTitle>
+                <DialogDescription>
+                  In <span className="font-medium">{selectedPost.categoryName}</span> <br />
+                  Posted by: <span className="font-medium">{selectedPost.author}</span> | {selectedPost.replies} replies | Last activity: {selectedPost.lastActivity}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4 overflow-y-auto flex-grow">
+                <p className="text-sm text-muted-foreground whitespace-pre-line">{selectedPost.content}</p>
+                <p className="mt-6 text-xs text-destructive text-center font-semibold">
+                  (This is a mock discussion content. Full forum functionality, including actual replies and interactions, is coming soon.)
+                </p>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setSelectedPost(null)} variant="outline">Close</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
@@ -141,6 +214,3 @@ export default function CommunityForumPage() {
     </div>
   );
 }
-
-
-    
