@@ -2,18 +2,30 @@
 'use client';
 
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
-import Link from 'next/link'; // Added Link import
+import Link from 'next/link'; 
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { SkillInput, type Skill } from '@/components/employmint/SkillInput';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UploadCloud, Linkedin, Github, XCircleIcon, Globe, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
+import { UploadCloud, Linkedin, Github, XCircleIcon, Globe, ArrowLeft, Trash } from 'lucide-react'; 
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Separator } from '@/components/ui/separator';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -30,9 +42,23 @@ export default function ProfilePage() {
   const [twitter, setTwitter] = useState(profile.socialLinks.twitter);
   const [website, setWebsite] = useState(profile.socialLinks.website);
 
+  const [showFirstResetDialog, setShowFirstResetDialog] = useState(false);
+  const [showSecondResetDialog, setShowSecondResetDialog] = useState(false);
+
+  const LOCAL_STORAGE_KEYS_TO_RESET = [
+    'employmint-user-profile',
+    'employmint-theme',
+    'employmint-zoom',
+    'employmint-view-mode',
+    'employmint-color-palette',
+    // Add any other app-specific localStorage keys here if they exist.
+    // ResumeDataContext doesn't use localStorage directly, its state is in memory.
+    // JobResultsContext is also in-memory.
+    // A reload will reset these in-memory contexts by re-initializing their providers.
+  ];
 
   useEffect(() => {
-    loadProfile(); // Load profile from localStorage when component mounts
+    loadProfile(); 
   }, [loadProfile]);
 
   useEffect(() => {
@@ -75,11 +101,28 @@ export default function ProfilePage() {
         website,
       },
     });
-    saveProfile(); // Persists the entire profile context state to localStorage
+    saveProfile(); 
     toast({
       title: "Profile Saved",
       description: "Your profile information has been updated locally.",
     });
+  };
+
+  const handleFullAppReset = () => {
+    if (typeof window !== 'undefined') {
+      LOCAL_STORAGE_KEYS_TO_RESET.forEach(key => {
+        localStorage.removeItem(key);
+      });
+      toast({
+        title: "App Data Reset",
+        description: "All application data has been cleared. The app will now reload.",
+        variant: "destructive"
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 700); // Delay reload slightly
+    }
+    setShowSecondResetDialog(false); 
   };
 
 
@@ -135,7 +178,7 @@ export default function ProfilePage() {
                   <Input value={github} onChange={(e) => setGithub(e.target.value)} placeholder="GitHub Profile URL" className="text-base"/>
                 </div>
                 <div className="flex items-center gap-3">
-                  <XCircleIcon className="h-6 w-6 text-sky-500" /> {/* Using a generic X icon */}
+                  <XCircleIcon className="h-6 w-6 text-sky-500" /> 
                   <Input value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="X.com (Twitter) Profile URL" className="text-base"/>
                 </div>
                 <div className="flex items-center gap-3">
@@ -144,19 +187,86 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
+
+            <Separator className="my-8" />
+
+            <div>
+              <h3 className="text-xl font-semibold text-destructive mb-3">Danger Zone</h3>
+              <Card className="border-destructive bg-destructive/5">
+                <CardHeader>
+                  <CardTitle className="text-destructive flex items-center"><Trash className="mr-2 h-5 w-5" />Reset Application Data</CardTitle>
+                  <CardDescription className="text-destructive/80">
+                    This will clear all your profile information, skills, appearance settings, and any other data stored by EmployMint in this browser. This action cannot be undone.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="destructive" className="w-full" onClick={() => setShowFirstResetDialog(true)}>
+                     Reset All App Data
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
           </CardContent>
-          <CardFooter className="border-t pt-6 flex justify-between items-center"> {/* Updated for flex layout */}
-            <Link href="/" passHref>
-              <Button variant="outline" size="lg" className="w-full md:w-auto">
+          <CardFooter className="border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-4"> 
+            <Link href="/" passHref className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Go Back to Home
               </Button>
             </Link>
-            <Button onClick={handleSaveProfile} size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button onClick={handleSaveProfile} size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
               Save Profile
             </Button>
           </CardFooter>
         </Card>
+
+        {/* First Confirmation Dialog */}
+        <AlertDialog open={showFirstResetDialog} onOpenChange={setShowFirstResetDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to reset?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will erase all your settings, profile data, and skill lists stored by EmployMint in this browser. This action is not reversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowFirstResetDialog(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setShowFirstResetDialog(false);
+                  setShowSecondResetDialog(true);
+                }}
+                // Default styling for AlertDialogAction is fine here
+              >
+                Proceed
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Second (Final) Confirmation Dialog */}
+        <AlertDialog open={showSecondResetDialog} onOpenChange={setShowSecondResetDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-destructive flex items-center"><Trash className="mr-2 h-5 w-5"/>FINAL WARNING: Confirm Reset</AlertDialogTitle>
+              <AlertDialogDescription>
+                You are about to delete ALL EmployMint application data permanently from this browser. There is no going back.
+                Are you absolutely sure you want to proceed?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowSecondResetDialog(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleFullAppReset}
+                className={buttonVariants({ variant: "destructive" })}
+              >
+                Yes, Delete All My Data
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
