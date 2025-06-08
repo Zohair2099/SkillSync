@@ -11,10 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge'; // Added import
+import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Mic, Brain, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Send, RotateCcw, CheckCircle } from 'lucide-react';
 import { performGenerateInterviewQuestions, performEvaluateInterviewAnswer } from '@/app/actions';
-import type { GenerateInterviewQuestionsOutput, EvaluateInterviewAnswerOutput } from '@/ai/flows/interview-practice-flow';
+import type { GenerateInterviewQuestionsOutput, EvaluateInterviewAnswerOutput, GenerateInterviewQuestionsInput, EvaluateInterviewAnswerInput } from '@/app/actions'; // Changed import
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 
@@ -42,7 +42,8 @@ export default function InterviewPracticePage() {
     }
     startGeneratingQuestionsTransition(async () => {
       try {
-        const result = await performGenerateInterviewQuestions({ jobTitle, numQuestions });
+        const input: GenerateInterviewQuestionsInput = { jobTitle, numQuestions };
+        const result = await performGenerateInterviewQuestions(input);
         if (result.questions && result.questions.length > 0) {
           setQuestions(result.questions);
           setUserAnswers({});
@@ -71,11 +72,12 @@ export default function InterviewPracticePage() {
     }
     startEvaluatingAnswerTransition(async () => {
       try {
-        const result = await performEvaluateInterviewAnswer({
+        const input: EvaluateInterviewAnswerInput = {
           jobTitle,
           question: questions[currentQuestionIndex],
           userAnswer: currentAnswer,
-        });
+        };
+        const result = await performEvaluateInterviewAnswer(input);
         setFeedbackList(prev => ({ ...prev, [currentQuestionIndex]: result }));
       } catch (error) {
         console.error("Error evaluating answer:", error);
@@ -89,7 +91,7 @@ export default function InterviewPracticePage() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
-      setSessionPhase('review'); // All questions answered, move to review
+      setSessionPhase('review'); 
     }
   };
   
@@ -299,5 +301,7 @@ export default function InterviewPracticePage() {
       </div>
     );
   }
-  return null; // Should not happen if sessionPhase is one of the defined states
+  return null; 
 }
+
+    

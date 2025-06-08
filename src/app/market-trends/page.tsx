@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, BarChart3, Briefcase, Lightbulb, Sparkles, TrendingUp, Users, Cpu, DollarSign, Info, BookOpen } from 'lucide-react';
 import { performMarketTrendsAnalysis } from '@/app/actions';
-import type { MarketTrendsInput, MarketTrendsOutput } from '@/ai/flows/market-trends-flow';
+import type { MarketTrendsInput, MarketTrendsOutput } from '@/app/actions'; // Changed import
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
@@ -209,3 +209,5 @@ export default function MarketTrendsPage() {
     </div>
   );
 }
+
+    

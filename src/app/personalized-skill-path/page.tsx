@@ -11,10 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Brain, Download } from 'lucide-react';
 import { performJobFocusedSkillComparison } from '@/app/actions';
-import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
+import type { JobFocusedSkillComparisonOutput, JobFocusedSkillComparisonInput } from '@/app/actions'; // Changed import
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
-import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; 
 
 export default function PersonalizedSkillPathPage() {
   const { profile } = useProfile();
@@ -37,10 +37,11 @@ export default function PersonalizedSkillPathPage() {
     setSkillPathResult(null);
     startTransition(async () => {
       try {
-        const result = await performJobFocusedSkillComparison({
-          userSkills,
-          jobDescription: jobDescription || undefined,
-        });
+        const input: JobFocusedSkillComparisonInput = {
+            userSkills,
+            jobDescription: jobDescription || undefined,
+        };
+        const result = await performJobFocusedSkillComparison(input);
         setSkillPathResult(result);
         if (!result.missingSkills?.length && !result.suggestedJobCategories?.length && !result.skillDevelopmentRoadmap?.length) {
             toast({
@@ -60,15 +61,10 @@ export default function PersonalizedSkillPathPage() {
   };
 
   const handleDownloadPdf = () => {
-    // Placeholder for PDF generation. 
-    // In a real app, this could use window.print() with print-specific CSS,
-    // or a library like jsPDF + html2canvas.
     toast({
       title: "PDF Download (Placeholder)",
       description: "This feature will be implemented soon. For now, you can use your browser's print to PDF function.",
     });
-    // Example: window.print(); 
-    // (Requires careful CSS @media print styling for good results)
   };
 
   return (
@@ -149,3 +145,5 @@ export default function PersonalizedSkillPathPage() {
     </div>
   );
 }
+
+    

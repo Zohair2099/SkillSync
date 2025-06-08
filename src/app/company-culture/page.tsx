@@ -15,8 +15,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Building, Users, Lightbulb, Sparkles, ThumbsDown, Search, CheckCircle } from 'lucide-react';
 import { performCompanyCultureMatching } from '@/app/actions';
-import type { CompanyCulturePreferencesInput, CompanyCultureMatchOutput } from '@/ai/flows/company-culture-flow';
-import { CompanyCulturePreferencesInputSchema } from '@/lib/schemas/company-culture-schemas'; // Import schema from new location
+import type { CompanyCulturePreferencesInput, CompanyCultureMatchOutput } from '@/app/actions'; // Changed import
+import { CompanyCulturePreferencesInputSchema } from '@/lib/schemas/company-culture-schemas'; 
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -335,3 +335,5 @@ export default function CompanyCulturePage() {
     </div>
   );
 }
+
+    

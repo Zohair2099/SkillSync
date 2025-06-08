@@ -11,9 +11,9 @@ import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ArrowLeft, MessageSquare, Lightbulb, CheckCircle, AlertTriangle, TrendingUp, ArrowRight, ArrowLeftCircle, Brain } from 'lucide-react';
 import { performSoftSkillAssessment } from '@/app/actions';
-import type { SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
+import type { SoftSkillAssessmentOutput, SoftSkillAssessmentInput } from '@/app/actions'; // Changed import
 import { useToast } from "@/hooks/use-toast";
-import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; 
 
 const softSkillQuestions = [
   { id: 'q1', text: "Describe a time you had to work with a difficult colleague or team member. How did you approach the situation and what was the outcome?" },
@@ -67,7 +67,6 @@ export default function SoftSkillAssessmentPage() {
         description: `Please answer all questions before submitting. You are missing: ${unanswered.map(u => `Q${softSkillQuestions.indexOf(u)+1}`).join(', ')}.`,
         variant: "destructive",
       });
-      // Optionally, navigate to the first unanswered question
       const firstUnansweredIndex = softSkillQuestions.findIndex(q => !answers[q.id]?.trim());
       if(firstUnansweredIndex !== -1) setCurrentQuestionIndex(firstUnansweredIndex);
       return;
@@ -75,12 +74,14 @@ export default function SoftSkillAssessmentPage() {
 
     const formattedAnswers = softSkillQuestions.map(q => ({
       question: q.text,
-      answer: answers[q.id] || "User did not provide an answer.", // Fallback, though validation should prevent this
+      answer: answers[q.id] || "User did not provide an answer.", 
     }));
+    
+    const input: SoftSkillAssessmentInput = { answers: formattedAnswers };
 
     startTransition(async () => {
       try {
-        const result = await performSoftSkillAssessment({ answers: formattedAnswers });
+        const result = await performSoftSkillAssessment(input);
         setAssessmentResult(result);
       } catch (error) {
         console.error("Error performing soft skill assessment:", error);
@@ -246,3 +247,5 @@ export default function SoftSkillAssessmentPage() {
     </div>
   );
 }
+
+    
