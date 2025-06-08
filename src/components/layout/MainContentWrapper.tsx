@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useAppearance } from '@/context/AppearanceContext';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 interface MainContentWrapperProps {
   children: React.ReactNode;
@@ -23,18 +24,17 @@ export default function MainContentWrapper({ children }: MainContentWrapperProps
   if (viewMode === 'mobile') {
     wrapperStyle.maxWidth = '420px';
     wrapperStyle.margin = '0 auto';
-    // Optionally, add a subtle border or shadow to better distinguish the "mobile" view
-    // wrapperStyle.borderLeft = '1px solid hsl(var(--border))';
-    // wrapperStyle.borderRight = '1px solid hsl(var(--border))';
-    // wrapperStyle.boxShadow = '0 0 15px rgba(0,0,0,0.1)';
   } else {
-    wrapperStyle.maxWidth = '100%'; // Ensure it takes full width in desktop mode
+    wrapperStyle.maxWidth = '100%';
   }
 
   return (
     <div
       style={wrapperStyle}
-      className="main-content-wrapper" // This class can be used for additional global styling if needed
+      className={cn(
+        "main-content-wrapper",
+        "bg-background" // Added bg-background here
+      )}
     >
       {children}
     </div>

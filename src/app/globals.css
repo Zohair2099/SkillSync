@@ -20,7 +20,7 @@
     --secondary: 210 40% 92%; /* A lighter shade for secondary elements */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 92%; 
+    --muted: 210 40% 92%;
     --muted-foreground: 215 25% 55%; /* Adjusted for better readability */
 
     --accent: 125 39% 64%; /* Muted Green #81C784 */
@@ -32,7 +32,7 @@
     --border: 210 25% 88%; /* Adjusted for more definition */
     --input: 210 25% 88%; /* Adjusted for consistency with border */
     --ring: 207 88% 60%; /* Ring color based on primary */
-    
+
     --yellow: 45 93% 57%; /* Gold/Yellow for 100% match */
     --yellow-foreground: 45 93% 10%; /* Dark text on gold/yellow */
     --yellow-400: 45 93% 57%; /* Specific shade for direct use */
@@ -68,7 +68,7 @@
     --primary: 207 80% 60%; /* Slightly adjusted blue for dark */
     --primary-foreground: 210 40% 98%; /* Keep light text on primary */
 
-    --secondary: 220 13% 25%; 
+    --secondary: 220 13% 25%;
     --secondary-foreground: 0 0% 90%;
 
     --muted: 220 13% 20%;
@@ -82,10 +82,10 @@
 
     --border: 220 13% 28%; /* Adjusted for more definition */
     --input: 220 13% 28%; /* Adjusted for consistency with border */
-    --ring: 207 80% 65%; 
+    --ring: 207 80% 65%;
 
-    --yellow: 45 85% 55%; 
-    --yellow-foreground: 45 85% 8%; 
+    --yellow: 45 85% 55%;
+    --yellow-foreground: 45 85% 8%;
     --yellow-400: 45 85% 55%;
     --orange-500: 30 80% 50%;
 
@@ -111,43 +111,44 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    position: relative; 
-    overflow-x: hidden; 
+    @apply text-foreground; /* Removed bg-background */
+    position: relative;
+    overflow-x: hidden;
   }
-  
+
   body::before,
   body::after {
     content: "";
-    position: fixed; 
-    z-index: -1; 
+    position: fixed;
+    z-index: -1;
     border-radius: 50%;
-    opacity: 0.03; 
-    pointer-events: none; 
-    will-change: transform; 
+    opacity: 0.05; /* Increased opacity */
+    pointer-events: none;
+    will-change: transform;
   }
 
   body::before {
-    width: 30vw; 
-    height: 30vw; 
-    min-width: 200px; 
-    min-height: 200px;
+    width: 40vw; /* Increased size */
+    height: 40vw; /* Increased size */
+    min-width: 250px; /* Adjusted min-size */
+    min-height: 250px; /* Adjusted min-size */
     background-color: hsl(var(--primary));
-    top: 5vh;
-    left: -10vw; 
+    top: -5vh; /* Adjusted position */
+    left: -15vw; /* Adjusted position */
   }
 
   body::after {
-    width: 25vw;
-    height: 25vw;
-    min-width: 150px;
-    min-height: 150px;
+    width: 30vw; /* Increased size */
+    height: 30vw; /* Increased size */
+    min-width: 200px; /* Adjusted min-size */
+    min-height: 200px; /* Adjusted min-size */
     background-color: hsl(var(--accent));
-    bottom: 5vh;
-    right: -8vw; 
+    bottom: -10vh; /* Adjusted position */
+    right: -10vw; /* Adjusted position */
+    opacity: 0.04; /* Slightly different opacity for variation */
   }
 
   html.dark body {
-     @apply bg-background text-foreground;
+     @apply text-foreground; /* Ensured dark mode also doesn't set bg-background on body */
   }
 }
