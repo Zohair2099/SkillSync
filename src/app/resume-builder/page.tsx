@@ -285,7 +285,7 @@ const LayoutSelectorAndPreview = () => {
 
   const renderPreview = () => {
     return (
-      <div id="resume-preview-content" className="border p-6 h-[600px] overflow-y-auto bg-white text-black font-sans text-xs print:h-auto print:overflow-visible print:border-none print:p-0 print:text-[10pt]">
+      <div id="resume-preview-content" className="border p-6 h-[600px] overflow-y-auto bg-white text-gray-900 font-sans text-xs print:h-auto print:overflow-visible print:border-none print:p-0 print:text-[10pt]">
         <style jsx global>{`
           @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin:0; padding:0; background-color: white !important; color: black !important; }
