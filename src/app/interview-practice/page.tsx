@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge'; // Added import
 import { ArrowLeft, Mic, Brain, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Send, RotateCcw, CheckCircle } from 'lucide-react';
 import { performGenerateInterviewQuestions, performEvaluateInterviewAnswer } from '@/app/actions';
 import type { GenerateInterviewQuestionsOutput, EvaluateInterviewAnswerOutput } from '@/ai/flows/interview-practice-flow';
