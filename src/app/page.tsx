@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List, UserCircle } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
@@ -216,10 +216,12 @@ export default function EmployMintPage() {
     const hash = window.location.hash.substring(1);
     if (HOME_PAGE_TAB_VALUES.includes(hash)) {
       setActiveTab(hash);
-    } else {
-      setActiveTab(HOME_PAGE_TAB_VALUES[0]); // Default to first tab
+    } else if (pathname === '/') { // Default to first tab if on homepage and no valid hash
+      setActiveTab(HOME_PAGE_TAB_VALUES[0]);
     }
-  }, [searchParams]); // Re-check on searchParams change (though hash isn't in searchParams directly)
+    // If on a subpage, activeTab remains as is or could be cleared.
+    // Current logic: on homepage, hash determines tab.
+  }, [pathname, searchParams]); // Re-check on pathname and searchParams change
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -345,9 +347,8 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" // Padding for the global mobile bottom nav
+        viewMode === 'mobile' && "pb-24" 
       )}>
-        {/* Tabs are only for desktop view now */}
         {viewMode === 'desktop' && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className={cn(
@@ -368,7 +369,6 @@ export default function EmployMintPage() {
               ))}
             </TabsList>
 
-            {/* TabsContent remains the same, controlled by activeTab state */}
             <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
@@ -556,7 +556,7 @@ export default function EmployMintPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="job-analyzer">
+            <TabsContent value="job-analyzer">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
@@ -623,14 +623,12 @@ export default function EmployMintPage() {
                   <CardTitle className="font-headline text-2xl text-foreground flex items-center">
                     <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
                   </CardTitle>
-                  {/* Layout toggle removed for desktop view, only applies to mobile */}
                 </div>
                 <CardDescription>
                   Unlock advanced tools and personalized guidance to supercharge your career journey.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                 {/* Desktop layout remains grid */}
                 <div className='grid md:grid-cols-2 gap-6'>
                   {employMintPlusFeatures.map((feature) => (
                     <Card 
@@ -663,11 +661,11 @@ export default function EmployMintPage() {
           </Tabs>
         )}
 
-        {/* Content for Mobile View - Render based on activeTab, but without Radix Tabs wrapper */}
         {viewMode === 'mobile' && (
           <>
             {activeTab === 'job-matcher' && (
-                <Card className="shadow-lg rounded-xl">
+              <div key="job-matcher-content-mobile">
+                <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                   <CardDescription>
@@ -680,7 +678,7 @@ export default function EmployMintPage() {
                   ) : (
                     <>
                       <form onSubmit={handleJobMatchSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 gap-4"> {/* Single column for mobile */}
+                        <div className="grid grid-cols-1 gap-4"> 
                           <div>
                             <Label htmlFor="jobMatchTitleMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Title</Label>
                             <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
@@ -723,7 +721,7 @@ export default function EmployMintPage() {
                           <Label htmlFor="jobMatchIdealDescriptionMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Description</Label>
                           <Textarea id="jobMatchIdealDescriptionMobile" value={jobMatchIdealDescription} onChange={(e) => setJobMatchIdealDescription(e.target.value)} placeholder="Describe your ideal role..." rows={4} required className="bg-card"/>
                         </div>
-                        <div className="grid grid-cols-1 gap-4"> {/* Single column for mobile */}
+                        <div className="grid grid-cols-1 gap-4"> 
                           <div>
                             <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Opt.)</Label>
                             <div className="flex items-center gap-2">
@@ -760,9 +758,11 @@ export default function EmployMintPage() {
                   )}
                 </CardContent>
               </Card>
+              </div>
             )}
             {activeTab === 'job-analyzer' && (
-                 <Card className="shadow-lg rounded-xl">
+              <div key="job-analyzer-content-mobile">
+                 <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                  <CardHeader>
                    <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
                    <CardDescription className="space-y-2 text-sm">
@@ -790,9 +790,11 @@ export default function EmployMintPage() {
                    )}
                  </CardContent>
                </Card>
+               </div>
             )}
             {activeTab === 'employmint-plus' && (
-               <Card className="shadow-lg rounded-xl">
+              <div key="employmint-plus-content-mobile">
+               <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                <CardHeader>
                  <div className="flex justify-between items-center">
                    <CardTitle className="font-headline text-2xl text-foreground flex items-center"><Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features</CardTitle>
@@ -804,7 +806,7 @@ export default function EmployMintPage() {
                  <CardDescription>Unlock advanced tools for your career journey.</CardDescription>
                </CardHeader>
                <CardContent className="space-y-6">
-                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}> {/* Simplified grid for mobile, or list */}
+                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}> 
                    {employMintPlusFeatures.map((feature) => (
                      <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
                        <CardHeader><CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle></CardHeader>
@@ -819,6 +821,7 @@ export default function EmployMintPage() {
                  </div>
                </CardContent>
              </Card>
+             </div>
             )}
           </>
         )}
@@ -826,7 +829,6 @@ export default function EmployMintPage() {
       <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
-      {/* Removed style jsx global block as it's now in MobileBottomNavigation */}
     </div>
   );
 }
