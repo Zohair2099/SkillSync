@@ -2,14 +2,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Briefcase, UserCircle } from 'lucide-react';
+import { Briefcase, UserCircle, Maximize, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useAppearance } from '@/context/AppearanceContext'; 
 import { cn } from '@/lib/utils';
 
 export function Header() {
-  const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode } = useAppearance();
+  const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode, isDesktopFullscreen, toggleDesktopFullscreen } = useAppearance();
 
   return (
     <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50 shadow-md">
@@ -21,12 +21,22 @@ export function Header() {
           </h1>
         </Link>
         <div className="flex items-center gap-2">
-          {viewMode === 'desktop' && ( // Only show in desktop view
-            <Link href="/profile" passHref>
-              <Button variant="ghost" size="icon" aria-label="User Profile">
-                <UserCircle className="h-6 w-6" />
+          {viewMode === 'desktop' && (
+            <>
+              <Link href="/profile" passHref>
+                <Button variant="ghost" size="icon" aria-label="User Profile">
+                  <UserCircle className="h-6 w-6" />
+                </Button>
+              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleDesktopFullscreen} 
+                aria-label={isDesktopFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isDesktopFullscreen ? <Minimize className="h-6 w-6" /> : <Maximize className="h-6 w-6" />}
               </Button>
-            </Link>
+            </>
           )}
           <SettingsPopover 
             currentTheme={theme} 
