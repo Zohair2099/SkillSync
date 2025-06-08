@@ -1,14 +1,85 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, DollarSign } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ArrowLeft, DollarSign, Lightbulb, AlertTriangle, BarChartHorizontalBig } from 'lucide-react';
+import { performSalaryEstimation } from '@/app/actions';
+import type { SalaryEstimatorInput, SalaryEstimatorOutput } from '@/app/actions';
+import { useToast } from "@/hooks/use-toast";
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
+
+// Client-side Zod schema for form validation
+const formSchema = z.object({
+  jobTitle: z.string().min(3, "Job title must be at least 3 characters."),
+  yearsExperience: z.coerce.number().min(0, "Years of experience cannot be negative.").max(50, "Years of experience seems too high."),
+  skills: z.string().min(3, "Please list at least one skill.").transform(value => value.split(',').map(skill => skill.trim()).filter(skill => skill)),
+  location: z.string().optional(),
+  companySize: z.enum(["startup", "mid-size", "large-enterprise", "any"]).optional(),
+  industry: z.string().optional(),
+});
+
+type SalaryFormValues = z.infer<typeof formSchema>;
 
 export default function SalaryEstimatorPage() {
+  const { toast } = useToast();
+  const [estimationResult, setEstimationResult] = useState<SalaryEstimatorOutput | null>(null);
+  const [isLoading, startTransition] = useTransition();
+
+  const form = useForm<SalaryFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      jobTitle: "",
+      yearsExperience: 0,
+      skills: "",
+      location: "",
+      companySize: "any",
+      industry: "",
+    },
+  });
+
+  const onSubmit = (values: SalaryFormValues) => {
+    setEstimationResult(null);
+    startTransition(async () => {
+      try {
+        // Ensure skills array is not empty after filtering
+        if (values.skills.length === 0 && form.getValues("skills")) {
+             form.setError("skills", { type: "manual", message: "Please provide at least one valid skill after trimming." });
+             toast({
+                title: "Invalid Input",
+                description: "Please ensure you have entered at least one skill.",
+                variant: "destructive",
+             });
+            return;
+        }
+        const inputForApi: SalaryEstimatorInput = {
+          ...values,
+          companySize: values.companySize === "any" ? undefined : values.companySize,
+        };
+        const result = await performSalaryEstimation(inputForApi);
+        setEstimationResult(result);
+      } catch (error) {
+        console.error("Error estimating salary:", error);
+        toast({
+          title: "Estimation Error",
+          description: (error as Error).message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -22,25 +93,138 @@ export default function SalaryEstimatorPage() {
         </div>
 
         <Card className="max-w-2xl mx-auto shadow-xl rounded-xl">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-3">
-                <DollarSign className="h-12 w-12 text-primary" />
+          <CardHeader>
+            <div className="flex items-center mb-2">
+              <DollarSign className="h-10 w-10 text-primary mr-3" />
+              <CardTitle className="font-headline text-3xl text-primary">AI-Powered Salary Estimator</CardTitle>
             </div>
-            <CardTitle className="font-headline text-3xl text-primary">AI-Based Salary Estimator</CardTitle>
             <CardDescription>
-              Predict expected salary ranges based on your profile.
-              This feature is currently under development.
+              Enter job details to get an AI-driven salary estimation. More details can lead to a more accurate prediction.
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-muted-foreground">
-              Soon, you'll be able to predict expected salary ranges based on your
-              experience, skills, and job role using AI-powered market data.
-            </p>
-            <div className="p-8 border-2 border-dashed border-border rounded-lg bg-muted/50">
-              <p className="text-lg font-semibold text-foreground">Coming Soon!</p>
-            </div>
-          </CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="jobTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Title</FormLabel>
+                      <FormControl><Input placeholder="e.g., Software Engineer, Product Manager" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="yearsExperience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Years of Relevant Experience</FormLabel>
+                      <FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="skills"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Key Skills (comma-separated)</FormLabel>
+                      <FormControl><Textarea placeholder="e.g., React, Python, Project Management, SEO" {...field} /></FormControl>
+                      <FormDescription>List skills most relevant to the job title.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location (Optional)</FormLabel>
+                        <FormControl><Input placeholder="e.g., New York, NY or London, UK" {...field} /></FormControl>
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="companySize"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Size (Optional)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value || "any"}>
+                          <FormControl><SelectTrigger><SelectValue placeholder="Select company size" /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="any">Any Size</SelectItem>
+                            <SelectItem value="startup">Startup (1-50 employees)</SelectItem>
+                            <SelectItem value="mid-size">Mid-size (51-500 employees)</SelectItem>
+                            <SelectItem value="large-enterprise">Large Enterprise (500+ employees)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry (Optional)</FormLabel>
+                      <FormControl><Input placeholder="e.g., Technology, Healthcare, Finance" {...field} /></FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                  {isLoading ? 'Estimating Salary...' : 'Estimate Salary'}
+                </Button>
+              </CardContent>
+            </form>
+          </Form>
+
+          {isLoading && (
+            <CardContent><LoadingIndicator loadingText="Calculating salary estimation..." /></CardContent>
+          )}
+
+          {estimationResult && !isLoading && (
+            <CardFooter className="flex-col items-start space-y-4 border-t pt-6">
+              <CardTitle className="text-xl text-primary flex items-center"><BarChartHorizontalBig className="mr-2 h-6 w-6"/>Estimation Results</CardTitle>
+              <Card className="w-full p-6 bg-secondary/30 shadow-inner">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-muted-foreground">Estimated Annual Salary Range</p>
+                  <p className="text-3xl font-bold text-accent">
+                    {estimationResult.estimatedLow.toLocaleString()} - {estimationResult.estimatedHigh.toLocaleString()} <span className="text-xl text-muted-foreground">{estimationResult.currency}</span>
+                  </p>
+                </div>
+                <div className="space-y-3 text-sm">
+                  <p><strong className="text-foreground">Confidence Level:</strong> <span className={`font-semibold ${estimationResult.confidenceLevel === 'high' ? 'text-green-600' : estimationResult.confidenceLevel === 'medium' ? 'text-yellow-600' : 'text-red-600'}`}>{estimationResult.confidenceLevel.charAt(0).toUpperCase() + estimationResult.confidenceLevel.slice(1)}</span></p>
+                  
+                  <div>
+                    <strong className="text-foreground flex items-center mb-1"><Lightbulb className="mr-2 h-4 w-4 text-primary"/>Influencing Factors:</strong>
+                    <ul className="list-disc list-inside pl-4 text-muted-foreground space-y-1">
+                      {estimationResult.influencingFactors.map((factor, index) => (
+                        <li key={index}>{factor}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {estimationResult.notes && (
+                    <div>
+                      <strong className="text-foreground flex items-center mb-1"><AlertTriangle className="mr-2 h-4 w-4 text-orange-500"/>Additional Notes:</strong>
+                      <p className="text-muted-foreground italic">{estimationResult.notes}</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+               <p className="text-xs text-muted-foreground text-center w-full pt-2">
+                This is an AI-generated estimate and actual salaries can vary. Consider it as one data point in your research.
+              </p>
+            </CardFooter>
+          )}
         </Card>
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
@@ -49,4 +233,3 @@ export default function SalaryEstimatorPage() {
     </div>
   );
 }
-

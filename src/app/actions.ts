@@ -9,7 +9,7 @@ import {
   generateInterviewQuestions, type GenerateInterviewQuestionsInput, type GenerateInterviewQuestionsOutput,
   evaluateInterviewAnswer, type EvaluateInterviewAnswerInput, type EvaluateInterviewAnswerOutput
 } from '@/ai/flows/interview-practice-flow';
-// Removed imports for CompanyCulturePreferencesInput and CompanyCultureMatchOutput
+import { estimateSalary, type SalaryEstimatorInput, type SalaryEstimatorOutput } from '@/ai/flows/salary-estimator-flow';
 
 // Re-export types for client-side usage
 export type { 
@@ -18,8 +18,8 @@ export type {
   SoftSkillAssessmentInput, SoftSkillAssessmentOutput,
   MarketTrendsInput, MarketTrendsOutput,
   GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
-  EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput
-  // Removed CompanyCulturePreferencesInput, CompanyCultureMatchOutput from re-export
+  EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput,
+  SalaryEstimatorInput, SalaryEstimatorOutput // Added Salary Estimator types
 };
 
 
@@ -103,4 +103,12 @@ export async function performEvaluateInterviewAnswer(input: EvaluateInterviewAns
   }
 }
 
-// Removed performCompanyCultureMatching function
+export async function performSalaryEstimation(input: SalaryEstimatorInput): Promise<SalaryEstimatorOutput> {
+  try {
+    const result = await estimateSalary(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performSalaryEstimation:', error);
+    throw new Error('Failed to estimate salary. Please try again.');
+  }
+}
