@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
@@ -129,9 +129,17 @@ const employMintPlusFeatures = [
     id: "social-networking",
     icon: Share2,
     title: "Social Integration & Networking",
-    description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences.",
+    description: "Connect with mentors, recruiters, and professionals. Access links to update your professional profiles.",
     href: "/social-networking",
-    actionText: "Connect",
+    actionText: "Connect & Network",
+  },
+  {
+    id: "community-forum",
+    icon: Users,
+    title: "Community Forum",
+    description: "Join discussions, share tips, and network with other EmployMint users. (Coming Soon)",
+    href: "/community-forum",
+    actionText: "Join the Discussion",
   },
   {
     id: "company-culture",

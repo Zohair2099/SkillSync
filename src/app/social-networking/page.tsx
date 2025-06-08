@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowLeft, Share2, Linkedin, Users, Edit3 } from 'lucide-react';
+import { ArrowLeft, Share2, Linkedin, Users, Edit3, MessageSquare } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 export default function SocialNetworkingPage() {
@@ -65,10 +65,11 @@ export default function SocialNetworkingPage() {
                 <li>Network with other professionals in various fields.</li>
                 <li>Get advice on skill development and career growth.</li>
               </ul>
-              <div className="p-6 border-2 border-dashed border-border rounded-lg bg-muted/50 text-center">
-                <p className="text-lg font-semibold text-foreground">Coming Soon!</p>
-                <p className="text-sm text-muted-foreground mt-1">We're working on building a vibrant community space for you.</p>
-              </div>
+              <Link href="/community-forum" passHref>
+                <Button variant="secondary" className="w-full">
+                  <MessageSquare className="mr-2 h-4 w-4" /> Go to Community Forum (Coming Soon)
+                </Button>
+              </Link>
             </div>
           </CardContent>
            <CardFooter className="text-center mt-4">
