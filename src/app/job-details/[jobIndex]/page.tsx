@@ -6,8 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { performJobFocusedSkillComparison } from '@/app/actions';
-import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
-import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
+// Corrected: Import types from actions.ts
+import type { JobFocusedSkillComparisonOutput, SkillBasedJobMatchingOutput } from '@/app/actions';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
 import { cn } from "@/lib/utils";
-import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; 
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -343,3 +343,4 @@ export default function JobDetailsPage() {
     </div>
   );
 }
+
