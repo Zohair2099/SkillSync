@@ -67,12 +67,12 @@ export function SettingsPopover({
             </div>
              <Separator />
             <div>
-              <Label htmlFor="zoom-level" className="block mb-1">Zoom Level: {currentZoomLevel}%</Label>
+              <Label htmlFor="display-size" className="block mb-1">Display Size: {currentZoomLevel}%</Label>
                <span className="text-xs font-normal leading-snug text-muted-foreground mb-2 block">
-                  Adjust application zoom.
+                  Scales text and all UI elements.
                 </span>
               <Slider
-                id="zoom-level"
+                id="display-size"
                 min={50}
                 max={200} 
                 step={10}
