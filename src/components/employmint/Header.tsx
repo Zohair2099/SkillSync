@@ -11,7 +11,7 @@ export function Header() {
   const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode } = useAppearance();
 
   return (
-    <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50">
+    <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Briefcase className="h-8 w-8 text-primary" />

@@ -21,7 +21,7 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 92%; 
-    --muted-foreground: 215 20.2% 65.1%; /* Lighter grey text for muted */
+    --muted-foreground: 215 25% 55%; /* Adjusted for better readability */
 
     --accent: 125 39% 64%; /* Muted Green #81C784 */
     --accent-foreground: 0 0% 98%; /* White/Very Light Grey text on accent */
@@ -29,8 +29,8 @@
     --destructive: 0 84.2% 60.2%; /* Red for destructive actions / low match */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%; /* Light border */
-    --input: 214.3 31.8% 91.4%; /* Input border */
+    --border: 210 25% 88%; /* Adjusted for more definition */
+    --input: 210 25% 88%; /* Adjusted for consistency with border */
     --ring: 207 88% 60%; /* Ring color based on primary */
     
     --yellow: 45 93% 57%; /* Gold/Yellow for 100% match */
@@ -43,7 +43,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Increased for softer corners */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -72,7 +72,7 @@
     --secondary-foreground: 0 0% 90%;
 
     --muted: 220 13% 20%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted-foreground: 210 15% 70%; /* Adjusted for better readability */
 
     --accent: 125 50% 60%; /* Slightly adjusted green for dark */
     --accent-foreground: 0 0% 98%; /* Keep light text on accent */
@@ -80,8 +80,8 @@
     --destructive: 0 70% 55%; /* Adjusted red for dark */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 30%; /* Darker border */
-    --input: 220 13% 28%; /* Darker input border */
+    --border: 220 13% 28%; /* Adjusted for more definition */
+    --input: 220 13% 28%; /* Adjusted for consistency with border */
     --ring: 207 80% 65%; 
 
     --yellow: 45 85% 55%; 
