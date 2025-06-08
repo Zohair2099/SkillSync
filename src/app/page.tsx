@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+// Removed Image import as it's no longer used for EmployMint+ cards here
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -96,7 +96,6 @@ const employMintPlusFeatures = [
     description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations to bridge the gap.",
     href: "/personalized-skill-path",
     actionText: "Get Your Path",
-    imageHint: "map growth",
   },
   {
     id: "resume-builder",
@@ -105,7 +104,6 @@ const employMintPlusFeatures = [
     description: "Craft a professional resume by entering your details and choosing from various layouts. Download as PDF.",
     href: "/resume-builder",
     actionText: "Build Your Resume",
-    imageHint: "document resume",
   },
   {
     id: "soft-skill-assessment",
@@ -114,7 +112,6 @@ const employMintPlusFeatures = [
     description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement.",
     href: "/soft-skill-assessment",
     actionText: "Assess Skills",
-    imageHint: "brainstorm people",
   },
   {
     id: "market-trends",
@@ -123,7 +120,6 @@ const employMintPlusFeatures = [
     description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields.",
     href: "/market-trends",
     actionText: "View Trends",
-    imageHint: "chart graph",
   },
   {
     id: "interview-practice",
@@ -132,7 +128,6 @@ const employMintPlusFeatures = [
     description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback.",
     href: "/interview-practice",
     actionText: "Start Practice",
-    imageHint: "microphone interview",
   },
   {
     id: "social-networking",
@@ -141,7 +136,6 @@ const employMintPlusFeatures = [
     description: "Connect with mentors, recruiters, and professionals. Access links to update your professional profiles.",
     href: "/social-networking",
     actionText: "Connect & Network",
-    imageHint: "network connections",
   },
    {
     id: "community-forum",
@@ -150,7 +144,6 @@ const employMintPlusFeatures = [
     description: "Join discussions, share tips, and network with other EmployMint users.",
     href: "/community-forum",
     actionText: "Join the Discussion",
-    imageHint: "community people",
   },
   {
     id: "salary-estimator",
@@ -159,7 +152,6 @@ const employMintPlusFeatures = [
     description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
     href: "/salary-estimator",
     actionText: "Estimate Salary",
-    imageHint: "money calculator",
   },
   {
     id: "company-culture",
@@ -168,7 +160,6 @@ const employMintPlusFeatures = [
     description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings.",
     href: "/company-culture",
     actionText: "Find Matches (Coming Soon)",
-    imageHint: "office building",
   },
   {
     id: "notifications",
@@ -177,7 +168,6 @@ const employMintPlusFeatures = [
     description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile.",
     href: "/notifications",
     actionText: "Set Up Alerts (Coming Soon)",
-    imageHint: "bell notification",
   },
   {
     id: "app-tracker",
@@ -186,7 +176,6 @@ const employMintPlusFeatures = [
     description: "Track your job applications, interviews, and follow-up actions in one organized place.",
     href: "/application-tracker",
     actionText: "Track Applications (Coming Soon)",
-    imageHint: "checklist clipboard",
   }
 ];
 
@@ -225,29 +214,42 @@ export default function EmployMintPage() {
 
  useEffect(() => {
     const syncActiveTabWithUrl = () => {
-      if (pathname === '/') {
-        let currentHash = window.location.hash.substring(1);
+      if (pathname === '/') { // Only manage tabs if on the homepage
+        let currentHash = typeof window !== "undefined" ? window.location.hash.substring(1) : "";
+        
         if (HOME_PAGE_TAB_IDS.includes(currentHash)) {
-          setActiveTab(currentHash);
+          if (activeTab !== currentHash) { // Only update if different
+            setActiveTab(currentHash);
+          }
         } else {
-          setActiveTab(HOME_PAGE_TAB_IDS[0]);
-          if (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
+          // Default to job-matcher if hash is empty or not recognized
+          if (activeTab !== HOME_PAGE_TAB_IDS[0]) {
+            setActiveTab(HOME_PAGE_TAB_IDS[0]);
+          }
+          // Update URL hash to reflect default, only if it's not already correct
+          if (typeof window !== "undefined" && window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
              window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
           }
         }
       }
     };
 
-    syncActiveTabWithUrl(); // Sync on initial mount or pathname change
+    syncActiveTabWithUrl(); // Sync on initial mount or pathname change to '/'
 
-    window.addEventListener('hashchange', syncActiveTabWithUrl);
-    window.addEventListener('popstate', syncActiveTabWithUrl); // For browser back/forward
+    // Add event listeners for hash changes and browser back/forward
+    if (typeof window !== "undefined") {
+      window.addEventListener('hashchange', syncActiveTabWithUrl);
+      window.addEventListener('popstate', syncActiveTabWithUrl); // For browser back/forward
+    }
 
     return () => {
-      window.removeEventListener('hashchange', syncActiveTabWithUrl);
-      window.removeEventListener('popstate', syncActiveTabWithUrl);
+      // Cleanup event listeners
+      if (typeof window !== "undefined") {
+        window.removeEventListener('hashchange', syncActiveTabWithUrl);
+        window.removeEventListener('popstate', syncActiveTabWithUrl);
+      }
     };
-  }, [pathname]); // Re-run only when pathname changes
+  }, [pathname, activeTab]); // activeTab is added to ensure re-evaluation if it's programmatically changed elsewhere, though primarily driven by URL
 
 
   const handleTabChange = (value: string) => {
@@ -662,9 +664,7 @@ export default function EmployMintPage() {
                       className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
                     >
                       <CardHeader>
-                        <div className="mb-3 h-20 w-full bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                           <Image src={`https://placehold.co/120x80.png`} alt={`${feature.title} graphic`} width={120} height={80} data-ai-hint={feature.imageHint || "abstract tech"} className="object-contain"/>
-                        </div>
+                        {/* Removed image container div */}
                         <CardTitle className="text-lg text-primary flex items-center">
                           <feature.icon className="mr-2 h-5 w-5" />
                           {feature.title}
@@ -842,9 +842,7 @@ export default function EmployMintPage() {
                        className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
                      >
                        <CardHeader>
-                         <div className="mb-3 h-20 w-full bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                           <Image src={`https://placehold.co/120x80.png`} alt={`${feature.title} graphic`} width={120} height={80} data-ai-hint={feature.imageHint || "abstract tech"} className="object-contain"/>
-                         </div>
+                          {/* Removed image container div */}
                          <CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle>
                        </CardHeader>
                        <CardContent className="flex-grow"><p className="text-sm text-muted-foreground">{feature.description}</p></CardContent>

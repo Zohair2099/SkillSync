@@ -112,8 +112,41 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative; 
+    overflow-x: hidden; 
   }
-  /* Ensure html also gets dark mode styling for consistent scrollbars etc. */
+  
+  body::before,
+  body::after {
+    content: "";
+    position: fixed; 
+    z-index: -1; 
+    border-radius: 50%;
+    opacity: 0.03; 
+    pointer-events: none; 
+    will-change: transform; 
+  }
+
+  body::before {
+    width: 30vw; 
+    height: 30vw; 
+    min-width: 200px; 
+    min-height: 200px;
+    background-color: hsl(var(--primary));
+    top: 5vh;
+    left: -10vw; 
+  }
+
+  body::after {
+    width: 25vw;
+    height: 25vw;
+    min-width: 150px;
+    min-height: 150px;
+    background-color: hsl(var(--accent));
+    bottom: 5vh;
+    right: -8vw; 
+  }
+
   html.dark body {
      @apply bg-background text-foreground;
   }
