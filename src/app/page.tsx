@@ -142,6 +142,14 @@ const employMintPlusFeatures = [
     actionText: "Join the Discussion",
   },
   {
+    id: "salary-estimator",
+    icon: SalaryIcon,
+    title: "AI-Based Salary Estimator",
+    description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
+    href: "/salary-estimator",
+    actionText: "Estimate Salary",
+  },
+  {
     id: "company-culture",
     icon: Building,
     title: "Company Culture & Work Environment Matching",
@@ -164,14 +172,6 @@ const employMintPlusFeatures = [
     description: "Track your job applications, interviews, and follow-up actions in one organized place.",
     href: "/application-tracker",
     actionText: "Track Applications",
-  },
-  {
-    id: "salary-estimator",
-    icon: SalaryIcon,
-    title: "AI-Based Salary Estimator",
-    description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
-    href: "/salary-estimator",
-    actionText: "Estimate Salary",
   }
 ];
 
