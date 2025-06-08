@@ -1,5 +1,5 @@
 
-// use server'
+'use server';
 
 /**
  * @fileOverview Matches open jobs to the user based on their specified skills and preferences, 
@@ -119,3 +119,4 @@ const skillBasedJobMatchingFlow = ai.defineFlow(
     return output || [];
   }
 );
+
