@@ -2,39 +2,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Briefcase, UserCircle, Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Briefcase, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
+import { useAppearance } from '@/context/AppearanceContext'; // Use the new context
 
 export function Header() {
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    const localTheme = localStorage.getItem('employmint-theme');
-    if (localTheme) {
-      setTheme(localTheme);
-      if (localTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('employmint-theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  };
+  const { theme, toggleTheme, zoomLevel, setZoomLevel } = useAppearance();
 
   return (
     <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50">
@@ -51,10 +25,14 @@ export function Header() {
               <UserCircle className="h-6 w-6" />
             </Button>
           </Link>
-          <SettingsPopover currentTheme={theme} onToggleTheme={toggleTheme} />
+          <SettingsPopover 
+            currentTheme={theme} 
+            onToggleTheme={toggleTheme}
+            currentZoomLevel={zoomLevel}
+            onZoomChange={setZoomLevel}
+          />
         </div>
       </div>
     </header>
   );
 }
-

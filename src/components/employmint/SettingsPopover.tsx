@@ -1,37 +1,34 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Moon, Sun, ZoomIn, Info, Gift, Monitor, Smartphone } from 'lucide-react';
+import { Settings, Info, Gift, Monitor, Smartphone } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface SettingsPopoverProps {
   currentTheme: 'light' | 'dark';
   onToggleTheme: () => void;
+  currentZoomLevel: number;
+  onZoomChange: (level: number) => void;
 }
 
-export function SettingsPopover({ currentTheme, onToggleTheme }: SettingsPopoverProps) {
-  const [zoomLevel, setZoomLevel] = useState(100);
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+export function SettingsPopover({ currentTheme, onToggleTheme, currentZoomLevel, onZoomChange }: SettingsPopoverProps) {
+  const [viewMode, setViewMode] = React.useState<'desktop' | 'mobile'>('desktop');
 
   const handleZoomChange = (value: number[]) => {
-    setZoomLevel(value[0]);
-    // Note: True application zoom is complex. This is a placeholder.
+    onZoomChange(value[0]);
   };
 
   const handleViewModeChange = (value: 'desktop' | 'mobile') => {
     setViewMode(value);
     // Note: True view mode switching is complex. This is a UI placeholder.
-    // A simple simulation could involve adding a class to document.body
-    // and using CSS to constrain width, e.g., document.body.classList.toggle('mobile-view-simulation', value === 'mobile');
-    // Then in CSS: .mobile-view-simulation { max-width: 400px; margin: 0 auto; border: 1px solid #ccc; }
   };
 
 
@@ -68,24 +65,22 @@ export function SettingsPopover({ currentTheme, onToggleTheme }: SettingsPopover
             </div>
              <Separator />
             <div>
-              <Label htmlFor="zoom-level" className="block mb-1">Zoom Level: {zoomLevel}%</Label>
+              <Label htmlFor="zoom-level" className="block mb-1">Zoom Level: {currentZoomLevel}%</Label>
                <span className="text-xs font-normal leading-snug text-muted-foreground mb-2 block">
-                  Adjust application zoom (UI placeholder).
+                  Adjust application zoom.
                 </span>
               <Slider
                 id="zoom-level"
                 min={50}
-                max={200} // Changed from 300 to 200 to match earlier designs, user requested 300. Reverted to 200 for now based on existing component.
+                max={200} 
                 step={10}
-                defaultValue={[100]}
+                value={[currentZoomLevel]}
                 onValueChange={handleZoomChange}
-                disabled // Disabled for now as true app zoom is complex
               />
-              <p className="text-xs text-muted-foreground mt-1">Note: Full app zoom is typically handled by your browser (Ctrl/Cmd + +/-).</p>
             </div>
             <Separator />
             <div>
-                <Label className="block mb-2">View Mode</Label>
+                <Label className="block mb-2">View Mode (Conceptual)</Label>
                 <RadioGroup defaultValue="desktop" value={viewMode} onValueChange={handleViewModeChange} className="flex space-x-2">
                     <div className="flex items-center space-x-1">
                         <RadioGroupItem value="desktop" id="desktop-view" />

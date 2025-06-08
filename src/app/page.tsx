@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Info, Puzzle, GraduationCap } from 'lucide-react';
+import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
@@ -105,18 +105,16 @@ const employMintPlusFeatures = [
     icon: MessageSquare,
     title: "Soft Skill Assessment",
     description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement.",
-    href: "#", 
-    actionText: "Assess Skills (Soon)",
-    conceptual: true,
+    href: "/soft-skill-assessment", 
+    actionText: "Assess Skills",
   },
   {
     id: "market-trends",
     icon: BarChart3,
     title: "Real-Time Job Market Trends",
     description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields.",
-    href: "#",
-    actionText: "View Trends (Soon)",
-    conceptual: true,
+    href: "/market-trends",
+    actionText: "View Trends",
   },
   {
     id: "interview-practice",
@@ -131,27 +129,24 @@ const employMintPlusFeatures = [
     icon: Share2,
     title: "Social Integration & Networking",
     description: "Connect with mentors, recruiters, and professionals via LinkedIn or other platforms. Join a community forum to discuss job search tips and experiences.",
-    href: "#",
-    actionText: "Connect (Soon)",
-    conceptual: true,
+    href: "/social-networking",
+    actionText: "Connect",
   },
   {
     id: "company-culture",
     icon: Building,
     title: "Company Culture & Work Environment Matching",
     description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings.",
-    href: "#",
-    actionText: "Find Matches (Soon)",
-    conceptual: true,
+    href: "/company-culture",
+    actionText: "Find Matches",
   },
   {
     id: "notifications",
     icon: Bell,
     title: "Smart Notifications & Reminders",
     description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile.",
-    href: "#",
-    actionText: "Set Up Alerts (Soon)",
-    conceptual: true,
+    href: "/notifications",
+    actionText: "Set Up Alerts",
   },
   {
     id: "app-tracker",
@@ -166,9 +161,8 @@ const employMintPlusFeatures = [
     icon: SalaryIcon,
     title: "AI-Based Salary Estimator",
     description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
-    href: "#",
-    actionText: "Estimate Salary (Soon)",
-    conceptual: true,
+    href: "/salary-estimator",
+    actionText: "Estimate Salary",
   }
 ];
 
@@ -293,15 +287,6 @@ export default function EmployMintPage() {
       setJobMatchState("");
     }
   }, [jobMatchCountry]);
-
-
-  const handleConceptualFeatureClick = (title: string) => {
-    toast({
-        title: `${title}`,
-        description: `This feature is coming soon! Stay tuned for updates.`,
-    });
-  };
-
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -579,22 +564,12 @@ export default function EmployMintPage() {
                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                       </CardContent>
                       <CardFooter>
-                        {feature.href && feature.href !== "#" ? (
-                          <Link href={feature.href} passHref className="w-full">
-                            <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
-                              <feature.icon className="mr-2 h-4 w-4"/>
-                              {feature.actionText || 'Explore Feature'}
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Button 
-                            className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground" 
-                            onClick={() => feature.conceptual && handleConceptualFeatureClick(feature.title)}
-                            disabled={!feature.conceptual}
-                          >
-                            <feature.icon className="mr-2 h-4 w-4"/> {feature.actionText || 'Explore (Conceptual)'}
+                        <Link href={feature.href} passHref className="w-full">
+                          <Button className="w-full mt-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+                            <feature.icon className="mr-2 h-4 w-4"/>
+                            {feature.actionText || 'Explore Feature'}
                           </Button>
-                        )}
+                        </Link>
                       </CardFooter>
                     </Card>
                   ))}
