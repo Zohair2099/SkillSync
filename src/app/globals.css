@@ -21,7 +21,7 @@
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 92%;
-    --muted-foreground: 215 25% 55%; /* Adjusted for better readability */
+    --muted-foreground: 215 25% 45%; /* Darkened for better light mode contrast */
 
     --accent: 125 39% 64%; /* Muted Green #81C784 */
     --accent-foreground: 0 0% 98%; /* White/Very Light Grey text on accent */
@@ -111,7 +111,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground; /* Apply bg-background here */
+    @apply bg-background text-foreground;
     position: relative;
     overflow-x: hidden;
   }
@@ -120,7 +120,7 @@
   body::after {
     content: "";
     position: fixed;
-    z-index: -1; /* These shapes will likely be hidden if body has an opaque background */
+    z-index: -1; 
     border-radius: 50%;
     opacity: 0.05; 
     pointer-events: none;
@@ -149,6 +149,6 @@
   }
 
   html.dark body {
-     @apply bg-background text-foreground; /* Apply bg-background here for dark mode */
+     @apply bg-background text-foreground;
   }
 }

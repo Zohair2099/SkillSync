@@ -19,6 +19,7 @@ import { performSalaryEstimation } from '@/app/actions';
 import type { SalaryEstimatorInput, SalaryEstimatorOutput } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
+import { cn } from '@/lib/utils';
 
 // Client-side Zod schema for form validation
 const formSchema = z.object({
@@ -53,10 +54,6 @@ export default function SalaryEstimatorPage() {
   });
 
   const onSubmit = (values: SalaryFormValues) => {
-    // The Zod schema with .pipe now handles the empty array validation for skills.
-    // The react-hook-form will prevent submission if this validation fails.
-    // The manual check below could be removed or simplified if relying purely on Zod.
-    // For now, keeping it as an additional safeguard or for specific toast message.
     if (values.skills.length === 0) {
         form.setError("skills", { type: "manual", message: "Please provide at least one valid skill after filtering." });
          toast({
@@ -71,7 +68,7 @@ export default function SalaryEstimatorPage() {
     startTransition(async () => {
       try {
         const inputForApi: SalaryEstimatorInput = {
-          ...values, // `values.skills` is already an array here due to the transform in Zod schema
+          ...values, 
           companySize: values.companySize === "any" ? undefined : values.companySize,
         };
         const result = await performSalaryEstimation(inputForApi);
@@ -85,6 +82,19 @@ export default function SalaryEstimatorPage() {
         });
       }
     });
+  };
+
+  const getConfidenceColorClass = (level: 'high' | 'medium' | 'low') => {
+    switch (level) {
+      case 'high':
+        return 'text-accent'; // Theme's green
+      case 'medium':
+        return 'text-yellow'; // Theme's yellow
+      case 'low':
+        return 'text-destructive'; // Theme's red
+      default:
+        return 'text-foreground';
+    }
   };
 
   return (
@@ -208,7 +218,7 @@ export default function SalaryEstimatorPage() {
                   </p>
                 </div>
                 <div className="space-y-3 text-sm">
-                  <p><strong className="text-foreground">Confidence Level:</strong> <span className={`font-semibold ${estimationResult.confidenceLevel === 'high' ? 'text-green-600' : estimationResult.confidenceLevel === 'medium' ? 'text-yellow-600' : 'text-red-600'}`}>{estimationResult.confidenceLevel.charAt(0).toUpperCase() + estimationResult.confidenceLevel.slice(1)}</span></p>
+                  <p><strong className="text-foreground">Confidence Level:</strong> <span className={cn("font-semibold", getConfidenceColorClass(estimationResult.confidenceLevel))}>{estimationResult.confidenceLevel.charAt(0).toUpperCase() + estimationResult.confidenceLevel.slice(1)}</span></p>
                   
                   <div>
                     <strong className="text-foreground flex items-center mb-1"><Lightbulb className="mr-2 h-4 w-4 text-primary"/>Influencing Factors:</strong>

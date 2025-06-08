@@ -30,22 +30,22 @@ const JobRecommendationCardComponent = ({
     salaryRange,
   } = job;
 
-  let progressColor = 'bg-destructive'; 
-  let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "destructive";
-  let badgeClass = 'bg-destructive text-destructive-foreground';
+  let badgeBgClass = 'bg-destructive';
+  let badgeTextClass = 'text-destructive-foreground';
+  let progressIndicatorClass = 'bg-destructive';
 
   if (matchPercentage === 100) {
-    progressColor = 'bg-yellow-400'; 
-    badgeVariant = "default";
-    badgeClass = 'bg-yellow-400 text-yellow-foreground dark:text-yellow-900';
+    badgeBgClass = 'bg-yellow'; // Uses theme's yellow-DEFAULT
+    badgeTextClass = 'text-yellow-foreground';
+    progressIndicatorClass = 'bg-yellow';
   } else if (matchPercentage >= 75) {
-    progressColor = 'bg-accent'; 
-    badgeVariant = "default";
-    badgeClass = 'bg-accent text-accent-foreground';
+    badgeBgClass = 'bg-accent';
+    badgeTextClass = 'text-accent-foreground';
+    progressIndicatorClass = 'bg-accent';
   } else if (matchPercentage >= 45) {
-    progressColor = 'bg-orange-500'; 
-    badgeVariant = "secondary";
-    badgeClass = 'bg-orange-500 text-white dark:text-orange-950';
+    badgeBgClass = 'bg-orange-500'; // Uses theme's orange-500
+    badgeTextClass = 'text-white'; // text-white should contrast well with orange-500 in both modes
+    progressIndicatorClass = 'bg-orange-500';
   }
   
   return (
@@ -69,7 +69,7 @@ const JobRecommendationCardComponent = ({
               )}
             </div>
           </div>
-          <Badge variant={badgeVariant} className={`${badgeClass} whitespace-nowrap ml-auto shrink-0 self-start sm:self-center mt-2 sm:mt-0`}>
+          <Badge className={cn("whitespace-nowrap ml-auto shrink-0 self-start sm:self-center mt-2 sm:mt-0", badgeBgClass, badgeTextClass)}>
             <Target className="mr-1.5 h-4 w-4" />
             {matchPercentage.toFixed(0)}% Match
           </Badge>
@@ -78,7 +78,7 @@ const JobRecommendationCardComponent = ({
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{jobDescription}</p>
         )}
         <div className="w-full space-y-1 mb-3">
-          <Progress value={matchPercentage} indicatorClassName={progressColor} aria-label={`Match percentage: ${matchPercentage.toFixed(0)}%`} className="h-2" />
+          <Progress value={matchPercentage} indicatorClassName={cn("transition-all duration-500", progressIndicatorClass)} aria-label={`Match percentage: ${matchPercentage.toFixed(0)}%`} className="h-2" />
         </div>
         <div className="flex justify-between items-center">
             <p className="text-xs text-muted-foreground flex items-center">
