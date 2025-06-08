@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation'; // Corrected import
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -207,43 +207,46 @@ export default function EmployMintPage() {
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
   const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
+  
+  // State for active tab, defaults to the first one
   const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
 
 
   useEffect(() => {
-    const updateActiveTabFromHash = () => {
-      const hash = window.location.hash.substring(1);
+    const handleRouteChange = () => {
       if (pathname === '/') {
+        const hash = window.location.hash.substring(1);
         if (HOME_PAGE_TAB_IDS.includes(hash)) {
           setActiveTab(hash);
         } else {
-          setActiveTab(HOME_PAGE_TAB_IDS[0]);
-          // Optionally, update URL to reflect default tab if hash is invalid or empty
-          // window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
+          setActiveTab(HOME_PAGE_TAB_IDS[0]); // Default to first tab on homepage
+          // Ensure URL hash is set on initial load if empty, without full navigation
+          if (window.location.hash === '' || !HOME_PAGE_TAB_IDS.includes(window.location.hash.substring(1))) {
+            window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
+          }
         }
       }
     };
 
-    updateActiveTabFromHash(); // Set initial tab based on current hash or default
+    // Handle initial load and direct navigation to a hash
+    handleRouteChange();
 
-    window.addEventListener('hashchange', updateActiveTabFromHash);
+    // Listen for hash changes (e.g., from MobileBottomNavigation) and browser back/forward
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+
     return () => {
-      window.removeEventListener('hashchange', updateActiveTabFromHash);
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
     };
-  }, [pathname]); // Re-run when pathname changes, e.g., navigating away and back
-
-  // This effect ensures the URL hash reflects the default tab if no hash is present on initial load of homepage.
-  useEffect(() => {
-    if (pathname === '/' && window.location.hash === '' && activeTab === HOME_PAGE_TAB_IDS[0]) {
-      window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
-    }
-  }, [pathname, activeTab]);
+  }, [pathname]); // Key dependency: re-evaluate when the path changes.
 
 
   const handleTabChange = (value: string) => {
+    // This function is for desktop tabs, mobile tabs directly change URL hash
     if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      window.location.hash = value;
+      window.location.hash = value; // Also update hash for desktop consistency
     }
   };
 
@@ -680,7 +683,7 @@ export default function EmployMintPage() {
         {viewMode === 'mobile' && (
           <>
             {activeTab === 'job-matcher' && (
-              <div key={activeTab}>
+              <div key={activeTab}> 
                 <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
