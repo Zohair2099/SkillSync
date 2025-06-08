@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation'; // useRouter might not be needed for hash logic
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -178,15 +178,14 @@ const employMintPlusFeatures = [
   }
 ];
 
-const HOME_PAGE_TAB_VALUES = ["job-matcher", "job-analyzer", "employmint-plus"];
+const HOME_PAGE_TAB_IDS = ["job-matcher", "job-analyzer", "employmint-plus"];
 
 export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
   const { viewMode } = useAppearance();
   const pathname = usePathname();
-  // const searchParams = useSearchParams(); // searchParams might not be needed if hashchange handles activeTab
-  const router = useRouter();
+  // const router = useRouter(); // May not be needed if hashchange handles activeTab and Link components handle navigation
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -209,47 +208,48 @@ export default function EmployMintPage() {
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
   const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
-  const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_VALUES[0]);
+  const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
 
- useEffect(() => {
-    const updateActiveTabFromHash = () => {
+
+  useEffect(() => {
+    const handleHashChange = () => {
       const hash = window.location.hash.substring(1);
-      if (HOME_PAGE_TAB_VALUES.includes(hash)) {
+      if (HOME_PAGE_TAB_IDS.includes(hash)) {
         setActiveTab(hash);
-      } else if (pathname === '/' && !hash) { 
-        // Default to first tab if on homepage and no hash
-        // or if hash is not one of the known tab values (e.g. #job-matcher)
-        // We need to ensure a valid hash for "job-matcher" is also handled
-        if(hash === "job-matcher" || !hash) {
-            setActiveTab(HOME_PAGE_TAB_VALUES[0]); // "job-matcher"
-            if (!hash) { // If no hash, explicitly set it for "job-matcher"
-                router.replace('/#job-matcher', { scroll: false });
-            }
-        } else {
-             setActiveTab(HOME_PAGE_TAB_VALUES[0]); // Default to job-matcher if unknown hash on homepage
-        }
+      } else if (pathname === '/' && (hash === '' || !HOME_PAGE_TAB_IDS.includes(hash))) {
+        // If on homepage and hash is empty or unknown, default to job-matcher
+        setActiveTab(HOME_PAGE_TAB_IDS[0]);
       }
     };
 
-    updateActiveTabFromHash(); // Initial check
+    // Set initial tab based on current hash or default
+    handleHashChange();
 
-    window.addEventListener('hashchange', updateActiveTabFromHash, false);
-
+    window.addEventListener('hashchange', handleHashChange);
     return () => {
-      window.removeEventListener('hashchange', updateActiveTabFromHash, false);
+      window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [pathname, router]); // Dependency on pathname and router
+  }, [pathname]);
+
+  // This effect ensures the URL hash reflects the default tab if no hash is present on initial load of homepage.
+  useEffect(() => {
+    if (pathname === '/' && window.location.hash === '' && activeTab === HOME_PAGE_TAB_IDS[0]) {
+      // Using window.history.replaceState to avoid a full re-render/navigation cycle
+      // that router.replace might cause in some scenarios.
+      window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
+    }
+  }, [pathname, activeTab]);
 
 
   const handleTabChange = (value: string) => {
     // This function is mainly for desktop tabs.
-    // Mobile navigation updates hash directly via Link components.
-    if (viewMode === 'desktop' && HOME_PAGE_TAB_VALUES.includes(value)) {
+    // Mobile navigation updates hash directly via Link components in MobileBottomNavigation.
+    if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      router.replace(`/#${value}`, { scroll: false });
+      // Update URL hash without causing a full page navigation that re-fetches data
+      window.location.hash = value;
     }
   };
-
 
   useEffect(() => {
     if (viewMode === 'mobile') {
@@ -367,7 +367,7 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24"
+        viewMode === 'mobile' && "pb-24" // Padding for the fixed mobile bottom navigation
       )}>
         {viewMode === 'desktop' && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -684,7 +684,7 @@ export default function EmployMintPage() {
         {viewMode === 'mobile' && (
           <>
             {activeTab === 'job-matcher' && (
-              <div key="job-matcher-content-mobile">
+              <div key={activeTab}>
                 <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
@@ -781,7 +781,7 @@ export default function EmployMintPage() {
               </div>
             )}
             {activeTab === 'job-analyzer' && (
-              <div key="job-analyzer-content-mobile">
+              <div key={activeTab}>
                  <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                  <CardHeader>
                    <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
@@ -813,7 +813,7 @@ export default function EmployMintPage() {
                </div>
             )}
             {activeTab === 'employmint-plus' && (
-              <div key="employmint-plus-content-mobile">
+              <div key={activeTab}>
                <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                <CardHeader>
                  <div className="flex justify-between items-center">
@@ -846,7 +846,7 @@ export default function EmployMintPage() {
           </>
         )}
       </main>
-      <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
+      <footer className={cn("text-center p-4 text-sm text-muted-foreground border-t border-border", viewMode === 'mobile' && 'pb-24')}>
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
     </div>
