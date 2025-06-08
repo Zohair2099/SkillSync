@@ -5,6 +5,10 @@ import { skillBasedJobMatching, SkillBasedJobMatchingInput, SkillBasedJobMatchin
 import { jobFocusedSkillComparison, JobFocusedSkillComparisonInput, JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { assessSoftSkills, SoftSkillAssessmentInput, SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
 import { generateMarketTrends, MarketTrendsInput, MarketTrendsOutput } from '@/ai/flows/market-trends-flow';
+import { 
+  generateInterviewQuestions, GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
+  evaluateInterviewAnswer, EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput
+} from '@/ai/flows/interview-practice-flow';
 
 export async function performSkillBasedJobMatching(input: SkillBasedJobMatchingInput): Promise<SkillBasedJobMatchingOutput> {
   try {
@@ -48,8 +52,6 @@ export async function performJobFocusedSkillComparison(input: JobFocusedSkillCom
 
 export async function performSoftSkillAssessment(input: SoftSkillAssessmentInput): Promise<SoftSkillAssessmentOutput> {
   try {
-    // Validate answers: ensure no answer is empty, though the AI might handle it.
-    // For now, we'll pass them as is.
     const result = await assessSoftSkills(input);
     return result;
   } catch (error) {
@@ -65,5 +67,25 @@ export async function performMarketTrendsAnalysis(input: MarketTrendsInput): Pro
   } catch (error) {
     console.error('Error in performMarketTrendsAnalysis:', error);
     throw new Error('Failed to generate market trends. Please try again.');
+  }
+}
+
+export async function performGenerateInterviewQuestions(input: GenerateInterviewQuestionsInput): Promise<GenerateInterviewQuestionsOutput> {
+  try {
+    const result = await generateInterviewQuestions(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performGenerateInterviewQuestions:', error);
+    throw new Error('Failed to generate interview questions. Please try again.');
+  }
+}
+
+export async function performEvaluateInterviewAnswer(input: EvaluateInterviewAnswerInput): Promise<EvaluateInterviewAnswerOutput> {
+  try {
+    const result = await evaluateInterviewAnswer(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performEvaluateInterviewAnswer:', error);
+    throw new Error('Failed to evaluate interview answer. Please try again.');
   }
 }
