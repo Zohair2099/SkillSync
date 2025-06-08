@@ -6,17 +6,78 @@ import React, { createContext, useState, useContext, ReactNode, useCallback, use
 const LOCAL_STORAGE_THEME_KEY = 'employmint-theme';
 const LOCAL_STORAGE_ZOOM_KEY = 'employmint-zoom';
 const LOCAL_STORAGE_VIEW_MODE_KEY = 'employmint-view-mode';
+const LOCAL_STORAGE_COLOR_PALETTE_KEY = 'employmint-color-palette';
 
 type Theme = 'light' | 'dark';
 type ViewMode = 'desktop' | 'mobile';
 
+export interface ColorPalette {
+  name: string;
+  colors: {
+    primary: string; // HSL string
+    accent: string;  // HSL string
+    secondary: string; // HSL string
+    // Optional: specify foregrounds if default ones don't work
+    // primaryForeground?: string;
+    // accentForeground?: string;
+    // secondaryForeground?: string;
+  };
+}
+
+const availableColorPalettes: ColorPalette[] = [
+  {
+    name: 'Default',
+    colors: { // Values from existing globals.css (light mode)
+      primary: '207 88% 68%', // Soft Blue
+      accent: '125 39% 64%',  // Muted Green
+      secondary: '210 40% 92%', // Light Greyish Blue
+    },
+  },
+  {
+    name: 'EmployMint',
+    colors: {
+      primary: '150 60% 50%',  // Mint Green
+      accent: '207 88% 68%',   // Soft Blue
+      secondary: '170 50% 90%', // Light Teal/Aqua
+    },
+  },
+  {
+    name: 'Oceanic',
+    colors: {
+      primary: '220 70% 55%', // Deep Blue
+      accent: '170 60% 45%',  // Teal
+      secondary: '190 80% 92%', // Light Sky Blue
+    },
+  },
+  {
+    name: 'Sunset',
+    colors: {
+      primary: '30 90% 60%',   // Warm Orange
+      accent: '0 80% 70%',    // Soft Red/Pink
+      secondary: '50 100% 90%', // Pale Yellow
+    },
+  },
+  {
+    name: 'Forest',
+    colors: {
+      primary: '120 60% 35%',  // Deep Green
+      accent: '30 40% 50%',   // Brown
+      secondary: '90 30% 88%',  // Light Moss Green
+    },
+  }
+];
+
+
 interface AppearanceContextType {
-  theme: Theme;
+  theme: Theme; // light | dark for base theme
   toggleTheme: () => void;
   zoomLevel: number;
   setZoomLevel: (level: number) => void;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
+  activeColorPaletteName: string;
+  setActiveColorPalette: (paletteName: string) => void;
+  availableColorPalettes: ColorPalette[];
 }
 
 const AppearanceContext = createContext<AppearanceContextType | undefined>(undefined);
@@ -60,9 +121,21 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>('light');
   const [zoomLevel, setZoomLevelState] = useState<number>(100);
   const [viewMode, setViewModeState] = useState<ViewMode>('desktop');
+  const [activeColorPaletteName, setActiveColorPaletteNameState] = useState<string>(availableColorPalettes[0].name);
 
+  const applyColorPalette = useCallback((paletteName: string) => {
+    const selectedPalette = availableColorPalettes.find(p => p.name === paletteName);
+    if (selectedPalette && typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--primary', selectedPalette.colors.primary);
+      document.documentElement.style.setProperty('--accent', selectedPalette.colors.accent);
+      document.documentElement.style.setProperty('--secondary', selectedPalette.colors.secondary);
+      // Note: If palettes defined specific foregrounds, set them here too.
+      // e.g., document.documentElement.style.setProperty('--primary-foreground', selectedPalette.colors.primaryForeground);
+    }
+  }, []);
+  
   useEffect(() => {
-    // Theme initialization
+    // Theme (light/dark) initialization
     const localTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -91,11 +164,17 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
     const localViewMode = localStorage.getItem(LOCAL_STORAGE_VIEW_MODE_KEY) as ViewMode | null;
     if (localViewMode) {
       setViewModeState(localViewMode);
-      // Note: We don't trigger fullscreen on initial load based on stored preference,
-      // only on explicit user interaction via setViewMode.
     }
 
-  }, []);
+    // Color Palette Initialization
+    const localPaletteName = localStorage.getItem(LOCAL_STORAGE_COLOR_PALETTE_KEY);
+    const initialPaletteName = localPaletteName && availableColorPalettes.find(p => p.name === localPaletteName) 
+                              ? localPaletteName 
+                              : availableColorPalettes[0].name;
+    setActiveColorPaletteNameState(initialPaletteName);
+    applyColorPalette(initialPaletteName);
+
+  }, [applyColorPalette]);
 
   const toggleTheme = useCallback(() => {
     setThemeState(prevTheme => {
@@ -111,7 +190,7 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const setZoomLevel = useCallback((level: number) => {
-    const newZoomLevel = Math.max(50, Math.min(200, level)); // Clamp between 50% and 200%
+    const newZoomLevel = Math.max(50, Math.min(200, level));
     setZoomLevelState(newZoomLevel);
     localStorage.setItem(LOCAL_STORAGE_ZOOM_KEY, newZoomLevel.toString());
   }, []);
@@ -133,14 +212,15 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
       }
   }, []);
 
-  // Listen for fullscreen changes triggered by browser (e.g., Esc key)
+  const setActiveColorPalette = useCallback((paletteName: string) => {
+    setActiveColorPaletteNameState(paletteName);
+    localStorage.setItem(LOCAL_STORAGE_COLOR_PALETTE_KEY, paletteName);
+    applyColorPalette(paletteName);
+  }, [applyColorPalette]);
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!isFullscreen() && viewMode === 'mobile') {
-        // If fullscreen was exited externally while in mobile view mode,
-        // you might want to revert viewMode to 'desktop', or just let it be.
-        // For now, we'll just log it. If desired, we can change viewModeState here.
-        // setViewModeState('desktop'); // Example: revert to desktop if fullscreen exited
         console.log("Fullscreen exited, current view mode is still mobile.");
       }
     };
@@ -160,7 +240,13 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
 
 
   return (
-    <AppearanceContext.Provider value={{ theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode }}>
+    <AppearanceContext.Provider value={{ 
+      theme, toggleTheme, 
+      zoomLevel, setZoomLevel, 
+      viewMode, setViewMode,
+      activeColorPaletteName, setActiveColorPalette,
+      availableColorPalettes
+    }}>
       {children}
     </AppearanceContext.Provider>
   );

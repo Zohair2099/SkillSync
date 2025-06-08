@@ -8,17 +8,20 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Settings, Info, Gift, Monitor, Smartphone } from 'lucide-react';
+import { Settings, Info, Gift, Monitor, Smartphone, Palette as PaletteIcon } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useAppearance } from '@/context/AppearanceContext';
+import type { ColorPalette } from '@/context/AppearanceContext';
 
 interface SettingsPopoverProps {
-  currentTheme: 'light' | 'dark';
+  currentTheme: 'light' | 'dark'; // This refers to the base light/dark mode
   onToggleTheme: () => void;
   currentZoomLevel: number;
   onZoomChange: (level: number) => void;
   currentViewMode: 'desktop' | 'mobile';
   onViewModeChange: (mode: 'desktop' | 'mobile') => void;
+  // activeColorPaletteName and setActiveColorPalette will be taken from context
 }
 
 export function SettingsPopover({ 
@@ -29,6 +32,7 @@ export function SettingsPopover({
   currentViewMode,
   onViewModeChange
 }: SettingsPopoverProps) {
+  const { activeColorPaletteName, setActiveColorPalette, availableColorPalettes } = useAppearance();
 
   const handleZoomChange = (value: number[]) => {
     onZoomChange(value[0]);
@@ -55,7 +59,7 @@ export function SettingsPopover({
               <Label htmlFor="dark-mode" className="flex flex-col gap-1">
                 <span>Dark Mode</span>
                 <span className="text-xs font-normal leading-snug text-muted-foreground">
-                  Toggle between light and dark themes.
+                  Toggle base light/dark themes.
                 </span>
               </Label>
               <Switch
@@ -64,6 +68,28 @@ export function SettingsPopover({
                 onCheckedChange={onToggleTheme}
                 aria-label="Toggle dark mode"
               />
+            </div>
+            <Separator />
+            <div>
+              <Label className="block mb-1 text-sm font-medium">Color Palette</Label>
+               <span className="text-xs font-normal leading-snug text-muted-foreground mb-2 block">
+                  Choose a palette for primary & accent colors.
+                </span>
+              <RadioGroup
+                value={activeColorPaletteName}
+                onValueChange={setActiveColorPalette}
+                className="grid grid-cols-2 gap-2 mt-1"
+              >
+                {availableColorPalettes.map((palette: ColorPalette) => (
+                  <div key={palette.name} className="flex items-center space-x-2">
+                    <RadioGroupItem value={palette.name} id={`palette-${palette.name}`} />
+                    <Label htmlFor={`palette-${palette.name}`} className="text-sm font-normal flex items-center gap-1.5">
+                      <PaletteIcon className="h-4 w-4" style={{ color: `hsl(${palette.colors.primary})` }} /> 
+                      {palette.name}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
             </div>
              <Separator />
             <div>
