@@ -1,14 +1,12 @@
 
-// REMOVED 'use client'; directive from here to make RootLayout a Server Component
-
-import type { Metadata } from 'next'; // Ensure Metadata type is imported
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { JobResultsProvider } from '@/context/JobResultsContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { ResumeDataProvider } from '@/context/ResumeDataContext';
-import { AppearanceProvider } from '@/context/AppearanceContext'; // useAppearance hook is not directly used here
-import MainContentWrapper from '@/components/layout/MainContentWrapper'; // Import the client component
+import { AppearanceProvider } from '@/context/AppearanceContext';
+import MainContentWrapper from '@/components/layout/MainContentWrapper';
 
 export const metadata: Metadata = {
   title: 'EmployMint',
@@ -33,7 +31,7 @@ export default function RootLayout({
           <ProfileProvider>
             <JobResultsProvider>
               <ResumeDataProvider>
-                <MainContentWrapper> {/* Use the imported Client Component */}
+                <MainContentWrapper>
                   {children}
                 </MainContentWrapper>
               </ResumeDataProvider>
