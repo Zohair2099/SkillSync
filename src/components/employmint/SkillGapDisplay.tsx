@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award, Waypoints } from 'lucide-react';
+import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award, Waypoints, LinkIcon } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface SuggestedJobCategory {
@@ -26,6 +26,34 @@ interface SkillGapDisplayProps {
   mentorshipAdvice?: string;
   skillDevelopmentRoadmap?: RoadmapStep[];
 }
+
+const roadmapShLinks = [
+  { title: "Frontend Developer", url: "https://roadmap.sh/frontend" },
+  { title: "Backend Developer", url: "https://roadmap.sh/backend" },
+  { title: "DevOps", url: "https://roadmap.sh/devops" },
+  { title: "Full Stack Developer", url: "https://roadmap.sh/full-stack" },
+  { title: "API Design", url: "https://roadmap.sh/api-design" },
+  { title: "QA / Automation Tester", url: "https://roadmap.sh/qa" },
+  { title: "Android Developer", url: "https://roadmap.sh/android" },
+  { title: "iOS Developer", url: "https://roadmap.sh/ios" },
+  { title: "PostgreSQL DBA", url: "https://roadmap.sh/postgresql-dba" },
+  { title: "Software Architect", url: "https://roadmap.sh/software-architect" },
+  { title: "Technical Writer", url: "https://roadmap.sh/technical-writer" },
+  { title: "Developer Relations (DevRel)", url: "https://roadmap.sh/devrel" },
+  { title: "AI & Data Scientist", url: "https://roadmap.sh/ai-data-scientist" },
+  { title: "AI Engineer", url: "https://roadmap.sh/ai-engineer" },
+  { title: "AI Agents Developer", url: "https://roadmap.sh/ai-agents" },
+  { title: "Data Analyst", url: "https://roadmap.sh/data-analyst" },
+  { title: "MLOps Engineer", url: "https://roadmap.sh/mlops" },
+  { title: "Product Manager", url: "https://roadmap.sh/product-manager" },
+  { title: "Engineering Manager", url: "https://roadmap.sh/engineering-manager" },
+  { title: "Game Developer", url: "https://roadmap.sh/game-developer" },
+  { title: "Server-Side Game Developer", url: "https://roadmap.sh/server-side-game-developer" },
+  { title: "UX Designer", url: "https://roadmap.sh/ux-design" },
+  { title: "Blockchain Developer", url: "https://roadmap.sh/blockchain" },
+  { title: "Cyber Security", url: "https://roadmap.sh/cyber-security" },
+];
+
 
 const SkillGapDisplayComponent = ({ 
   missingSkills, 
@@ -77,23 +105,35 @@ const SkillGapDisplayComponent = ({
           )
         )}
 
-        {/* Roadmap Visualizer (Coming Soon) Section */}
-        <Card className="bg-muted/50 border-dashed border-border">
-          <CardHeader>
-            <CardTitle className="text-md flex items-center">
-              <Waypoints className="mr-2 h-5 w-5 text-primary" />
-              Interactive Roadmap Visualizer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 text-center border-2 border-dashed border-border rounded-lg bg-background">
-              <p className="text-lg font-semibold text-foreground">Coming Soon!</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                A new visual way to explore your skill development path.
+        {/* Roadmap.sh Links Section */}
+        <Accordion type="single" collapsible className="w-full pt-4">
+          <AccordionItem value="roadmap-sh-links">
+            <AccordionTrigger className="text-left">
+              <div className="flex items-center">
+                <LinkIcon className="mr-2 h-5 w-5 text-primary" />
+                Explore External Learning Roadmaps (roadmap.sh)
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <p className="text-xs text-muted-foreground mb-3">
+                These are comprehensive, community-driven roadmaps for various roles and technologies.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                {roadmapShLinks.map(link => (
+                  <a 
+                    key={link.title} 
+                    href={link.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-sm text-primary hover:underline hover:text-primary/80 transition-colors break-words"
+                  >
+                    {link.title}
+                  </a>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
 
         {skillDevelopmentRoadmap && skillDevelopmentRoadmap.length > 0 && (
@@ -216,4 +256,3 @@ const SkillGapDisplayComponent = ({
 }
 
 export const SkillGapDisplay = React.memo(SkillGapDisplayComponent);
-
