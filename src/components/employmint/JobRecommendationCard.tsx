@@ -1,4 +1,5 @@
 
+import React from 'react';
 import Link from 'next/link';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -13,10 +14,10 @@ interface JobRecommendationCardProps {
   jobIndex: number; // Used for linking to the details page
 }
 
-export function JobRecommendationCard({ 
+const JobRecommendationCardComponent = ({
   job,
   jobIndex
-}: JobRecommendationCardProps) {
+}: JobRecommendationCardProps) => {
   
   const {
     jobTitle, 
@@ -89,3 +90,5 @@ export function JobRecommendationCard({
     </Card>
   );
 }
+
+export const JobRecommendationCard = React.memo(JobRecommendationCardComponent);

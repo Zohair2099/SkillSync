@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award } from 'lucide-react';
@@ -26,7 +27,7 @@ interface SkillGapDisplayProps {
   skillDevelopmentRoadmap?: RoadmapStep[];
 }
 
-export function SkillGapDisplay({ 
+const SkillGapDisplayComponent = ({ 
   missingSkills, 
   suggestedHardSkillsResources, 
   skillComparisonSummary, 
@@ -35,7 +36,7 @@ export function SkillGapDisplay({
   suggestedSoftSkills,
   mentorshipAdvice,
   skillDevelopmentRoadmap
-}: SkillGapDisplayProps) {
+}: SkillGapDisplayProps) => {
   const noGapsFound = !missingSkills || missingSkills.length === 0;
   const isGeneralAnalysis = !skillComparisonSummary.toLowerCase().includes("specific job") && (suggestedJobCategories && suggestedJobCategories.length > 0);
 
@@ -195,3 +196,4 @@ export function SkillGapDisplay({
   );
 }
 
+export const SkillGapDisplay = React.memo(SkillGapDisplayComponent);

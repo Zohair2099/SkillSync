@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // useRouter might not be needed for hash logic
+import { usePathname } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -185,7 +185,6 @@ export default function EmployMintPage() {
   const userSkills = profile.skills;
   const { viewMode } = useAppearance();
   const pathname = usePathname();
-  // const router = useRouter(); // May not be needed if hashchange handles activeTab and Link components handle navigation
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -212,41 +211,38 @@ export default function EmployMintPage() {
 
 
   useEffect(() => {
-    const handleHashChange = () => {
+    const updateActiveTabFromHash = () => {
       const hash = window.location.hash.substring(1);
-      if (HOME_PAGE_TAB_IDS.includes(hash)) {
-        setActiveTab(hash);
-      } else if (pathname === '/' && (hash === '' || !HOME_PAGE_TAB_IDS.includes(hash))) {
-        // If on homepage and hash is empty or unknown, default to job-matcher
-        setActiveTab(HOME_PAGE_TAB_IDS[0]);
+      if (pathname === '/') {
+        if (HOME_PAGE_TAB_IDS.includes(hash)) {
+          setActiveTab(hash);
+        } else {
+          setActiveTab(HOME_PAGE_TAB_IDS[0]);
+          // Optionally, update URL to reflect default tab if hash is invalid or empty
+          // window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
+        }
       }
     };
 
-    // Set initial tab based on current hash or default
-    handleHashChange();
+    updateActiveTabFromHash(); // Set initial tab based on current hash or default
 
-    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', updateActiveTabFromHash);
     return () => {
-      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('hashchange', updateActiveTabFromHash);
     };
-  }, [pathname]);
+  }, [pathname]); // Re-run when pathname changes, e.g., navigating away and back
 
   // This effect ensures the URL hash reflects the default tab if no hash is present on initial load of homepage.
   useEffect(() => {
     if (pathname === '/' && window.location.hash === '' && activeTab === HOME_PAGE_TAB_IDS[0]) {
-      // Using window.history.replaceState to avoid a full re-render/navigation cycle
-      // that router.replace might cause in some scenarios.
       window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
     }
   }, [pathname, activeTab]);
 
 
   const handleTabChange = (value: string) => {
-    // This function is mainly for desktop tabs.
-    // Mobile navigation updates hash directly via Link components in MobileBottomNavigation.
     if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      // Update URL hash without causing a full page navigation that re-fetches data
       window.location.hash = value;
     }
   };
