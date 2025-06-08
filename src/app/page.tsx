@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // Corrected import
+import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -185,6 +185,7 @@ export default function EmployMintPage() {
   const userSkills = profile.skills;
   const { viewMode } = useAppearance();
   const pathname = usePathname();
+  // const router = useRouter(); // Keep if other programmatic navigation is needed
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -202,51 +203,54 @@ export default function EmployMintPage() {
   const [isJobMatchingLoading, startJobMatchingTransition] = useTransition();
   const [isSkillComparingLoading, startSkillComparingTransition] = useTransition();
 
-
   const { toast } = useToast();
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
   const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
   
-  // State for active tab, defaults to the first one
   const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
 
 
   useEffect(() => {
-    const handleRouteChange = () => {
-      if (pathname === '/') {
-        const hash = window.location.hash.substring(1);
-        if (HOME_PAGE_TAB_IDS.includes(hash)) {
-          setActiveTab(hash);
+    // This function determines the active tab based on the current URL hash.
+    // It's called on mount, and by event listeners for hash/popstate changes.
+    const syncActiveTabWithUrl = () => {
+      if (pathname === '/') { // Only manage tabs if on the homepage
+        let currentHash = window.location.hash.substring(1);
+        
+        if (HOME_PAGE_TAB_IDS.includes(currentHash)) {
+          setActiveTab(currentHash);
         } else {
-          setActiveTab(HOME_PAGE_TAB_IDS[0]); // Default to first tab on homepage
-          // Ensure URL hash is set on initial load if empty, without full navigation
-          if (window.location.hash === '' || !HOME_PAGE_TAB_IDS.includes(window.location.hash.substring(1))) {
-            window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
+          // Default to the first tab if hash is invalid or missing
+          setActiveTab(HOME_PAGE_TAB_IDS[0]);
+          // Update URL to reflect default tab for consistency, without adding to history
+          if (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
+             window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
           }
         }
       }
     };
 
-    // Handle initial load and direct navigation to a hash
-    handleRouteChange();
+    // Initial sync when component mounts or pathname changes to '/'
+    syncActiveTabWithUrl();
 
-    // Listen for hash changes (e.g., from MobileBottomNavigation) and browser back/forward
-    window.addEventListener('hashchange', handleRouteChange);
-    window.addEventListener('popstate', handleRouteChange);
+    // Add event listeners for hash changes and browser back/forward navigation
+    window.addEventListener('hashchange', syncActiveTabWithUrl);
+    window.addEventListener('popstate', syncActiveTabWithUrl);
 
+    // Cleanup function to remove event listeners when the component unmounts
+    // or before the effect re-runs due to pathname change.
     return () => {
-      window.removeEventListener('hashchange', handleRouteChange);
-      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', syncActiveTabWithUrl);
+      window.removeEventListener('popstate', syncActiveTabWithUrl);
     };
-  }, [pathname]); // Key dependency: re-evaluate when the path changes.
+  }, [pathname]); // Re-run this effect if the pathname changes
 
 
   const handleTabChange = (value: string) => {
-    // This function is for desktop tabs, mobile tabs directly change URL hash
     if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      window.location.hash = value; // Also update hash for desktop consistency
+      window.location.hash = value; 
     }
   };
 
@@ -366,7 +370,7 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" // Padding for the fixed mobile bottom navigation
+        viewMode === 'mobile' && "pb-24" 
       )}>
         {viewMode === 'desktop' && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -851,3 +855,5 @@ export default function EmployMintPage() {
     </div>
   );
 }
+
+    
