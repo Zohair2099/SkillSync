@@ -18,6 +18,7 @@ const SkillSchema = z.object({
   experience: z.string().optional().describe('Years of experience with the skill (e.g., "2", "5+", "0-1"). Can be omitted.'),
 });
 
+// This schema object is not exported
 const JobFocusedSkillComparisonInputSchema = z.object({
   jobDescription: z
     .string()
@@ -38,6 +39,7 @@ const RoadmapStepSchema = z.object({
   difficulty: z.string().optional().describe("Estimated difficulty (e.g., 'Beginner', 'Intermediate', 'Advanced', or 'Foundational').")
 });
 
+// This schema object is not exported
 const JobFocusedSkillComparisonOutputSchema = z.object({
   missingSkills: z
     .array(z.string())

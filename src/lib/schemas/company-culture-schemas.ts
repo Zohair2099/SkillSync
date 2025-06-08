@@ -1,6 +1,8 @@
 
 import {z} from 'genkit';
 
+// This schema is used by the client-side form in company-culture/page.tsx
+// and by the server-side AI flow.
 export const CompanyCulturePreferencesInputSchema = z.object({
   workLifeBalance: z.enum(["flexible", "moderate", "structured"]).describe("User's preference for work-life balance (e.g., flexible hours, standard 9-5, results-oriented)."),
   teamEnvironment: z.enum(["collaborative", "independent", "mixed"]).describe("Preferred team environment (e.g., highly collaborative, independent work focus, social/team events)."),
@@ -13,3 +15,4 @@ export const CompanyCulturePreferencesInputSchema = z.object({
   socialImpactFocus: z.boolean().describe("Preference for companies with a strong social impact mission."),
   diversityAndInclusion: z.boolean().describe("Importance of strong diversity and inclusion initiatives and a welcoming environment for all."),
 });
+export type CompanyCulturePreferencesInput = z.infer<typeof CompanyCulturePreferencesInputSchema>;

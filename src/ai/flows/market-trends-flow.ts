@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+// This schema object is not exported
 const MarketTrendsInputSchema = z.object({
   areaOfInterest: z
     .string()
@@ -38,6 +39,7 @@ const IndustryInsightSchema = z.object({
   growthOutlook: z.string().optional().describe("Brief comment on the industry's growth outlook (e.g., 'Strong Growth', 'Stable', 'Transforming').")
 });
 
+// This schema object is not exported
 const MarketTrendsOutputSchema = z.object({
   areaAnalyzed: z.string().describe("A confirmation of the area/focus of the trend analysis (e.g., 'Global Job Market', 'Technology Sector in Europe')."),
   dataFreshness: z.string().describe("A statement about the AI's knowledge cutoff or perceived recency of data (e.g., 'Based on general knowledge up to early 2024. For precise real-time data, consult specialized market reports.')."),

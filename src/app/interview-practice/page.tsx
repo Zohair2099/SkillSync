@@ -14,7 +14,13 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Mic, Brain, Sparkles, ThumbsUp, AlertTriangle, Lightbulb, Send, RotateCcw, CheckCircle } from 'lucide-react';
 import { performGenerateInterviewQuestions, performEvaluateInterviewAnswer } from '@/app/actions';
-import type { GenerateInterviewQuestionsOutput, EvaluateInterviewAnswerOutput, GenerateInterviewQuestionsInput, EvaluateInterviewAnswerInput } from '@/app/actions'; // Changed import
+// Import types from actions.ts
+import type { 
+  GenerateInterviewQuestionsOutput, 
+  EvaluateInterviewAnswerOutput, 
+  GenerateInterviewQuestionsInput, 
+  EvaluateInterviewAnswerInput 
+} from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 
@@ -303,5 +309,3 @@ export default function InterviewPracticePage() {
   }
   return null; 
 }
-
-    

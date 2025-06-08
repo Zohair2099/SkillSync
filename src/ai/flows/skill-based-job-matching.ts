@@ -18,6 +18,7 @@ const SkillSchema = z.object({
   experience: z.string().optional().describe('Years of experience with the skill (e.g., "2", "5+", "0-1"). Can be omitted.'),
 });
 
+// This schema object is not exported
 const SkillBasedJobMatchingInputSchema = z.object({
   userSkills: z.array(SkillSchema).describe('A list of skills possessed by the user, optionally with years of experience.'),
   jobTitle: z.string().describe('The desired job title or type of job the user is looking for.'),
@@ -51,6 +52,7 @@ const JobMatchSchema = z.object({
   rationale: z.string().describe('A concise explanation (1-2 sentences) of why this job is a good match for the user based on their skills and preferences.'),
 });
 
+// This schema object is not exported
 const SkillBasedJobMatchingOutputSchema = z.array(JobMatchSchema).describe('An array of 3-5 generated job postings that match the user criteria and preferences.');
 
 export type SkillBasedJobMatchingOutput = z.infer<typeof SkillBasedJobMatchingOutputSchema>;
@@ -119,4 +121,3 @@ const skillBasedJobMatchingFlow = ai.defineFlow(
     return output || [];
   }
 );
-

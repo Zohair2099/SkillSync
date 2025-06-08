@@ -9,9 +9,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { CompanyCulturePreferencesInputSchema } from '@/lib/schemas/company-culture-schemas'; // Import from shared location
+// Import the schema from the shared location
+import { CompanyCulturePreferencesInputSchema, type CompanyCulturePreferencesInput } from '@/lib/schemas/company-culture-schemas';
 
-export type CompanyCulturePreferencesInput = z.infer<typeof CompanyCulturePreferencesInputSchema>;
+// Re-export the type if needed by actions.ts or other server components
+export type { CompanyCulturePreferencesInput };
 
 const MockCompanyProfileSchema = z.object({
     companyName: z.string().describe("An invented, plausible name for a company matching the cultural preferences (e.g., 'Innovatech Solutions', 'GreenLeaf Organics', 'Momentum Dynamics')."),
@@ -23,6 +25,7 @@ const MockCompanyProfileSchema = z.object({
     alignmentRationale: z.string().describe("A concise (1-2 sentences) explanation of WHY this company's generated culture is a strong match for the user's stated preferences, referencing specific inputs.")
 });
 
+// This schema object is not exported
 const CompanyCultureMatchOutputSchema = z.array(MockCompanyProfileSchema)
     .min(2)
     .max(3)
@@ -38,7 +41,7 @@ export async function matchCompanyCulture(input: CompanyCulturePreferencesInput)
 
 const prompt = ai.definePrompt({
   name: 'companyCultureMatchPrompt',
-  input: {schema: CompanyCulturePreferencesInputSchema},
+  input: {schema: CompanyCulturePreferencesInputSchema}, // Uses the imported schema
   output: {schema: CompanyCultureMatchOutputSchema},
   prompt: `You are an expert career advisor specializing in company culture and work environment fit.
 A user has provided their preferences for various cultural aspects. Your task is to generate 2-3 distinct, mock company profiles that would be an excellent cultural match for them.
@@ -79,7 +82,7 @@ Strictly adhere to the output schema. Create 2 to 3 such profiles.
 const matchCompanyCultureFlow = ai.defineFlow(
   {
     name: 'matchCompanyCultureFlow',
-    inputSchema: CompanyCulturePreferencesInputSchema,
+    inputSchema: CompanyCulturePreferencesInputSchema, // Uses the imported schema
     outputSchema: CompanyCultureMatchOutputSchema,
   },
   async (input) => {

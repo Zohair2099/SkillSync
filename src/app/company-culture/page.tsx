@@ -15,8 +15,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Building, Users, Lightbulb, Sparkles, ThumbsDown, Search, CheckCircle } from 'lucide-react';
 import { performCompanyCultureMatching } from '@/app/actions';
-import type { CompanyCulturePreferencesInput, CompanyCultureMatchOutput } from '@/app/actions'; // Changed import
-import { CompanyCulturePreferencesInputSchema } from '@/lib/schemas/company-culture-schemas'; 
+// Import the schema and type from the new shared location
+import { CompanyCulturePreferencesInputSchema, type CompanyCulturePreferencesInput } from '@/lib/schemas/company-culture-schemas';
+// Import the output type from actions.ts (or flows if it was re-exported from there, but actions.ts is safer for client)
+import type { CompanyCultureMatchOutput } from '@/app/actions'; // Assuming actions.ts re-exports this type
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -28,7 +30,7 @@ export default function CompanyCulturePage() {
   const [matchResults, setMatchResults] = useState<CompanyCultureMatchOutput | null>(null);
 
   const form = useForm<CompanyCulturePreferencesInput>({
-    resolver: zodResolver(CompanyCulturePreferencesInputSchema),
+    resolver: zodResolver(CompanyCulturePreferencesInputSchema), // Use the imported schema
     defaultValues: {
       workLifeBalance: "moderate",
       teamEnvironment: "mixed",
@@ -335,5 +337,3 @@ export default function CompanyCulturePage() {
     </div>
   );
 }
-
-    

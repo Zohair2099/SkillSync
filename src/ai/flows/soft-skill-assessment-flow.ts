@@ -16,6 +16,7 @@ const QuestionAnswerSchema = z.object({
   answer: z.string().describe('The user\'s answer to the question.'),
 });
 
+// This schema object is not exported
 const SoftSkillAssessmentInputSchema = z.object({
   answers: z.array(QuestionAnswerSchema).describe('A list of questions and the user\'s answers.'),
 });
@@ -29,6 +30,7 @@ const SpecificSkillAssessmentSchema = z.object({
   developmentTips: z.array(z.string()).describe('A list of 1-2 actionable tips or resources for developing this soft skill.'),
 });
 
+// This schema object is not exported
 const SoftSkillAssessmentOutputSchema = z.object({
   overallSummary: z.string().describe('A concise (3-5 sentences) overall summary of the user\'s soft skill profile based on their answers. Highlight key themes and general takeaways.'),
   skillAssessments: z.array(SpecificSkillAssessmentSchema).describe('An array of assessments for various key soft skills. Aim to cover at least 5-7 distinct soft skills evident from the answers (e.g., Communication, Problem-Solving, Teamwork, Leadership, Adaptability, Time Management, Creativity, Emotional Intelligence).'),
@@ -87,4 +89,3 @@ const softSkillAssessmentFlow = ai.defineFlow(
     return output!;
   }
 );
-

@@ -1,14 +1,30 @@
+
 'use server';
 
-import { skillBasedJobMatching, SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
-import { jobFocusedSkillComparison, JobFocusedSkillComparisonInput, JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
-import { assessSoftSkills, SoftSkillAssessmentInput, SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
-import { generateMarketTrends, MarketTrendsInput, MarketTrendsOutput } from '@/ai/flows/market-trends-flow';
+import { skillBasedJobMatching, type SkillBasedJobMatchingInput, type SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
+import { jobFocusedSkillComparison, type JobFocusedSkillComparisonInput, type JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
+import { assessSoftSkills, type SoftSkillAssessmentInput, type SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
+import { generateMarketTrends, type MarketTrendsInput, type MarketTrendsOutput } from '@/ai/flows/market-trends-flow';
 import { 
-  generateInterviewQuestions, GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
-  evaluateInterviewAnswer, EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput
+  generateInterviewQuestions, type GenerateInterviewQuestionsInput, type GenerateInterviewQuestionsOutput,
+  evaluateInterviewAnswer, type EvaluateInterviewAnswerInput, type EvaluateInterviewAnswerOutput
 } from '@/ai/flows/interview-practice-flow';
-import { matchCompanyCulture, CompanyCulturePreferencesInput, CompanyCultureMatchOutput } from '@/ai/flows/company-culture-flow';
+// Import the type from the shared schema location or the flow if it re-exports the type.
+// For consistency, if CompanyCulturePreferencesInput is also used by client form, it's better to have actions.ts be the single source of truth for client-side type imports for AI flows.
+// Let's assume CompanyCulturePreferencesInput type can be inferred or imported correctly by the flow.
+// The CompanyCultureMatchOutput is an output type and can be re-exported here.
+import { matchCompanyCulture, type CompanyCultureMatchOutput, type CompanyCulturePreferencesInput } from '@/ai/flows/company-culture-flow';
+
+// Re-export types for client-side usage
+export type { 
+  SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput,
+  JobFocusedSkillComparisonInput, JobFocusedSkillComparisonOutput,
+  SoftSkillAssessmentInput, SoftSkillAssessmentOutput,
+  MarketTrendsInput, MarketTrendsOutput,
+  GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
+  EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput,
+  CompanyCulturePreferencesInput, CompanyCultureMatchOutput 
+};
 
 
 export async function performSkillBasedJobMatching(input: SkillBasedJobMatchingInput): Promise<SkillBasedJobMatchingOutput> {

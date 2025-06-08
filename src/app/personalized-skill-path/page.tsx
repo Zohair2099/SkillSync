@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Brain, Download } from 'lucide-react';
 import { performJobFocusedSkillComparison } from '@/app/actions';
-import type { JobFocusedSkillComparisonOutput, JobFocusedSkillComparisonInput } from '@/app/actions'; // Changed import
+// Import types from actions.ts
+import type { JobFocusedSkillComparisonOutput, JobFocusedSkillComparisonInput } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; 
@@ -145,5 +146,3 @@ export default function PersonalizedSkillPathPage() {
     </div>
   );
 }
-
-    

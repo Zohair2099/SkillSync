@@ -11,7 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ArrowLeft, MessageSquare, Lightbulb, CheckCircle, AlertTriangle, TrendingUp, ArrowRight, ArrowLeftCircle, Brain } from 'lucide-react';
 import { performSoftSkillAssessment } from '@/app/actions';
-import type { SoftSkillAssessmentOutput, SoftSkillAssessmentInput } from '@/app/actions'; // Changed import
+// Import types from actions.ts
+import type { SoftSkillAssessmentOutput, SoftSkillAssessmentInput } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; 
 
@@ -247,5 +248,3 @@ export default function SoftSkillAssessmentPage() {
     </div>
   );
 }
-
-    
