@@ -17,8 +17,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
-import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
-import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
+import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
+import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
@@ -600,3 +600,4 @@ export default function EmployMintPage() {
     </div>
   );
 }
+
