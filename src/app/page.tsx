@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation'; // Added useSearchParams and useRouter
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
 import { SkillGapDisplay } from '@/components/employmint/SkillGapDisplay';
@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
-import { useAppearance } from '@/context/AppearanceContext'; 
-import { cn } from '@/lib/utils'; 
+import { useAppearance } from '@/context/AppearanceContext';
+import { cn } from '@/lib/utils';
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -109,7 +109,7 @@ const employMintPlusFeatures = [
     icon: MessageSquare,
     title: "Soft Skill Assessment",
     description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement.",
-    href: "/soft-skill-assessment", 
+    href: "/soft-skill-assessment",
     actionText: "Assess Skills",
   },
   {
@@ -178,15 +178,14 @@ const employMintPlusFeatures = [
   }
 ];
 
-// Define the tab values that correspond to URL hashes
 const HOME_PAGE_TAB_VALUES = ["job-matcher", "job-analyzer", "employmint-plus"];
 
 export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
-  const { viewMode } = useAppearance(); 
+  const { viewMode } = useAppearance();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // const searchParams = useSearchParams(); // searchParams might not be needed if hashchange handles activeTab
   const router = useRouter();
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
@@ -212,20 +211,41 @@ export default function EmployMintPage() {
   const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
   const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_VALUES[0]);
 
-  useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (HOME_PAGE_TAB_VALUES.includes(hash)) {
-      setActiveTab(hash);
-    } else if (pathname === '/') { // Default to first tab if on homepage and no valid hash
-      setActiveTab(HOME_PAGE_TAB_VALUES[0]);
-    }
-    // If on a subpage, activeTab remains as is or could be cleared.
-    // Current logic: on homepage, hash determines tab.
-  }, [pathname, searchParams]); // Re-check on pathname and searchParams change
+ useEffect(() => {
+    const updateActiveTabFromHash = () => {
+      const hash = window.location.hash.substring(1);
+      if (HOME_PAGE_TAB_VALUES.includes(hash)) {
+        setActiveTab(hash);
+      } else if (pathname === '/' && !hash) { 
+        // Default to first tab if on homepage and no hash
+        // or if hash is not one of the known tab values (e.g. #job-matcher)
+        // We need to ensure a valid hash for "job-matcher" is also handled
+        if(hash === "job-matcher" || !hash) {
+            setActiveTab(HOME_PAGE_TAB_VALUES[0]); // "job-matcher"
+            if (!hash) { // If no hash, explicitly set it for "job-matcher"
+                router.replace('/#job-matcher', { scroll: false });
+            }
+        } else {
+             setActiveTab(HOME_PAGE_TAB_VALUES[0]); // Default to job-matcher if unknown hash on homepage
+        }
+      }
+    };
+
+    updateActiveTabFromHash(); // Initial check
+
+    window.addEventListener('hashchange', updateActiveTabFromHash, false);
+
+    return () => {
+      window.removeEventListener('hashchange', updateActiveTabFromHash, false);
+    };
+  }, [pathname, router]); // Dependency on pathname and router
+
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    if (HOME_PAGE_TAB_VALUES.includes(value)) {
+    // This function is mainly for desktop tabs.
+    // Mobile navigation updates hash directly via Link components.
+    if (viewMode === 'desktop' && HOME_PAGE_TAB_VALUES.includes(value)) {
+      setActiveTab(value);
       router.replace(`/#${value}`, { scroll: false });
     }
   };
@@ -233,9 +253,9 @@ export default function EmployMintPage() {
 
   useEffect(() => {
     if (viewMode === 'mobile') {
-      setEmployMintPlusLayout('list'); 
+      setEmployMintPlusLayout('list');
     } else {
-      setEmployMintPlusLayout('grid'); 
+      setEmployMintPlusLayout('grid');
     }
   }, [viewMode]);
 
@@ -347,13 +367,13 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" 
+        viewMode === 'mobile' && "pb-24"
       )}>
         {viewMode === 'desktop' && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className={cn(
               "text-muted-foreground",
-              "grid w-full grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
+              "grid w-full grid-cols-3 bg-muted p-1 rounded-lg mb-6"
             )}>
               {desktopTabDefinitions.map(tab => (
                 <TabsTrigger
@@ -361,7 +381,7 @@ export default function EmployMintPage() {
                   value={tab.value}
                   className={cn(
                     "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                    "rounded-sm" 
+                    "rounded-sm"
                   )}
                 >
                   <tab.icon className="mr-2 h-4 w-4 inline-block"/>{tab.title}
@@ -631,8 +651,8 @@ export default function EmployMintPage() {
               <CardContent className="space-y-6">
                 <div className='grid md:grid-cols-2 gap-6'>
                   {employMintPlusFeatures.map((feature) => (
-                    <Card 
-                      key={feature.id} 
+                    <Card
+                      key={feature.id}
                       className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col"
                     >
                       <CardHeader>
@@ -678,7 +698,7 @@ export default function EmployMintPage() {
                   ) : (
                     <>
                       <form onSubmit={handleJobMatchSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 gap-4"> 
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <Label htmlFor="jobMatchTitleMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Title</Label>
                             <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
@@ -721,7 +741,7 @@ export default function EmployMintPage() {
                           <Label htmlFor="jobMatchIdealDescriptionMobile" className="block text-sm font-medium text-foreground mb-1">Ideal Job Description</Label>
                           <Textarea id="jobMatchIdealDescriptionMobile" value={jobMatchIdealDescription} onChange={(e) => setJobMatchIdealDescription(e.target.value)} placeholder="Describe your ideal role..." rows={4} required className="bg-card"/>
                         </div>
-                        <div className="grid grid-cols-1 gap-4"> 
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Opt.)</Label>
                             <div className="flex items-center gap-2">
@@ -806,7 +826,7 @@ export default function EmployMintPage() {
                  <CardDescription>Unlock advanced tools for your career journey.</CardDescription>
                </CardHeader>
                <CardContent className="space-y-6">
-                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}> 
+                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}>
                    {employMintPlusFeatures.map((feature) => (
                      <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
                        <CardHeader><CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle></CardHeader>

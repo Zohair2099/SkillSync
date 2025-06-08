@@ -1,16 +1,16 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, Brain, Plus, UserCircle } from 'lucide-react'; 
+import { Briefcase, Brain, Plus, UserCircle } from 'lucide-react';
 import { useAppearance } from '@/context/AppearanceContext';
 import { cn } from '@/lib/utils';
 
 const tabDefinitions = [
-  { href: "/", value: "job-matcher", title: "Matcher", icon: Briefcase },
-  { href: "/#job-analyzer", internalTabValue:"job-analyzer", title: "Analyzer", icon: Brain }, 
+  { href: "/", title: "Matcher", icon: Briefcase, baseTabValue: "job-matcher" },
+  { href: "/#job-analyzer", internalTabValue:"job-analyzer", title: "Analyzer", icon: Brain },
   { href: "/#employmint-plus", internalTabValue:"employmint-plus", title: "EmployMint+", icon: Plus },
   { href: "/profile", title: "Profile", icon: UserCircle },
 ];
@@ -18,29 +18,47 @@ const tabDefinitions = [
 export function MobileBottomNavigation() {
   const { viewMode } = useAppearance();
   const pathname = usePathname();
-  const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : '';
+  const [currentHash, setCurrentHash] = useState(
+    typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
+  );
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentHash(window.location.hash.substring(1));
+    };
+
+    // Set initial hash correctly
+    setCurrentHash(window.location.hash.substring(1));
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
 
   if (viewMode !== 'mobile') {
     return null;
   }
 
-  const isActive = (tabHref: string, internalTabValue?: string) => {
+  const isActive = (tabHref: string, internalTabValue?: string, baseTabValue?: string) => {
     if (tabHref === "/profile") return pathname === "/profile";
-    
+
     if (pathname === "/") {
-      // If there's a hash, it determines the active tab
-      if (hash && internalTabValue) {
-        return hash === internalTabValue;
+      if (currentHash && internalTabValue) {
+        return currentHash === internalTabValue;
       }
-      // If no hash, and it's the base "Matcher" tab, it's active
-      if (!hash && tabHref === "/") {
+      if (baseTabValue) { // For Matcher tab
+        return currentHash === baseTabValue || (!currentHash && tabHref === "/");
+      }
+      // Fallback if no internalTabValue and no baseTabValue (shouldn't happen with current defs)
+      if (!currentHash && tabHref === "/") {
         return true;
       }
     }
     return false;
   };
-  
+
 
   return (
     <>
@@ -50,16 +68,17 @@ export function MobileBottomNavigation() {
         )}
       >
         {tabDefinitions.map((tab) => {
-            const active = isActive(tab.href, tab.internalTabValue);
-            const linkHref = tab.internalTabValue ? `/#${tab.internalTabValue}` : tab.href;
+            const active = isActive(tab.href, tab.internalTabValue, tab.baseTabValue);
+            const linkHref = tab.internalTabValue ? `/#${tab.internalTabValue}` : (tab.baseTabValue && tab.href === "/" ? `/#${tab.baseTabValue}`: tab.href) ;
+
 
             return (
               <Link
                 href={linkHref}
                 key={tab.title}
                 className={cn(
-                  "mobile-nav-item flex flex-col items-center justify-center h-full text-xs p-1 text-muted-foreground transition-all duration-150 ease-in-out", 
-                   active ? "mobile-tab-active rounded-lg" : "rounded-none" 
+                  "mobile-nav-item flex flex-col items-center justify-center h-full text-xs p-1 text-muted-foreground transition-all duration-150 ease-in-out",
+                   active ? "mobile-tab-active rounded-lg" : "rounded-none"
                 )}
               >
                 <span className={cn("text-xs order-first mb-0.5 font-medium", active && "text-primary-foreground")}>
