@@ -9,11 +9,7 @@ import {
   generateInterviewQuestions, type GenerateInterviewQuestionsInput, type GenerateInterviewQuestionsOutput,
   evaluateInterviewAnswer, type EvaluateInterviewAnswerInput, type EvaluateInterviewAnswerOutput
 } from '@/ai/flows/interview-practice-flow';
-// Import the type from the shared schema location or the flow if it re-exports the type.
-// For consistency, if CompanyCulturePreferencesInput is also used by client form, it's better to have actions.ts be the single source of truth for client-side type imports for AI flows.
-// Let's assume CompanyCulturePreferencesInput type can be inferred or imported correctly by the flow.
-// The CompanyCultureMatchOutput is an output type and can be re-exported here.
-import { matchCompanyCulture, type CompanyCultureMatchOutput, type CompanyCulturePreferencesInput } from '@/ai/flows/company-culture-flow';
+// Removed imports for CompanyCulturePreferencesInput and CompanyCultureMatchOutput
 
 // Re-export types for client-side usage
 export type { 
@@ -22,8 +18,8 @@ export type {
   SoftSkillAssessmentInput, SoftSkillAssessmentOutput,
   MarketTrendsInput, MarketTrendsOutput,
   GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
-  EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput,
-  CompanyCulturePreferencesInput, CompanyCultureMatchOutput 
+  EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput
+  // Removed CompanyCulturePreferencesInput, CompanyCultureMatchOutput from re-export
 };
 
 
@@ -107,12 +103,4 @@ export async function performEvaluateInterviewAnswer(input: EvaluateInterviewAns
   }
 }
 
-export async function performCompanyCultureMatching(input: CompanyCulturePreferencesInput): Promise<CompanyCultureMatchOutput> {
-  try {
-    const result = await matchCompanyCulture(input);
-    return result;
-  } catch (error) {
-    console.error('Error in performCompanyCultureMatching:', error);
-    throw new Error('Failed to match company cultures. Please try again.');
-  }
-}
+// Removed performCompanyCultureMatching function
