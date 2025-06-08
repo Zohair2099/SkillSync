@@ -337,18 +337,15 @@ export default function EmployMintPage() {
                 className={cn(
                   "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
                   viewMode === 'mobile'
-                      ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary data-[state=active]:text-primary-foreground" 
-                      : "rounded-sm data-[state=active]:text-primary-foreground" 
+                      ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary" 
+                      : "rounded-sm" 
                 )}
                 style={viewMode === 'mobile' && { boxShadow: 'var(--tab-active-shadow, none)' } as React.CSSProperties}
               >
                 {viewMode === 'mobile' ? (
                     <>
-                        <span className={cn(
-                          "text-xs order-first mb-1 font-medium",
-                          "data-[state=active]:text-primary-foreground" // Ensure active text color
-                        )}>{tab.title.split(' ')[0]}</span> 
-                        <tab.icon className={cn("h-5 w-5", "data-[state=active]:text-primary-foreground")} />
+                        <tab.icon className={cn("h-5 w-5")} />
+                        <span className={cn("text-xs order-first mb-1 font-medium")}>{tab.title.split(' ')[0]}</span> 
                     </>
                 ) : (
                     <>
@@ -687,10 +684,7 @@ export default function EmployMintPage() {
         [data-state="active"][style*="--tab-active-shadow"] {
           box-shadow: inset 0 3px 0 0 hsl(var(--primary)) !important; /* Increased thickness */
         }
-        [data-state="active"] span, [data-state="active"] svg {
-            color: hsl(var(--primary-foreground)) !important; /* Ensures icon and text are primary-foreground color */
-        }
-        /* Apply primary color to text and icon of active mobile tab specifically if needed */
+        /* Apply primary-foreground color to text and icon of active mobile tab specifically */
         .fixed .data-\\[state\\=active\\] span, .fixed .data-\\[state\\=active\\] svg {
             color: hsl(var(--primary-foreground)) !important;
         }

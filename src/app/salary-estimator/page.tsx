@@ -22,9 +22,12 @@ import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 
 // Client-side Zod schema for form validation
 const formSchema = z.object({
-  jobTitle: z.string().min(3, "Job title must be at least 3 characters."),
-  yearsExperience: z.coerce.number().min(0, "Years of experience cannot be negative.").max(50, "Years of experience seems too high."),
-  skills: z.string().min(3, "Please list at least one skill.").transform(value => value.split(',').map(skill => skill.trim()).filter(skill => skill)),
+  jobTitle: z.string().min(3, "Job title must be at least 3 characters long."),
+  yearsExperience: z.coerce.number().min(0, "Years of experience cannot be negative.").max(50, "Years of experience seems too high (max 50)."),
+  skills: z.string()
+    .min(1, "Please enter at least one skill.") // Check raw string not empty
+    .transform(value => value.split(',').map(skill => skill.trim()).filter(skill => skill))
+    .pipe(z.array(z.string()).min(1, "Please provide at least one valid skill. Ensure skills are separated by commas and are not just whitespace.")),
   location: z.string().optional(),
   companySize: z.enum(["startup", "mid-size", "large-enterprise", "any"]).optional(),
   industry: z.string().optional(),
@@ -50,21 +53,25 @@ export default function SalaryEstimatorPage() {
   });
 
   const onSubmit = (values: SalaryFormValues) => {
+    // The Zod schema with .pipe now handles the empty array validation for skills.
+    // The react-hook-form will prevent submission if this validation fails.
+    // The manual check below could be removed or simplified if relying purely on Zod.
+    // For now, keeping it as an additional safeguard or for specific toast message.
+    if (values.skills.length === 0) {
+        form.setError("skills", { type: "manual", message: "Please provide at least one valid skill after filtering." });
+         toast({
+            title: "Invalid Input",
+            description: "Please ensure you have entered at least one valid skill.",
+            variant: "destructive",
+         });
+        return;
+    }
+
     setEstimationResult(null);
     startTransition(async () => {
       try {
-        // Ensure skills array is not empty after filtering
-        if (values.skills.length === 0 && form.getValues("skills")) {
-             form.setError("skills", { type: "manual", message: "Please provide at least one valid skill after trimming." });
-             toast({
-                title: "Invalid Input",
-                description: "Please ensure you have entered at least one skill.",
-                variant: "destructive",
-             });
-            return;
-        }
         const inputForApi: SalaryEstimatorInput = {
-          ...values,
+          ...values, // `values.skills` is already an array here due to the transform in Zod schema
           companySize: values.companySize === "any" ? undefined : values.companySize,
         };
         const result = await performSalaryEstimation(inputForApi);
