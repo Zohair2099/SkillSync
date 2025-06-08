@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
@@ -23,8 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
-import { useAppearance } from '@/context/AppearanceContext'; // Import useAppearance
-import { cn } from '@/lib/utils'; // Import cn for conditional classes
+import { useAppearance } from '@/context/AppearanceContext'; 
+import { cn } from '@/lib/utils'; 
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -157,7 +157,7 @@ const employMintPlusFeatures = [
     title: "Company Culture & Work Environment Matching",
     description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings.",
     href: "/company-culture",
-    actionText: "Find Matches",
+    actionText: "Find Matches (Coming Soon)",
   },
   {
     id: "notifications",
@@ -165,7 +165,7 @@ const employMintPlusFeatures = [
     title: "Smart Notifications & Reminders",
     description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile.",
     href: "/notifications",
-    actionText: "Set Up Alerts",
+    actionText: "Set Up Alerts (Coming Soon)",
   },
   {
     id: "app-tracker",
@@ -173,7 +173,7 @@ const employMintPlusFeatures = [
     title: "Job Application Tracker",
     description: "Track your job applications, interviews, and follow-up actions in one organized place.",
     href: "/application-tracker",
-    actionText: "Track Applications",
+    actionText: "Track Applications (Coming Soon)",
   }
 ];
 
@@ -181,7 +181,7 @@ const employMintPlusFeatures = [
 export default function EmployMintPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
-  const { viewMode } = useAppearance(); // Get viewMode
+  const { viewMode } = useAppearance(); 
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -202,6 +202,16 @@ export default function EmployMintPage() {
 
   const { toast } = useToast();
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
+
+  const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
+
+  useEffect(() => {
+    if (viewMode === 'mobile') {
+      setEmployMintPlusLayout('list'); 
+    } else {
+      setEmployMintPlusLayout('grid'); 
+    }
+  }, [viewMode]);
 
 
   const handleJobMatchSubmit = async (event: React.FormEvent) => {
@@ -311,15 +321,14 @@ export default function EmployMintPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-20" // Add padding for bottom tabs
+        viewMode === 'mobile' && "pb-20" 
       )}>
         <Tabs defaultValue="job-matcher" className="w-full">
           <TabsList className={cn(
-             // Common classes
              "text-muted-foreground",
             viewMode === 'mobile'
-                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-3 h-16 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" // Mobile: fixed bottom bar
-                : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" // Desktop: regular tabs list
+                ? "fixed bottom-0 left-0 right-0 z-10 grid grid-cols-3 h-16 border-t bg-background shadow-[-2px_0px_10px_rgba(0,0,0,0.1)] dark:shadow-[-2px_0px_10px_rgba(255,255,255,0.05)] p-0 rounded-none" 
+                : "grid w-full grid-cols-2 md:grid-cols-3 bg-muted p-1 rounded-lg mb-6" 
           )}>
             {tabDefinitions.map(tab => (
               <TabsTrigger
@@ -328,8 +337,8 @@ export default function EmployMintPage() {
                 className={cn(
                     "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
                     viewMode === 'mobile'
-                        ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary" // Mobile specific trigger style
-                        : "rounded-sm" // Desktop specific trigger style
+                        ? "flex flex-col items-center justify-center h-full text-xs p-1 rounded-none data-[state=active]:shadow-inner_top_primary" 
+                        : "rounded-sm" 
                 )}
                 style={viewMode === 'mobile' && { boxShadow: 'var(--tab-active-shadow, none)' } as React.CSSProperties}
 
@@ -598,17 +607,51 @@ export default function EmployMintPage() {
           <TabsContent value="employmint-plus">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-2xl text-foreground flex items-center">
-                  <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="font-headline text-2xl text-foreground flex items-center">
+                    <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
+                  </CardTitle>
+                  {viewMode === 'mobile' && (
+                    <div className="flex gap-1">
+                      <Button
+                        variant={employMintPlusLayout === 'list' ? 'secondary' : 'ghost'}
+                        size="icon"
+                        onClick={() => setEmployMintPlusLayout('list')}
+                        aria-label="List view"
+                        className={employMintPlusLayout === 'list' ? 'bg-primary/20 text-primary' : ''}
+                      >
+                        <List className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        variant={employMintPlusLayout === 'grid' ? 'secondary' : 'ghost'}
+                        size="icon"
+                        onClick={() => setEmployMintPlusLayout('grid')}
+                        aria-label="Grid view"
+                        className={employMintPlusLayout === 'grid' ? 'bg-primary/20 text-primary' : ''}
+                      >
+                        <LayoutGrid className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <CardDescription>
                   Unlock advanced tools and personalized guidance to supercharge your career journey.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className={cn(
+                  viewMode === 'mobile' && employMintPlusLayout === 'list'
+                    ? 'space-y-4' 
+                    : 'grid md:grid-cols-2 gap-6' 
+                )}>
                   {employMintPlusFeatures.map((feature) => (
-                    <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
+                    <Card 
+                      key={feature.id} 
+                      className={cn(
+                        "bg-secondary/30 hover:shadow-md transition-shadow flex flex-col",
+                        viewMode === 'mobile' && employMintPlusLayout === 'list' && 'w-full' 
+                      )}
+                    >
                       <CardHeader>
                         <CardTitle className="text-lg text-primary flex items-center">
                           <feature.icon className="mr-2 h-5 w-5" />
@@ -646,3 +689,4 @@ export default function EmployMintPage() {
     </div>
   );
 }
+
