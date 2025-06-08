@@ -1,4 +1,3 @@
-
 'use server';
 
 import { skillBasedJobMatching, SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
@@ -9,6 +8,8 @@ import {
   generateInterviewQuestions, GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput,
   evaluateInterviewAnswer, EvaluateInterviewAnswerInput, EvaluateInterviewAnswerOutput
 } from '@/ai/flows/interview-practice-flow';
+import { matchCompanyCulture, CompanyCulturePreferencesInput, CompanyCultureMatchOutput } from '@/ai/flows/company-culture-flow';
+
 
 export async function performSkillBasedJobMatching(input: SkillBasedJobMatchingInput): Promise<SkillBasedJobMatchingOutput> {
   try {
@@ -87,5 +88,15 @@ export async function performEvaluateInterviewAnswer(input: EvaluateInterviewAns
   } catch (error) {
     console.error('Error in performEvaluateInterviewAnswer:', error);
     throw new Error('Failed to evaluate interview answer. Please try again.');
+  }
+}
+
+export async function performCompanyCultureMatching(input: CompanyCulturePreferencesInput): Promise<CompanyCultureMatchOutput> {
+  try {
+    const result = await matchCompanyCulture(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performCompanyCultureMatching:', error);
+    throw new Error('Failed to match company cultures. Please try again.');
   }
 }

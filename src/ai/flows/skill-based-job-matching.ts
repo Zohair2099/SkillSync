@@ -119,4 +119,3 @@ const skillBasedJobMatchingFlow = ai.defineFlow(
     return output || [];
   }
 );
-
