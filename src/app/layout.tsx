@@ -1,14 +1,14 @@
 
-'use client';
+// REMOVED 'use client'; directive from here to make RootLayout a Server Component
 
-import type {Metadata} from 'next';
+import type { Metadata } from 'next'; // Ensure Metadata type is imported
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { JobResultsProvider } from '@/context/JobResultsContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { ResumeDataProvider } from '@/context/ResumeDataContext';
-import { AppearanceProvider, useAppearance } from '@/context/AppearanceContext';
-
+import { AppearanceProvider } from '@/context/AppearanceContext'; // useAppearance hook is not directly used here
+import MainContentWrapper from '@/components/layout/MainContentWrapper'; // Import the client component
 
 export const metadata: Metadata = {
   title: 'EmployMint',
@@ -33,7 +33,7 @@ export default function RootLayout({
           <ProfileProvider>
             <JobResultsProvider>
               <ResumeDataProvider>
-                <MainContentWrapper>
+                <MainContentWrapper> {/* Use the imported Client Component */}
                   {children}
                 </MainContentWrapper>
               </ResumeDataProvider>
@@ -43,25 +43,5 @@ export default function RootLayout({
         </AppearanceProvider>
       </body>
     </html>
-  );
-}
-
-// This new component will consume the context
-function MainContentWrapper({ children }: { children: React.ReactNode }) {
-  const { zoomLevel } = useAppearance();
-  return (
-    <div 
-      style={{ 
-        transform: `scale(${zoomLevel / 100})`, 
-        transformOrigin: 'top',
-        transition: 'transform 0.2s ease-out', // Optional: smooth transition for zoom
-        minHeight: '100vh', // Ensure the scaled content still takes up height
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-      className="main-content-wrapper" // Added for potential fine-tuning with CSS
-    >
-      {children}
-    </div>
   );
 }
