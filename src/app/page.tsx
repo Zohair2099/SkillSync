@@ -15,13 +15,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 import { JobResultsContext } from '@/context/JobResultsContext';
 import { useProfile } from '@/context/ProfileContext';
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator';
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -309,175 +310,178 @@ export default function EmployMintPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleJobMatchSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="jobMatchTitle" className="block text-sm font-medium text-foreground mb-1">
-                        Ideal Job Title
-                      </Label>
-                      <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openJobTitleCombobox}
-                            className="w-full justify-between text-muted-foreground bg-card"
-                            id="jobMatchTitle"
-                          >
-                            {jobMatchTitle || "Select or type job title..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto">
-                          <Command>
-                            <CommandInput
-                              value={jobMatchTitle}
-                              onValueChange={(search) => {
-                                const exists = JOB_TITLES_PREDEFINED.some(title => title.toLowerCase() === search.toLowerCase());
-                                if (exists) {
-                                  setJobMatchTitle(JOB_TITLES_PREDEFINED.find(title => title.toLowerCase() === search.toLowerCase())!);
-                                } else {
-                                   setJobMatchTitle(search);
-                                }
-                              }}
-                              placeholder="Search or type new title..."
-                            />
-                            <CommandList>
-                              <CommandEmpty>No title found. Type to add new.</CommandEmpty>
-                              <CommandGroup>
-                                {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => (
-                                  <CommandItem
-                                    key={title}
-                                    value={title}
-                                    onSelect={(currentValue) => {
-                                      setJobMatchTitle(currentValue === jobMatchTitle ? '' : currentValue);
-                                      setOpenJobTitleCombobox(false);
-                                    }}
-                                  >
-                                    {title}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div>
-                      <Label htmlFor="jobMatchCountry" className="block text-sm font-medium text-foreground mb-1">
-                        Country (Optional)
-                      </Label>
-                      <Select value={jobMatchCountry} onValueChange={setJobMatchCountry}>
-                        <SelectTrigger id="jobMatchCountry" className="w-full bg-card">
-                          <SelectValue placeholder="Any Country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="any-country-placeholder">Any Country</SelectItem>
-                          {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {jobMatchCountry === "USA" && (
-                       <div>
-                        <Label htmlFor="jobMatchState" className="block text-sm font-medium text-foreground mb-1">
-                          State (USA) (Optional)
-                        </Label>
-                        <Select value={jobMatchState} onValueChange={setJobMatchState}>
-                          <SelectTrigger id="jobMatchState" className="w-full bg-card">
-                            <SelectValue placeholder="Any State" />
-                          </SelectTrigger>
-                          <SelectContent>
-                             <SelectItem value="any-state-placeholder">Any State</SelectItem>
-                            {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="jobMatchIdealDescription" className="block text-sm font-medium text-foreground mb-1">
-                      Ideal Job Description / Responsibilities
-                    </Label>
-                    <Textarea
-                      id="jobMatchIdealDescription"
-                      value={jobMatchIdealDescription}
-                      onChange={(e) => setJobMatchIdealDescription(e.target.value)}
-                      placeholder="Describe your ideal role, key responsibilities, or paste a sample job description..."
-                      rows={4}
-                      required
-                      className="bg-card"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div>
-                        <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Optional)</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            value={jobMatchMinSalary}
-                            onChange={(e) => setJobMatchMinSalary(e.target.value)}
-                            placeholder="Min Salary"
-                            className="bg-card"
-                          />
-                          <span>-</span>
-                          <Input
-                            type="number"
-                            value={jobMatchMaxSalary}
-                            onChange={(e) => setJobMatchMaxSalary(e.target.value)}
-                            placeholder="Max Salary"
-                            className="bg-card"
-                          />
+                {isJobMatchingLoading ? (
+                  <LoadingIndicator loadingText="Finding matching jobs..." />
+                ) : (
+                  <>
+                    <form onSubmit={handleJobMatchSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="jobMatchTitle" className="block text-sm font-medium text-foreground mb-1">
+                            Ideal Job Title
+                          </Label>
+                          <Popover open={openJobTitleCombobox} onOpenChange={setOpenJobTitleCombobox}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openJobTitleCombobox}
+                                className="w-full justify-between text-muted-foreground bg-card"
+                                id="jobMatchTitle"
+                              >
+                                {jobMatchTitle || "Select or type job title..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 max-h-80 overflow-y-auto">
+                              <Command>
+                                <CommandInput
+                                  value={jobMatchTitle}
+                                  onValueChange={(search) => {
+                                    const exists = JOB_TITLES_PREDEFINED.some(title => title.toLowerCase() === search.toLowerCase());
+                                    if (exists) {
+                                      setJobMatchTitle(JOB_TITLES_PREDEFINED.find(title => title.toLowerCase() === search.toLowerCase())!);
+                                    } else {
+                                      setJobMatchTitle(search);
+                                    }
+                                  }}
+                                  placeholder="Search or type new title..."
+                                />
+                                <CommandList>
+                                  <CommandEmpty>No title found. Type to add new.</CommandEmpty>
+                                  <CommandGroup>
+                                    {JOB_TITLES_PREDEFINED.filter(title => title.toLowerCase().includes(jobMatchTitle.toLowerCase())).slice(0, 50).map((title) => (
+                                      <CommandItem
+                                        key={title}
+                                        value={title}
+                                        onSelect={(currentValue) => {
+                                          setJobMatchTitle(currentValue === jobMatchTitle ? '' : currentValue);
+                                          setOpenJobTitleCombobox(false);
+                                        }}
+                                      >
+                                        {title}
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </div>
-                     </div>
-                     <div>
-                        <Label className="block text-sm font-medium text-foreground mb-1">Work Model (Optional)</Label>
-                        <Select value={jobMatchWorkModel} onValueChange={(value: 'any' | 'on-site' | 'remote' | 'hybrid')=> setJobMatchWorkModel(value)}>
-                            <SelectTrigger className="w-full bg-card">
-                                <SelectValue placeholder="Any Work Model" />
+                        <div>
+                          <Label htmlFor="jobMatchCountry" className="block text-sm font-medium text-foreground mb-1">
+                            Country (Optional)
+                          </Label>
+                          <Select value={jobMatchCountry} onValueChange={setJobMatchCountry}>
+                            <SelectTrigger id="jobMatchCountry" className="w-full bg-card">
+                              <SelectValue placeholder="Any Country" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="any">Any</SelectItem>
-                                <SelectItem value="on-site">On-site</SelectItem>
-                                <SelectItem value="remote">Remote</SelectItem>
-                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                              <SelectItem value="any-country-placeholder">Any Country</SelectItem>
+                              {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
-                        </Select>
-                     </div>
-                  </div>
-                  <Button type="submit" disabled={isJobMatchingLoading || userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
-                    {isJobMatchingLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Find Matching Jobs
-                  </Button>
-                </form>
-                {sortedJobMatchResults.length > 0 && !isJobMatchingLoading && (
-                  <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-headline text-foreground">Job Recommendations</h3>
-                      <div className="flex items-center gap-2">
-                        <ListFilter className="h-5 w-5 text-muted-foreground" />
-                        <Select value={jobMatchSortOrder} onValueChange={(value: 'highest' | 'lowest') => setJobMatchSortOrder(value)}>
-                          <SelectTrigger className="w-[180px] bg-card">
-                            <SelectValue placeholder="Sort by" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="highest">Highest Match</SelectItem>
-                            <SelectItem value="lowest">Lowest Match</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          </Select>
+                        </div>
+                        {jobMatchCountry === "USA" && (
+                          <div>
+                            <Label htmlFor="jobMatchState" className="block text-sm font-medium text-foreground mb-1">
+                              State (USA) (Optional)
+                            </Label>
+                            <Select value={jobMatchState} onValueChange={setJobMatchState}>
+                              <SelectTrigger id="jobMatchState" className="w-full bg-card">
+                                <SelectValue placeholder="Any State" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="any-state-placeholder">Any State</SelectItem>
+                                {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div className="space-y-4">
-                      {sortedJobMatchResults.map((job, index) => (
-                        <JobRecommendationCard
-                          key={`${job.jobTitle}-${index}-${job.companyName}`}
-                          job={job}
-                          jobIndex={jobMatchResults.findIndex(j => j === job)} 
+                      <div>
+                        <Label htmlFor="jobMatchIdealDescription" className="block text-sm font-medium text-foreground mb-1">
+                          Ideal Job Description / Responsibilities
+                        </Label>
+                        <Textarea
+                          id="jobMatchIdealDescription"
+                          value={jobMatchIdealDescription}
+                          onChange={(e) => setJobMatchIdealDescription(e.target.value)}
+                          placeholder="Describe your ideal role, key responsibilities, or paste a sample job description..."
+                          rows={4}
+                          required
+                          className="bg-card"
                         />
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="block text-sm font-medium text-foreground mb-1">Salary Range (USD Annual, Optional)</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              value={jobMatchMinSalary}
+                              onChange={(e) => setJobMatchMinSalary(e.target.value)}
+                              placeholder="Min Salary"
+                              className="bg-card"
+                            />
+                            <span>-</span>
+                            <Input
+                              type="number"
+                              value={jobMatchMaxSalary}
+                              onChange={(e) => setJobMatchMaxSalary(e.target.value)}
+                              placeholder="Max Salary"
+                              className="bg-card"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="block text-sm font-medium text-foreground mb-1">Work Model (Optional)</Label>
+                          <Select value={jobMatchWorkModel} onValueChange={(value: 'any' | 'on-site' | 'remote' | 'hybrid') => setJobMatchWorkModel(value)}>
+                            <SelectTrigger className="w-full bg-card">
+                              <SelectValue placeholder="Any Work Model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="any">Any</SelectItem>
+                              <SelectItem value="on-site">On-site</SelectItem>
+                              <SelectItem value="remote">Remote</SelectItem>
+                              <SelectItem value="hybrid">Hybrid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <Button type="submit" disabled={userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+                        Find Matching Jobs
+                      </Button>
+                    </form>
+                    {sortedJobMatchResults.length > 0 && (
+                      <div className="mt-8">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-xl font-headline text-foreground">Job Recommendations</h3>
+                          <div className="flex items-center gap-2">
+                            <ListFilter className="h-5 w-5 text-muted-foreground" />
+                            <Select value={jobMatchSortOrder} onValueChange={(value: 'highest' | 'lowest') => setJobMatchSortOrder(value)}>
+                              <SelectTrigger className="w-[180px] bg-card">
+                                <SelectValue placeholder="Sort by" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="highest">Highest Match</SelectItem>
+                                <SelectItem value="lowest">Lowest Match</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          {sortedJobMatchResults.map((job, index) => (
+                            <JobRecommendationCard
+                              key={`${job.jobTitle}-${index}-${job.companyName}`}
+                              job={job}
+                              jobIndex={jobMatchResults.findIndex(j => j === job)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -502,40 +506,43 @@ export default function EmployMintPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSkillCompareSubmit} className="space-y-6">
-                  <div>
-                    <Label htmlFor="skillCompareJobDescription" className="block text-sm font-medium text-foreground mb-1">
-                      Job Description (Optional)
-                    </Label>
-                    <Textarea
-                      id="skillCompareJobDescription"
-                      value={skillCompareJobDescription}
-                      onChange={(e) => setSkillCompareJobDescription(e.target.value)}
-                      placeholder="Paste a job description here to analyze against your skills, or leave blank for general advice..."
-                      rows={8}
-                      className="bg-card"
-                    />
-                  </div>
-                  <Button type="submit" disabled={isSkillComparingLoading || userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
-                    {isSkillComparingLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Analyze Skills
-                  </Button>
-                </form>
-                {skillGapResult && !isSkillComparingLoading && (
-                  <div className="mt-8">
-                    <SkillGapDisplay
-                      missingSkills={skillGapResult.missingSkills || []}
-                      suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []}
-                      skillComparisonSummary={skillGapResult.skillComparisonSummary || "Analysis complete."}
-                      interviewTips={skillGapResult.interviewTips}
-                      suggestedJobCategories={skillGapResult.suggestedJobCategories}
-                      suggestedSoftSkills={skillGapResult.suggestedSoftSkills}
-                      mentorshipAdvice={skillGapResult.mentorshipAdvice}
-                      skillDevelopmentRoadmap={skillGapResult.skillDevelopmentRoadmap}
-                    />
-                  </div>
+                {isSkillComparingLoading ? (
+                  <LoadingIndicator loadingText="Analyzing your skills..." />
+                ) : (
+                  <>
+                    <form onSubmit={handleSkillCompareSubmit} className="space-y-6">
+                      <div>
+                        <Label htmlFor="skillCompareJobDescription" className="block text-sm font-medium text-foreground mb-1">
+                          Job Description (Optional)
+                        </Label>
+                        <Textarea
+                          id="skillCompareJobDescription"
+                          value={skillCompareJobDescription}
+                          onChange={(e) => setSkillCompareJobDescription(e.target.value)}
+                          placeholder="Paste a job description here to analyze against your skills, or leave blank for general advice..."
+                          rows={8}
+                          className="bg-card"
+                        />
+                      </div>
+                      <Button type="submit" disabled={userSkills.length === 0} className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
+                        Analyze Skills
+                      </Button>
+                    </form>
+                    {skillGapResult && (
+                      <div className="mt-8">
+                        <SkillGapDisplay
+                          missingSkills={skillGapResult.missingSkills || []}
+                          suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []}
+                          skillComparisonSummary={skillGapResult.skillComparisonSummary || "Analysis complete."}
+                          interviewTips={skillGapResult.interviewTips}
+                          suggestedJobCategories={skillGapResult.suggestedJobCategories}
+                          suggestedSoftSkills={skillGapResult.suggestedSoftSkills}
+                          mentorshipAdvice={skillGapResult.mentorshipAdvice}
+                          skillDevelopmentRoadmap={skillGapResult.skillDevelopmentRoadmap}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

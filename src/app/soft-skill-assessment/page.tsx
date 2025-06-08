@@ -9,11 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, MessageSquare, Lightbulb, CheckCircle, AlertTriangle, Info, ThumbsUp, TrendingUp, ArrowRight, ArrowLeftCircle, Brain } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Lightbulb, CheckCircle, AlertTriangle, TrendingUp, ArrowRight, ArrowLeftCircle, Brain } from 'lucide-react';
 import { performSoftSkillAssessment } from '@/app/actions';
 import type { SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
 import { useToast } from "@/hooks/use-toast";
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
 
 const softSkillQuestions = [
   { id: 'q1', text: "Describe a time you had to work with a difficult colleague or team member. How did you approach the situation and what was the outcome?" },
@@ -101,9 +101,7 @@ export default function SoftSkillAssessmentPage() {
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-          <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-          <p className="text-xl text-foreground">Analyzing your soft skills...</p>
-          <p className="text-muted-foreground">This may take a few moments.</p>
+          <LoadingIndicator loadingText="Analyzing your soft skills..." />
         </main>
       </div>
     );
@@ -137,7 +135,7 @@ export default function SoftSkillAssessmentPage() {
                             <p className="text-muted-foreground italic">&quot;{skill.assessment}&quot;</p>
                             {skill.strengths.length > 0 && (
                                 <div>
-                                    <h4 className="font-semibold text-sm text-accent flex items-center mb-1"><ThumbsUp className="mr-2 h-4 w-4"/>Strengths:</h4>
+                                    <h4 className="font-semibold text-sm text-accent flex items-center mb-1">Strengths:</h4>
                                     <ul className="list-disc list-inside space-y-0.5 text-sm text-muted-foreground pl-4">
                                         {skill.strengths.map((strength, i) => <li key={`strength-${i}`}>{strength}</li>)}
                                     </ul>
@@ -233,8 +231,8 @@ export default function SoftSkillAssessmentPage() {
                   Next <ArrowRight className="ml-2 h-4 w-4"/>
                 </Button>
               ) : (
-                <Button onClick={handleSubmitAssessment} disabled={isLoading} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <CheckCircle className="mr-2 h-4 w-4"/>}
+                <Button onClick={handleSubmitAssessment} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                  <CheckCircle className="mr-2 h-4 w-4"/>
                   Finish & Analyze
                 </Button>
               )}

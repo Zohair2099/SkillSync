@@ -14,10 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Building2, LocateFixed, DollarSign, BriefcaseBusiness, CheckCircle, Brain, Clock, GraduationCap, Users, Type as TypeIcon, FileText, ExternalLink, Lightbulb, AlertTriangle, Sparkles } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import Link from 'next/link';
-import { cn } from "@/lib/utils"; // Added import
+import { cn } from "@/lib/utils";
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
@@ -63,7 +63,9 @@ export default function JobDetailsPage() {
       }
     } else if (jobMatchResults.length === 0 && jobIndex !== -1) {
       console.warn("Job details page accessed without JobResultsContext or invalid index.");
-      setLoading(false);
+      setLoading(false); // Set loading to false even if job is not found initially
+    } else {
+      setLoading(false); // Ensure loading is set to false in other cases too
     }
   }, [jobIndex, jobMatchResults, router, profile.skills]);
 
@@ -161,10 +163,7 @@ export default function JobDetailsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-foreground">Loading job details...</p>
-        </div>
+        <LoadingIndicator loadingText="Loading job details..." />
       </div>
     );
   }
@@ -286,10 +285,7 @@ export default function JobDetailsPage() {
           </CardHeader>
           <CardContent>
             {isAnalysisLoading ? (
-              <div className="flex flex-col items-center justify-center py-10">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                <p className="text-muted-foreground">Analyzing your skills against this job...</p>
-              </div>
+              <LoadingIndicator loadingText="Analyzing your skills for this job..." />
             ) : profile.skills.length === 0 ? (
                 <div className="text-center py-6">
                     <p className="text-muted-foreground mb-3">Please add skills to your profile to see a comparison.</p>
@@ -347,22 +343,3 @@ export default function JobDetailsPage() {
     </div>
   );
 }
-
-// Helper icon for loading states if not already globally available
-const Loader2 = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={cn("animate-spin", className)}
-  >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-  </svg>
-);
-

@@ -4,6 +4,7 @@
 import { skillBasedJobMatching, SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
 import { jobFocusedSkillComparison, JobFocusedSkillComparisonInput, JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { assessSoftSkills, SoftSkillAssessmentInput, SoftSkillAssessmentOutput } from '@/ai/flows/soft-skill-assessment-flow';
+import { generateMarketTrends, MarketTrendsInput, MarketTrendsOutput } from '@/ai/flows/market-trends-flow';
 
 export async function performSkillBasedJobMatching(input: SkillBasedJobMatchingInput): Promise<SkillBasedJobMatchingOutput> {
   try {
@@ -54,5 +55,15 @@ export async function performSoftSkillAssessment(input: SoftSkillAssessmentInput
   } catch (error) {
     console.error('Error in performSoftSkillAssessment:', error);
     throw new Error('Failed to assess soft skills. Please try again.');
+  }
+}
+
+export async function performMarketTrendsAnalysis(input: MarketTrendsInput): Promise<MarketTrendsOutput> {
+  try {
+    const result = await generateMarketTrends(input);
+    return result;
+  } catch (error) {
+    console.error('Error in performMarketTrendsAnalysis:', error);
+    throw new Error('Failed to generate market trends. Please try again.');
   }
 }

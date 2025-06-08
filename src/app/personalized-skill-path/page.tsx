@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowLeft, Brain, Download } from 'lucide-react';
+import { ArrowLeft, Brain, Download } from 'lucide-react';
 import { performJobFocusedSkillComparison } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/ai/flows/job-focused-skill-comparison';
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from '@/context/ProfileContext';
+import { LoadingIndicator } from '@/components/employmint/LoadingIndicator'; // Added import
 
 export default function PersonalizedSkillPathPage() {
   const { profile } = useProfile();
@@ -93,34 +94,32 @@ export default function PersonalizedSkillPathPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="skillPathJobDesc" className="block text-sm font-medium text-foreground mb-1">
-                Target Job Description / Role (Optional)
-              </Label>
-              <Textarea
-                id="skillPathJobDesc"
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="e.g., 'Senior Frontend Developer at TechCorp' or paste full job description..."
-                rows={6}
-                className="bg-card"
-              />
-            </div>
-            <Button onClick={handleSubmit} disabled={isLoading || userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Generate Development Path
-            </Button>
-            {userSkills.length === 0 && (
-                <p className="text-sm text-destructive text-center">Please add skills to your profile to use this feature.</p>
+            {isLoading ? (
+               <LoadingIndicator loadingText="Generating your personalized path..." />
+            ) : (
+              <>
+                <div>
+                  <Label htmlFor="skillPathJobDesc" className="block text-sm font-medium text-foreground mb-1">
+                    Target Job Description / Role (Optional)
+                  </Label>
+                  <Textarea
+                    id="skillPathJobDesc"
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="e.g., 'Senior Frontend Developer at TechCorp' or paste full job description..."
+                    rows={6}
+                    className="bg-card"
+                  />
+                </div>
+                <Button onClick={handleSubmit} disabled={userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Generate Development Path
+                </Button>
+                {userSkills.length === 0 && (
+                    <p className="text-sm text-destructive text-center">Please add skills to your profile to use this feature.</p>
+                )}
+              </>
             )}
           </CardContent>
-
-          {isLoading && (
-            <div className="flex flex-col items-center justify-center py-10 px-6">
-              <Loader2 className="mr-2 h-8 w-8 animate-spin text-primary" />
-              <p className="text-muted-foreground mt-2">Generating your personalized path... This may take a moment.</p>
-            </div>
-          )}
 
           {skillPathResult && !isLoading && (
             <CardFooter className="flex flex-col items-start p-6 border-t">
@@ -150,4 +149,3 @@ export default function PersonalizedSkillPathPage() {
     </div>
   );
 }
-
