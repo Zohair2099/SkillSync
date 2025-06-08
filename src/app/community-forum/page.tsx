@@ -8,7 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Users, MessageSquareText, Lightbulb, Briefcase } from 'lucide-react';
+
+interface MockReply {
+  id: string;
+  author: string;
+  avatarFallback: string;
+  timestamp: string;
+  text: string;
+}
 
 interface MockPost {
   id: string;
@@ -16,8 +25,9 @@ interface MockPost {
   author: string;
   replies: number;
   lastActivity: string;
-  content: string; // Added for detailed view
-  categoryName: string; // Added for context in dialog
+  content: string; 
+  categoryName: string;
+  repliesContent?: MockReply[];
 }
 
 interface MockCategory {
@@ -39,10 +49,40 @@ const mockForumData: MockCategory[] = [
         id: 'post1', 
         title: "My FAANG On-Site Loop - What to Expect (Software Engineer)", 
         author: 'UserAlex', 
-        replies: 12, 
+        replies: 15, // Updated reply count
         lastActivity: '2h ago',
         categoryName: 'Interview Experiences & Tips',
-        content: "Hey everyone,\n\nI just had my on-site loop at a major tech company (think FAANG) for a Software Engineer L4 role and wanted to share my experience to help others prepare.\n\n**Day Structure:**\n- Morning: 2 coding rounds (45 mins each). Focus was heavily on data structures (trees, graphs, hashmaps) and algorithms (dynamic programming, sorting).\n- Afternoon: 1 system design round (60 mins) - asked to design a basic URL shortener, and 1 behavioral round (45 mins) with a hiring manager focusing on leadership principles and past project experiences.\n\n**Key Takeaways:**\n- Practice LeetCode mediums/hards consistently. Don't just solve, understand the patterns.\n- Be able to articulate your thought process clearly, even if you don't arrive at the perfect solution immediately.\n- For system design, discuss trade-offs, scalability, and potential bottlenecks. Start high-level and dive deeper as requested.\n- Prepare STAR method examples for behavioral questions.\n\nOverall, it was challenging but fair. Preparation is key! Good luck to everyone else interviewing!"
+        content: "Hey everyone,\n\nI just had my on-site loop at a major tech company (think FAANG) for a Software Engineer L4 role and wanted to share my experience to help others prepare.\n\n**Day Structure:**\n- Morning: 2 coding rounds (45 mins each). Focus was heavily on data structures (trees, graphs, hashmaps) and algorithms (dynamic programming, sorting).\n- Afternoon: 1 system design round (60 mins) - asked to design a basic URL shortener, and 1 behavioral round (45 mins) with a hiring manager focusing on leadership principles and past project experiences.\n\n**Key Takeaways:**\n- Practice LeetCode mediums/hards consistently. Don't just solve, understand the patterns.\n- Be able to articulate your thought process clearly, even if you don't arrive at the perfect solution immediately.\n- For system design, discuss trade-offs, scalability, and potential bottlenecks. Start high-level and dive deeper as requested.\n- Prepare STAR method examples for behavioral questions.\n\nOverall, it was challenging but fair. Preparation is key! Good luck to everyone else interviewing!",
+        repliesContent: [
+          { 
+            id: 'reply1-1', 
+            author: 'TechLeadTom', 
+            avatarFallback: 'TT',
+            timestamp: '1h 50m ago', 
+            text: "Great summary, Alex! For the system design, did they ask about specific database choices or consistency models? That's where they usually dig in for L4+." 
+          },
+          { 
+            id: 'reply1-2', 
+            author: 'UserAlex', 
+            avatarFallback: 'UA',
+            timestamp: '1h 30m ago', 
+            text: "Good question, @TechLeadTom! They didn't push too hard on a specific DB, but I discussed the pros/cons of SQL vs NoSQL for different aspects of the URL shortener (e.g., analytics vs. core mapping). I emphasized eventual consistency for analytics to keep writes fast."
+          },
+          { 
+            id: 'reply1-3', 
+            author: 'NewGradNina', 
+            avatarFallback: 'NN',
+            timestamp: '45m ago', 
+            text: "Thanks for sharing, Alex! This is super helpful. For behavioral, any particular STAR example that seemed to resonate well?" 
+          },
+           { 
+            id: 'reply1-4', 
+            author: 'UserAlex', 
+            avatarFallback: 'UA',
+            timestamp: '15m ago', 
+            text: "@NewGradNina, I used an example about a time I had to debug a critical production issue with limited information. Focused on my systematic approach (Task), the steps I took (Action), and how it led to a quick resolution and a post-mortem (Result). They seemed to like the emphasis on learning from it." 
+          },
+        ]
       },
       { 
         id: 'post2', 
@@ -186,7 +226,7 @@ export default function CommunityForumPage() {
 
         {selectedPost && (
           <Dialog open={!!selectedPost} onOpenChange={(isOpen) => { if (!isOpen) setSelectedPost(null); }}>
-            <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle className="text-primary text-xl sm:text-2xl">{selectedPost.title}</DialogTitle>
                 <DialogDescription>
@@ -194,14 +234,58 @@ export default function CommunityForumPage() {
                   Posted by: <span className="font-medium">{selectedPost.author}</span> | {selectedPost.replies} replies | Last activity: {selectedPost.lastActivity}
                 </DialogDescription>
               </DialogHeader>
-              <div className="py-4 overflow-y-auto flex-grow">
-                <p className="text-sm text-muted-foreground whitespace-pre-line">{selectedPost.content}</p>
+              <div className="py-4 overflow-y-auto flex-grow space-y-6">
+                {/* Original Post */}
+                <Card className="bg-card shadow-md">
+                    <CardHeader className="pb-2">
+                        <div className="flex items-center space-x-3">
+                            <Avatar>
+                                <AvatarImage src={`https://placehold.co/40x40.png?text=${selectedPost.author.substring(0,2)}`} alt={selectedPost.author} data-ai-hint="person lettermark"/>
+                                <AvatarFallback>{selectedPost.author.substring(0,2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold text-foreground">{selectedPost.author} (OP)</p>
+                                <p className="text-xs text-muted-foreground">Original Post</p>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-foreground whitespace-pre-line">{selectedPost.content}</p>
+                    </CardContent>
+                </Card>
+
+                {/* Replies */}
+                {selectedPost.repliesContent && selectedPost.repliesContent.length > 0 && (
+                    <div className="space-y-4 pl-4 border-l-2 border-primary/50">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Replies:</h3>
+                        {selectedPost.repliesContent.map((reply) => (
+                            <Card key={reply.id} className="bg-secondary/50 shadow-sm">
+                                <CardHeader className="pb-2">
+                                    <div className="flex items-center space-x-3">
+                                        <Avatar className="h-8 w-8">
+                                             <AvatarImage src={`https://placehold.co/32x32.png?text=${reply.avatarFallback}`} alt={reply.author} data-ai-hint="person lettermark small"/>
+                                            <AvatarFallback className="text-xs">{reply.avatarFallback}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-medium text-sm text-foreground">{reply.author}</p>
+                                            <p className="text-xs text-muted-foreground">{reply.timestamp}</p>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-foreground whitespace-pre-line">{reply.text}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
                 <p className="mt-6 text-xs text-destructive text-center font-semibold">
                   (This is a mock discussion content. Full forum functionality, including actual replies and interactions, is coming soon.)
                 </p>
               </div>
               <DialogFooter>
                 <Button onClick={() => setSelectedPost(null)} variant="outline">Close</Button>
+                <Button variant="default" className="cursor-not-allowed" disabled>Reply (Coming Soon)</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -214,3 +298,4 @@ export default function CommunityForumPage() {
     </div>
   );
 }
+
