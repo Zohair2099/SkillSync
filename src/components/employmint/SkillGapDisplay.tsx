@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award } from 'lucide-react';
+import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award, Waypoints } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface SuggestedJobCategory {
@@ -77,12 +77,31 @@ const SkillGapDisplayComponent = ({
           )
         )}
 
+        {/* Roadmap Visualizer (Coming Soon) Section */}
+        <Card className="bg-muted/50 border-dashed border-border">
+          <CardHeader>
+            <CardTitle className="text-md flex items-center">
+              <Waypoints className="mr-2 h-5 w-5 text-primary" />
+              Interactive Roadmap Visualizer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 text-center border-2 border-dashed border-border rounded-lg bg-background">
+              <p className="text-lg font-semibold text-foreground">Coming Soon!</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                A new visual way to explore your skill development path.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+
         {skillDevelopmentRoadmap && skillDevelopmentRoadmap.length > 0 && (
           <Card className="bg-secondary/30 mt-4">
             <CardHeader>
               <CardTitle className="text-lg flex items-center text-primary">
                 <Map className="mr-2 h-5 w-5" />
-                Your Development Roadmap
+                Your AI-Generated Development Roadmap
               </CardTitle>
               <CardDescription>
                 A step-by-step guide to help you acquire necessary skills or advance your career.
@@ -197,3 +216,4 @@ const SkillGapDisplayComponent = ({
 }
 
 export const SkillGapDisplay = React.memo(SkillGapDisplayComponent);
+
