@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, BookOpen, Puzzle, PartyPopper, Brain, Briefcase, Users, MessageSquare, DollarSign, Info, CheckCircle, Map, TrendingUp, Award, Waypoints, LinkIcon } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { cn } from '@/lib/utils';
 
 interface SuggestedJobCategory {
   categoryName: string;
@@ -70,7 +71,7 @@ const SkillGapDisplayComponent = ({
 
 
   return (
-    <Card className="w-full shadow-lg">
+    <Card className="w-full shadow-lg animate-fade-in">
       <CardHeader>
         <div className="flex items-center gap-2">
            <Puzzle className="h-6 w-6 text-primary" />
@@ -108,8 +109,8 @@ const SkillGapDisplayComponent = ({
         {/* Roadmap.sh Links Section */}
         <Accordion type="single" collapsible className="w-full pt-4">
           <AccordionItem value="roadmap-sh-links">
-            <AccordionTrigger className="text-left">
-              <div className="flex items-center">
+            <AccordionTrigger className="text-left hover:no-underline">
+              <div className="flex items-center text-foreground">
                 <LinkIcon className="mr-2 h-5 w-5 text-primary" />
                 Explore External Learning Roadmaps (roadmap.sh)
               </div>
@@ -118,7 +119,7 @@ const SkillGapDisplayComponent = ({
               <p className="text-xs text-muted-foreground mb-3">
                 These are comprehensive, community-driven roadmaps for various roles and technologies.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
                 {roadmapShLinks.map(link => (
                   <a 
                     key={link.title} 
@@ -149,7 +150,7 @@ const SkillGapDisplayComponent = ({
             </CardHeader>
             <CardContent className="space-y-4">
               {skillDevelopmentRoadmap.map((step, index) => (
-                <div key={index} className="p-3 border rounded-md bg-card shadow-sm">
+                <div key={index} className="p-3 border rounded-md bg-card shadow-sm transition-shadow hover:shadow-md">
                   <div className="flex justify-between items-start mb-1">
                     <h4 className="font-semibold text-md text-foreground">
                       {`${index + 1}. ${step.stepTitle}`}
@@ -189,7 +190,7 @@ const SkillGapDisplayComponent = ({
             </h3>
             <Accordion type="multiple" className="w-full space-y-2">
               {suggestedJobCategories.map((jobCat, index) => (
-                <AccordionItem value={`cat-${index}`} key={jobCat.categoryName} className="border bg-card rounded-lg shadow-sm">
+                <AccordionItem value={`cat-${index}`} key={jobCat.categoryName} className="border bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-foreground font-medium">
                         {jobCat.categoryName}
                     </AccordionTrigger>
@@ -216,9 +217,9 @@ const SkillGapDisplayComponent = ({
                  <h3 className="text-lg font-semibold text-foreground mb-3">Additional Career Advice:</h3>
                  <Accordion type="multiple" className="w-full space-y-3">
                     {suggestedSoftSkills && suggestedSoftSkills.length > 0 && (
-                        <AccordionItem value="soft-skills">
-                            <AccordionTrigger><MessageSquare className="mr-2 h-5 w-5 text-primary" />Valuable Soft Skills</AccordionTrigger>
-                            <AccordionContent>
+                        <AccordionItem value="soft-skills" className="border bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-foreground font-medium"><MessageSquare className="mr-2 h-5 w-5 text-primary" />Valuable Soft Skills</AccordionTrigger>
+                            <AccordionContent className="px-4 pb-3">
                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground pl-2">
                                     {suggestedSoftSkills.map((skillTip, index) => (
                                         <li key={`softskill-${index}`}>{skillTip}</li>
@@ -228,17 +229,17 @@ const SkillGapDisplayComponent = ({
                         </AccordionItem>
                     )}
                     {mentorshipAdvice && (
-                        <AccordionItem value="mentorship">
-                            <AccordionTrigger><Users className="mr-2 h-5 w-5 text-primary" />Mentorship & Networking</AccordionTrigger>
-                            <AccordionContent className="text-sm text-muted-foreground">
+                        <AccordionItem value="mentorship" className="border bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-foreground font-medium"><Users className="mr-2 h-5 w-5 text-primary" />Mentorship & Networking</AccordionTrigger>
+                            <AccordionContent className="px-4 pb-3 text-sm text-muted-foreground">
                                 {mentorshipAdvice}
                             </AccordionContent>
                         </AccordionItem>
                     )}
                     {interviewTips && interviewTips.length > 0 && (
-                        <AccordionItem value="interview-tips">
-                            <AccordionTrigger><Brain className="mr-2 h-5 w-5 text-accent" />Helpful Interview Tips</AccordionTrigger>
-                            <AccordionContent>
+                        <AccordionItem value="interview-tips" className="border bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                            <AccordionTrigger className="px-4 py-3 text-left hover:no-underline text-foreground font-medium"><Brain className="mr-2 h-5 w-5 text-accent" />Helpful Interview Tips</AccordionTrigger>
+                            <AccordionContent className="px-4 pb-3">
                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground pl-2">
                                     {interviewTips.map((tip, index) => (
                                     <li key={`tip-${index}`}>{tip}</li>
@@ -256,4 +257,3 @@ const SkillGapDisplayComponent = ({
 }
 
 export const SkillGapDisplay = React.memo(SkillGapDisplayComponent);
-

@@ -3,6 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export default function NotificationsPage() {
           </Link>
         </div>
 
-        <Card className="max-w-2xl mx-auto shadow-xl rounded-xl">
+        <Card className="max-w-2xl mx-auto shadow-xl rounded-xl animate-fade-in">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-3">
                 <Bell className="h-12 w-12 text-primary" />
@@ -32,7 +33,10 @@ export default function NotificationsPage() {
               This feature is currently under development.
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center space-y-4">
+          <CardContent className="text-center space-y-6">
+            <div className="my-6 h-48 w-full bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+              <Image src="https://placehold.co/300x200.png" alt="Notifications Placeholder" width={300} height={200} data-ai-hint="bell alert" className="object-contain"/>
+            </div>
             <p className="text-muted-foreground">
               Soon, you'll receive notifications for new job openings matching your skills
               and get reminders to complete skill-building goals or update your profiles.

@@ -3,6 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Header } from '@/components/employmint/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +22,7 @@ export default function CompanyCulturePage() {
           </Link>
         </div>
 
-        <Card className="max-w-2xl mx-auto shadow-xl rounded-xl">
+        <Card className="max-w-2xl mx-auto shadow-xl rounded-xl animate-fade-in">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-3">
                 <Building className="h-12 w-12 text-primary" />
@@ -32,7 +33,10 @@ export default function CompanyCulturePage() {
               This feature is currently under development.
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center space-y-4">
+          <CardContent className="text-center space-y-6">
+            <div className="my-6 h-48 w-full bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+              <Image src="https://placehold.co/300x200.png" alt="Company Culture Placeholder" width={300} height={200} data-ai-hint="teamwork office" className="object-contain"/>
+            </div>
             <p className="text-muted-foreground">
               Soon, you'll be able to define your ideal work environment, and our AI
               will help you find companies that could be a great cultural fit.

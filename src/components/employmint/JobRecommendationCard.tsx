@@ -4,14 +4,15 @@ import Link from 'next/link';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Target, Info, ChevronsUpDown, Building2, LocateFixed, DollarSign, ArrowRight } from 'lucide-react';
+import { Target, Info, Building2, LocateFixed, DollarSign, ArrowRight } from 'lucide-react';
 import type { SkillBasedJobMatchingOutput } from '@/ai/flows/skill-based-job-matching';
+import { cn } from '@/lib/utils';
 
 type JobMatchResultItem = SkillBasedJobMatchingOutput[0];
 
 interface JobRecommendationCardProps {
   job: JobMatchResultItem;
-  jobIndex: number; // Used for linking to the details page
+  jobIndex: number; 
 }
 
 const JobRecommendationCardComponent = ({
@@ -23,7 +24,7 @@ const JobRecommendationCardComponent = ({
     jobTitle, 
     companyName, 
     location, 
-    jobDescription, // Short summary
+    jobDescription, 
     matchPercentage, 
     rationale,
     salaryRange,
@@ -48,7 +49,10 @@ const JobRecommendationCardComponent = ({
   }
   
   return (
-    <Card className="w-full shadow-lg overflow-hidden">
+    <Card className={cn(
+        "w-full shadow-lg overflow-hidden transition-all duration-300 ease-in-out",
+        "hover:shadow-xl hover:scale-[1.015]"
+      )}>
       <div className="p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-2">
           <div className="flex-grow">
@@ -81,8 +85,8 @@ const JobRecommendationCardComponent = ({
                 <Info className="mr-1.5 h-3 w-3" /> {rationale} 
             </p>
             <Link href={`/job-details/${jobIndex}`} passHref legacyBehavior>
-              <a className="text-sm text-primary hover:underline flex items-center">
-                More Details <ArrowRight className="ml-1 h-4 w-4" />
+              <a className="text-sm text-primary hover:underline flex items-center group">
+                More Details <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
               </a>
             </Link>
         </div>

@@ -3,6 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -95,6 +96,7 @@ const employMintPlusFeatures = [
     description: "If you lack skills for a desired job, get a personalized learning roadmap with course recommendations to bridge the gap.",
     href: "/personalized-skill-path",
     actionText: "Get Your Path",
+    imageHint: "map growth",
   },
   {
     id: "resume-builder",
@@ -103,6 +105,7 @@ const employMintPlusFeatures = [
     description: "Craft a professional resume by entering your details and choosing from various layouts. Download as PDF.",
     href: "/resume-builder",
     actionText: "Build Your Resume",
+    imageHint: "document resume",
   },
   {
     id: "soft-skill-assessment",
@@ -111,6 +114,7 @@ const employMintPlusFeatures = [
     description: "Analyze your soft skills like communication and leadership through AI-powered questionnaires or game-based assessments, and get suggestions for improvement.",
     href: "/soft-skill-assessment",
     actionText: "Assess Skills",
+    imageHint: "brainstorm people",
   },
   {
     id: "market-trends",
@@ -119,6 +123,7 @@ const employMintPlusFeatures = [
     description: "Get insights into job demand based on industry trends, see which skills are currently in high demand, and discover alternative roles in emerging fields.",
     href: "/market-trends",
     actionText: "View Trends",
+    imageHint: "chart graph",
   },
   {
     id: "interview-practice",
@@ -127,6 +132,7 @@ const employMintPlusFeatures = [
     description: "Practice with an AI tool that generates real interview questions based on job roles and assesses your responses with feedback.",
     href: "/interview-practice",
     actionText: "Start Practice",
+    imageHint: "microphone interview",
   },
   {
     id: "social-networking",
@@ -135,6 +141,7 @@ const employMintPlusFeatures = [
     description: "Connect with mentors, recruiters, and professionals. Access links to update your professional profiles.",
     href: "/social-networking",
     actionText: "Connect & Network",
+    imageHint: "network connections",
   },
    {
     id: "community-forum",
@@ -143,6 +150,7 @@ const employMintPlusFeatures = [
     description: "Join discussions, share tips, and network with other EmployMint users.",
     href: "/community-forum",
     actionText: "Join the Discussion",
+    imageHint: "community people",
   },
   {
     id: "salary-estimator",
@@ -151,6 +159,7 @@ const employMintPlusFeatures = [
     description: "Predict expected salary ranges based on experience, skills, and job role using AI-powered market data.",
     href: "/salary-estimator",
     actionText: "Estimate Salary",
+    imageHint: "money calculator",
   },
   {
     id: "company-culture",
@@ -159,6 +168,7 @@ const employMintPlusFeatures = [
     description: "Find companies that match your values and work style by analyzing employer reviews and job satisfaction ratings.",
     href: "/company-culture",
     actionText: "Find Matches (Coming Soon)",
+    imageHint: "office building",
   },
   {
     id: "notifications",
@@ -167,6 +177,7 @@ const employMintPlusFeatures = [
     description: "Receive notifications for new job openings matching your skills, and get reminders to complete skill-building goals or update your profile.",
     href: "/notifications",
     actionText: "Set Up Alerts (Coming Soon)",
+    imageHint: "bell notification",
   },
   {
     id: "app-tracker",
@@ -175,6 +186,7 @@ const employMintPlusFeatures = [
     description: "Track your job applications, interviews, and follow-up actions in one organized place.",
     href: "/application-tracker",
     actionText: "Track Applications (Coming Soon)",
+    imageHint: "checklist clipboard",
   }
 ];
 
@@ -185,7 +197,7 @@ export default function EmployMintPage() {
   const userSkills = profile.skills;
   const { viewMode } = useAppearance();
   const pathname = usePathname();
-  // const router = useRouter(); // Keep if other programmatic navigation is needed
+  const router = useRouter();
 
   const [jobMatchTitle, setJobMatchTitle] = useState('');
   const [openJobTitleCombobox, setOpenJobTitleCombobox] = useState(false);
@@ -211,19 +223,14 @@ export default function EmployMintPage() {
   const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
 
 
-  useEffect(() => {
-    // This function determines the active tab based on the current URL hash.
-    // It's called on mount, and by event listeners for hash/popstate changes.
+ useEffect(() => {
     const syncActiveTabWithUrl = () => {
-      if (pathname === '/') { // Only manage tabs if on the homepage
+      if (pathname === '/') {
         let currentHash = window.location.hash.substring(1);
-        
         if (HOME_PAGE_TAB_IDS.includes(currentHash)) {
           setActiveTab(currentHash);
         } else {
-          // Default to the first tab if hash is invalid or missing
           setActiveTab(HOME_PAGE_TAB_IDS[0]);
-          // Update URL to reflect default tab for consistency, without adding to history
           if (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
              window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
           }
@@ -231,26 +238,22 @@ export default function EmployMintPage() {
       }
     };
 
-    // Initial sync when component mounts or pathname changes to '/'
-    syncActiveTabWithUrl();
+    syncActiveTabWithUrl(); // Sync on initial mount or pathname change
 
-    // Add event listeners for hash changes and browser back/forward navigation
     window.addEventListener('hashchange', syncActiveTabWithUrl);
-    window.addEventListener('popstate', syncActiveTabWithUrl);
+    window.addEventListener('popstate', syncActiveTabWithUrl); // For browser back/forward
 
-    // Cleanup function to remove event listeners when the component unmounts
-    // or before the effect re-runs due to pathname change.
     return () => {
       window.removeEventListener('hashchange', syncActiveTabWithUrl);
       window.removeEventListener('popstate', syncActiveTabWithUrl);
     };
-  }, [pathname]); // Re-run this effect if the pathname changes
+  }, [pathname]); // Re-run only when pathname changes
 
 
   const handleTabChange = (value: string) => {
     if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      window.location.hash = value; 
+      window.location.hash = value; // Update hash for desktop tab clicks
     }
   };
 
@@ -546,7 +549,7 @@ export default function EmployMintPage() {
                       </Button>
                     </form>
                     {sortedJobMatchResults.length > 0 && (
-                      <div className="mt-8">
+                      <div className="mt-8 animate-fade-in">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="text-xl font-headline text-foreground">Job Recommendations</h3>
                           <div className="flex items-center gap-2">
@@ -621,7 +624,7 @@ export default function EmployMintPage() {
                       </Button>
                     </form>
                     {skillGapResult && (
-                      <div className="mt-8">
+                      <div className="mt-8 animate-fade-in">
                         <SkillGapDisplay
                           missingSkills={skillGapResult.missingSkills || []}
                           suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []}
@@ -656,9 +659,12 @@ export default function EmployMintPage() {
                   {employMintPlusFeatures.map((feature) => (
                     <Card
                       key={feature.id}
-                      className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col"
+                      className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
                     >
                       <CardHeader>
+                        <div className="mb-3 h-20 w-full bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                           <Image src={`https://placehold.co/120x80.png`} alt={`${feature.title} graphic`} width={120} height={80} data-ai-hint={feature.imageHint || "abstract tech"} className="object-contain"/>
+                        </div>
                         <CardTitle className="text-lg text-primary flex items-center">
                           <feature.icon className="mr-2 h-5 w-5" />
                           {feature.title}
@@ -764,7 +770,7 @@ export default function EmployMintPage() {
                         <Button type="submit" disabled={userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Find Matching Jobs</Button>
                       </form>
                       {sortedJobMatchResults.length > 0 && (
-                        <div className="mt-8">
+                        <div className="mt-8 animate-fade-in">
                           <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-headline text-foreground">Recommendations</h3>
                             <Select value={jobMatchSortOrder} onValueChange={(value: 'highest' | 'lowest') => setJobMatchSortOrder(value)}>
@@ -805,7 +811,7 @@ export default function EmployMintPage() {
                          <Button type="submit" disabled={userSkills.length === 0} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Analyze Skills</Button>
                        </form>
                        {skillGapResult && (
-                         <div className="mt-8">
+                         <div className="mt-8 animate-fade-in">
                            <SkillGapDisplay missingSkills={skillGapResult.missingSkills || []} suggestedHardSkillsResources={skillGapResult.suggestedHardSkillsResources || []} skillComparisonSummary={skillGapResult.skillComparisonSummary || "Analysis complete."} interviewTips={skillGapResult.interviewTips} suggestedJobCategories={skillGapResult.suggestedJobCategories} suggestedSoftSkills={skillGapResult.suggestedSoftSkills} mentorshipAdvice={skillGapResult.mentorshipAdvice} skillDevelopmentRoadmap={skillGapResult.skillDevelopmentRoadmap} />
                          </div>
                        )}
@@ -831,8 +837,16 @@ export default function EmployMintPage() {
                <CardContent className="space-y-6">
                  <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}>
                    {employMintPlusFeatures.map((feature) => (
-                     <Card key={feature.id} className="bg-secondary/30 hover:shadow-md transition-shadow flex flex-col">
-                       <CardHeader><CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle></CardHeader>
+                     <Card 
+                       key={feature.id} 
+                       className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
+                     >
+                       <CardHeader>
+                         <div className="mb-3 h-20 w-full bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                           <Image src={`https://placehold.co/120x80.png`} alt={`${feature.title} graphic`} width={120} height={80} data-ai-hint={feature.imageHint || "abstract tech"} className="object-contain"/>
+                         </div>
+                         <CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle>
+                       </CardHeader>
                        <CardContent className="flex-grow"><p className="text-sm text-muted-foreground">{feature.description}</p></CardContent>
                        <CardFooter>
                          <Link href={feature.href} passHref className="w-full">
@@ -855,5 +869,3 @@ export default function EmployMintPage() {
     </div>
   );
 }
-
-    
