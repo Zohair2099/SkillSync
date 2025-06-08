@@ -111,7 +111,7 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground; /* Removed bg-background */
+    @apply bg-background text-foreground; /* Apply bg-background here */
     position: relative;
     overflow-x: hidden;
   }
@@ -120,35 +120,35 @@
   body::after {
     content: "";
     position: fixed;
-    z-index: -1;
+    z-index: -1; /* These shapes will likely be hidden if body has an opaque background */
     border-radius: 50%;
-    opacity: 0.05; /* Increased opacity */
+    opacity: 0.05; 
     pointer-events: none;
     will-change: transform;
   }
 
   body::before {
-    width: 40vw; /* Increased size */
-    height: 40vw; /* Increased size */
-    min-width: 250px; /* Adjusted min-size */
-    min-height: 250px; /* Adjusted min-size */
+    width: 40vw; 
+    height: 40vw; 
+    min-width: 250px; 
+    min-height: 250px; 
     background-color: hsl(var(--primary));
-    top: -5vh; /* Adjusted position */
-    left: -15vw; /* Adjusted position */
+    top: -5vh; 
+    left: -15vw; 
   }
 
   body::after {
-    width: 30vw; /* Increased size */
-    height: 30vw; /* Increased size */
-    min-width: 200px; /* Adjusted min-size */
-    min-height: 200px; /* Adjusted min-size */
+    width: 30vw; 
+    height: 30vw; 
+    min-width: 200px; 
+    min-height: 200px; 
     background-color: hsl(var(--accent));
-    bottom: -10vh; /* Adjusted position */
-    right: -10vw; /* Adjusted position */
-    opacity: 0.04; /* Slightly different opacity for variation */
+    bottom: -10vh; 
+    right: -10vw; 
+    opacity: 0.04; 
   }
 
   html.dark body {
-     @apply text-foreground; /* Ensured dark mode also doesn't set bg-background on body */
+     @apply bg-background text-foreground; /* Apply bg-background here for dark mode */
   }
 }
