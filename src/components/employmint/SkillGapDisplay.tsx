@@ -214,7 +214,7 @@ const SkillGapDisplayComponent = ({
         {((suggestedSoftSkills && suggestedSoftSkills.length > 0) || mentorshipAdvice || (interviewTips && interviewTips.length > 0)) && (
             <div className="mt-6 pt-6 border-t">
                  <h3 className="text-lg font-semibold text-foreground mb-3">Additional Career Advice:</h3>
-                 <Accordion type="multiple" collapsible className="w-full space-y-3">
+                 <Accordion type="multiple" className="w-full space-y-3">
                     {suggestedSoftSkills && suggestedSoftSkills.length > 0 && (
                         <AccordionItem value="soft-skills">
                             <AccordionTrigger><MessageSquare className="mr-2 h-5 w-5 text-primary" />Valuable Soft Skills</AccordionTrigger>
@@ -256,3 +256,4 @@ const SkillGapDisplayComponent = ({
 }
 
 export const SkillGapDisplay = React.memo(SkillGapDisplayComponent);
+
