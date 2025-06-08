@@ -214,48 +214,57 @@ export default function EmployMintPage() {
 
  useEffect(() => {
     const syncActiveTabWithUrl = () => {
-      if (pathname === '/') { // Only manage tabs if on the homepage
-        let currentHash = typeof window !== "undefined" ? window.location.hash.substring(1) : "";
+      if (pathname === '/') {
+        const currentHash = typeof window !== "undefined" ? window.location.hash.substring(1) : "";
         
         if (HOME_PAGE_TAB_IDS.includes(currentHash)) {
-          if (activeTab !== currentHash) { // Only update if different
+          if (activeTab !== currentHash) {
             setActiveTab(currentHash);
           }
         } else {
-          // Default to job-matcher if hash is empty or not recognized
+          // Default to job-matcher and update URL if necessary
           if (activeTab !== HOME_PAGE_TAB_IDS[0]) {
             setActiveTab(HOME_PAGE_TAB_IDS[0]);
           }
-          // Update URL hash to reflect default, only if it's not already correct
-          if (typeof window !== "undefined" && window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
+          if (typeof window !== "undefined" && (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}` && currentHash !== HOME_PAGE_TAB_IDS[0])) {
              window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
           }
         }
       }
     };
 
-    syncActiveTabWithUrl(); // Sync on initial mount or pathname change to '/'
+    syncActiveTabWithUrl(); 
 
-    // Add event listeners for hash changes and browser back/forward
+    const handleHashChange = () => {
+        if(pathname === '/') { // Only react if on the homepage
+            const currentHash = window.location.hash.substring(1);
+            if (HOME_PAGE_TAB_IDS.includes(currentHash) && activeTab !== currentHash) {
+                setActiveTab(currentHash);
+            } else if (!currentHash && activeTab !== HOME_PAGE_TAB_IDS[0]) {
+                 setActiveTab(HOME_PAGE_TAB_IDS[0]); // Default if hash is removed
+            }
+        }
+    };
+    
     if (typeof window !== "undefined") {
-      window.addEventListener('hashchange', syncActiveTabWithUrl);
-      window.addEventListener('popstate', syncActiveTabWithUrl); // For browser back/forward
+      window.addEventListener('hashchange', handleHashChange);
+      // popstate is important for browser back/forward buttons changing the hash
+      window.addEventListener('popstate', handleHashChange); 
     }
 
     return () => {
-      // Cleanup event listeners
       if (typeof window !== "undefined") {
-        window.removeEventListener('hashchange', syncActiveTabWithUrl);
-        window.removeEventListener('popstate', syncActiveTabWithUrl);
+        window.removeEventListener('hashchange', handleHashChange);
+        window.removeEventListener('popstate', handleHashChange);
       }
     };
-  }, [pathname, activeTab]); // activeTab is added to ensure re-evaluation if it's programmatically changed elsewhere, though primarily driven by URL
+  }, [pathname, activeTab]);
 
 
   const handleTabChange = (value: string) => {
     if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      window.location.hash = value; // Update hash for desktop tab clicks
+      window.location.hash = value; 
     }
   };
 
@@ -861,9 +870,10 @@ export default function EmployMintPage() {
           </>
         )}
       </main>
-      <footer className={cn("text-center p-4 text-sm text-muted-foreground border-t border-border", viewMode === 'mobile' && 'pb-24')}>
+      <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
         © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
       </footer>
     </div>
   );
 }
+
