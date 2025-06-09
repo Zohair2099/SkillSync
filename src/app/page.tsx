@@ -256,7 +256,7 @@ export default function SkillSyncPage() {
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('popstate', handleHashChange);
     };
-  }, [pathname, activeTab]); // Rerun if pathname or activeTab itself changes to re-evaluate/resync
+  }, [pathname, activeTab]); 
 
 
   const handleTabChange = (value: string) => {
@@ -404,7 +404,7 @@ export default function SkillSyncPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="job-matcher" forceMount>
+            <TabsContent value="job-matcher">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
@@ -591,7 +591,7 @@ export default function SkillSyncPage() {
             </Card>
           </TabsContent>
 
-            <TabsContent value="job-analyzer" forceMount>
+            <TabsContent value="job-analyzer">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
@@ -651,7 +651,7 @@ export default function SkillSyncPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="skillsync-plus" forceMount>
+          <TabsContent value="skillsync-plus">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -866,4 +866,4 @@ export default function SkillSyncPage() {
     </div>
   );
 }
-
+    
