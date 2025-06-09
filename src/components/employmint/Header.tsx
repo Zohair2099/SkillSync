@@ -2,11 +2,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Cog, UserCircle, Maximize, Minimize } from 'lucide-react'; // Changed Briefcase to Cog
+import { UserCircle, Maximize, Minimize } from 'lucide-react'; // Cog removed
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useAppearance } from '@/context/AppearanceContext'; 
 import { cn } from '@/lib/utils';
+import { SkillSyncLogoIcon } from './SkillSyncLogoIcon'; // Added import for the new logo
 
 export function Header() {
   const { theme, toggleTheme, zoomLevel, setZoomLevel, viewMode, setViewMode, isDesktopFullscreen, toggleDesktopFullscreen } = useAppearance();
@@ -15,7 +16,7 @@ export function Header() {
     <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Cog className="h-8 w-8 text-primary" /> {/* Changed icon here */}
+          <SkillSyncLogoIcon className="h-8 w-8 text-primary" /> {/* Used new logo component */}
           <h1 className="text-3xl font-headline font-bold text-foreground">
             SkillSync
           </h1>
