@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Briefcase, UserCircle, Maximize, Minimize } from 'lucide-react';
+import { Cog, UserCircle, Maximize, Minimize } from 'lucide-react'; // Changed Briefcase to Cog
 import { Button } from '@/components/ui/button';
 import { SettingsPopover } from './SettingsPopover';
 import { useAppearance } from '@/context/AppearanceContext'; 
@@ -15,7 +15,7 @@ export function Header() {
     <header className="py-6 px-4 md:px-8 border-b bg-card sticky top-0 z-50 shadow-md">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <Briefcase className="h-8 w-8 text-primary" />
+          <Cog className="h-8 w-8 text-primary" /> {/* Changed icon here */}
           <h1 className="text-3xl font-headline font-bold text-foreground">
             SkillSync
           </h1>
