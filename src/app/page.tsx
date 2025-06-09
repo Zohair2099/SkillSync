@@ -384,7 +384,7 @@ export default function SkillSyncPage() {
       <Header />
       <main className={cn(
         "flex-grow container mx-auto px-4 py-8 space-y-8",
-        viewMode === 'mobile' && "pb-24" 
+         viewMode === 'mobile' && "pb-24" 
       )}>
         {viewMode === 'desktop' && (
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -406,7 +406,7 @@ export default function SkillSyncPage() {
               ))}
             </TabsList>
 
-            <TabsContent value="job-matcher">
+            <TabsContent value="job-matcher" forceMount>
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
@@ -593,7 +593,7 @@ export default function SkillSyncPage() {
             </Card>
           </TabsContent>
 
-            <TabsContent value="job-analyzer">
+            <TabsContent value="job-analyzer" forceMount>
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
@@ -653,7 +653,7 @@ export default function SkillSyncPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="skillsync-plus">
+          <TabsContent value="skillsync-plus" forceMount>
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -700,8 +700,7 @@ export default function SkillSyncPage() {
 
         {viewMode === 'mobile' && (
           <>
-            {activeTab === 'job-matcher' && (
-              <div key={activeTab}> 
+            <div className={cn(activeTab !== 'job-matcher' && 'hidden')}> 
                 <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
@@ -795,10 +794,8 @@ export default function SkillSyncPage() {
                   )}
                 </CardContent>
               </Card>
-              </div>
-            )}
-            {activeTab === 'job-analyzer' && (
-              <div key={activeTab}>
+            </div>
+            <div className={cn(activeTab !== 'job-analyzer' && 'hidden')}>
                  <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                  <CardHeader>
                    <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
@@ -827,10 +824,8 @@ export default function SkillSyncPage() {
                    )}
                  </CardContent>
                </Card>
-               </div>
-            )}
-            {activeTab === 'skillsync-plus' && (
-              <div key={activeTab}>
+            </div>
+            <div className={cn(activeTab !== 'skillsync-plus' && 'hidden')}>
                <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                <CardHeader>
                  <div className="flex justify-between items-center">
@@ -863,8 +858,7 @@ export default function SkillSyncPage() {
                  </div>
                </CardContent>
              </Card>
-             </div>
-            )}
+            </div>
           </>
         )}
       </main>
@@ -874,3 +868,4 @@ export default function SkillSyncPage() {
     </div>
   );
 }
+
