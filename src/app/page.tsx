@@ -3,7 +3,6 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-// Removed Image import as it's no longer used for SkillSync+ cards here
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -17,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List, UserCircle } from 'lucide-react';
+import { ListFilter, ChevronsUpDown, Briefcase, Brain, Plus, Route, FileText, MessageSquare, BarChart3, Mic, Share2, Building, Bell, ClipboardCheck, DollarSign as SalaryIcon, Users, LayoutGrid, List, UserCircle, Cog } from 'lucide-react';
 import { performSkillBasedJobMatching, performJobFocusedSkillComparison } from './actions';
 import type { SkillBasedJobMatchingInput, SkillBasedJobMatchingOutput } from '@/app/actions';
 import type { JobFocusedSkillComparisonOutput } from '@/app/actions';
@@ -209,62 +208,61 @@ export default function SkillSyncPage() {
 
   const [skillSyncPlusLayout, setSkillSyncPlusLayout] = useState<'list' | 'grid'>('grid');
   
-  const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
-
-
- useEffect(() => {
-    const syncActiveTabWithUrl = () => {
-      if (pathname === '/') {
-        const currentHash = typeof window !== "undefined" ? window.location.hash.substring(1) : "";
-        
-        if (HOME_PAGE_TAB_IDS.includes(currentHash)) {
-          if (activeTab !== currentHash) {
-            setActiveTab(currentHash);
-          }
-        } else {
-          // Default to job-matcher and update URL if necessary
-          if (activeTab !== HOME_PAGE_TAB_IDS[0]) {
-            setActiveTab(HOME_PAGE_TAB_IDS[0]);
-          }
-          if (typeof window !== "undefined" && (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}` && currentHash !== HOME_PAGE_TAB_IDS[0])) {
-             window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
-          }
-        }
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== "undefined" && pathname === '/') {
+      const hash = window.location.hash.substring(1);
+      if (HOME_PAGE_TAB_IDS.includes(hash)) {
+        return hash;
       }
-    };
+    }
+    return HOME_PAGE_TAB_IDS[0];
+  });
 
-    syncActiveTabWithUrl(); 
+  // Effect to update URL hash when activeTab changes (e.g., by desktop Tabs onValueChange)
+  useEffect(() => {
+    if (pathname === '/' && viewMode === 'desktop') {
+      const currentHash = typeof window !== "undefined" ? window.location.hash.substring(1) : "";
+      if (activeTab !== currentHash) {
+        // Using pushState to allow back/forward navigation for desktop tabs
+        window.history.pushState(null, '', `/#${activeTab}`);
+      }
+    }
+  }, [activeTab, pathname, viewMode]);
 
+  // Effect to listen to URL hash changes (e.g., from mobile nav, browser back/forward) and update activeTab
+  useEffect(() => {
     const handleHashChange = () => {
-        if(pathname === '/') { // Only react if on the homepage
-            const currentHash = window.location.hash.substring(1);
-            if (HOME_PAGE_TAB_IDS.includes(currentHash) && activeTab !== currentHash) {
-                setActiveTab(currentHash);
-            } else if (!currentHash && activeTab !== HOME_PAGE_TAB_IDS[0]) {
-                 setActiveTab(HOME_PAGE_TAB_IDS[0]); // Default if hash is removed
+      if (pathname === '/') {
+        const newHash = window.location.hash.substring(1);
+        if (HOME_PAGE_TAB_IDS.includes(newHash)) {
+          if (activeTab !== newHash) {
+            setActiveTab(newHash);
+          }
+        } else if (HOME_PAGE_TAB_IDS[0] !== activeTab) {
+            setActiveTab(HOME_PAGE_TAB_IDS[0]);
+            if (window.location.hash !== `#${HOME_PAGE_TAB_IDS[0]}`) {
+                 window.history.replaceState(null, '', `/#${HOME_PAGE_TAB_IDS[0]}`);
             }
         }
-    };
-    
-    if (typeof window !== "undefined") {
-      window.addEventListener('hashchange', handleHashChange);
-      // popstate is important for browser back/forward buttons changing the hash
-      window.addEventListener('popstate', handleHashChange); 
-    }
-
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener('hashchange', handleHashChange);
-        window.removeEventListener('popstate', handleHashChange);
       }
     };
-  }, [pathname, activeTab]);
+
+    handleHashChange(); // Sync on mount
+
+    window.addEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange); 
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
+  }, [pathname, activeTab]); // Rerun if pathname or activeTab itself changes to re-evaluate/resync
 
 
   const handleTabChange = (value: string) => {
-    if (viewMode === 'desktop' && HOME_PAGE_TAB_IDS.includes(value)) {
+    if (HOME_PAGE_TAB_IDS.includes(value)) {
       setActiveTab(value);
-      window.location.hash = value; 
+      // URL hash will be updated by the useEffect hook that depends on activeTab
     }
   };
 
@@ -701,7 +699,7 @@ export default function SkillSyncPage() {
         {viewMode === 'mobile' && (
           <>
             <div className={cn(activeTab !== 'job-matcher' && 'hidden')}> 
-                <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
+                <Card className="shadow-lg rounded-xl animate-fade-in">
                 <CardHeader>
                   <CardTitle className="font-headline text-2xl text-foreground">Skill-Based Job Matching</CardTitle>
                   <CardDescription>
@@ -796,7 +794,7 @@ export default function SkillSyncPage() {
               </Card>
             </div>
             <div className={cn(activeTab !== 'job-analyzer' && 'hidden')}>
-                 <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
+                 <Card className="shadow-lg rounded-xl animate-fade-in">
                  <CardHeader>
                    <CardTitle className="font-headline text-2xl text-foreground">Job-Focused Skill Comparison</CardTitle>
                    <CardDescription className="space-y-2 text-sm">
@@ -826,7 +824,7 @@ export default function SkillSyncPage() {
                </Card>
             </div>
             <div className={cn(activeTab !== 'skillsync-plus' && 'hidden')}>
-               <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
+               <Card className="shadow-lg rounded-xl animate-fade-in">
                <CardHeader>
                  <div className="flex justify-between items-center">
                    <CardTitle className="font-headline text-2xl text-foreground flex items-center"><Plus className="mr-2 h-6 w-6 text-primary"/>SkillSync+ Features</CardTitle>
