@@ -1,7 +1,7 @@
 
-# Technologies Used in EmployMint
+# Technologies Used in SkillSync
 
-This document outlines the key technologies, frameworks, and libraries used to build the EmployMint application.
+This document outlines the key technologies, frameworks, and libraries used to build the SkillSync application.
 
 ## Core Frontend Framework & Libraries:
 - **Next.js:** React framework for server-side rendering, static site generation, and a full-stack experience (App Router).

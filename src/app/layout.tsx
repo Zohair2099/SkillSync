@@ -10,7 +10,7 @@ import MainContentWrapper from '@/components/layout/MainContentWrapper';
 import { MobileBottomNavigation } from '@/components/layout/MobileBottomNavigation'; // Added import
 
 export const metadata: Metadata = {
-  title: 'EmployMint',
+  title: 'SkillSync',
   description: 'AI-Powered Career Advancement Platform',
 };
 

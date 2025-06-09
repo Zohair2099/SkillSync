@@ -3,10 +3,10 @@
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 
-const LOCAL_STORAGE_THEME_KEY = 'employmint-theme';
-const LOCAL_STORAGE_ZOOM_KEY = 'employmint-zoom';
-const LOCAL_STORAGE_VIEW_MODE_KEY = 'employmint-view-mode';
-const LOCAL_STORAGE_COLOR_PALETTE_KEY = 'employmint-color-palette';
+const LOCAL_STORAGE_THEME_KEY = 'skillsync-theme';
+const LOCAL_STORAGE_ZOOM_KEY = 'skillsync-zoom';
+const LOCAL_STORAGE_VIEW_MODE_KEY = 'skillsync-view-mode';
+const LOCAL_STORAGE_COLOR_PALETTE_KEY = 'skillsync-color-palette';
 
 type Theme = 'light' | 'dark';
 type ViewMode = 'desktop' | 'mobile';
@@ -30,7 +30,7 @@ const availableColorPalettes: ColorPalette[] = [
     },
   },
   {
-    name: 'EmployMint',
+    name: 'SkillSync', // Renamed from EmployMint
     colors: {
       primary: '150 60% 50%',  
       accent: '207 88% 68%',   

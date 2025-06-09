@@ -557,7 +557,7 @@ function ResumeBuilderPageContent() {
         </Card>
       </main>
       <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border no-print">
-        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
+        © {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.
       </footer>
     </div>
   );

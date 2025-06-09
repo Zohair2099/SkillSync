@@ -147,7 +147,7 @@ export default function InterviewPracticePage() {
             </CardContent>
           </Card>
         </main>
-        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.</footer>
+        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.</footer>
       </div>
     );
   }
@@ -235,7 +235,7 @@ export default function InterviewPracticePage() {
             </CardFooter>
           </Card>
         </main>
-        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.</footer>
+        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.</footer>
       </div>
     );
   }
@@ -303,7 +303,7 @@ export default function InterviewPracticePage() {
             </CardContent>
           </Card>
         </main>
-        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.</footer>
+        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">© {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.</footer>
       </div>
     );
   }

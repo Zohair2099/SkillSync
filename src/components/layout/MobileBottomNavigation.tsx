@@ -9,12 +9,12 @@ import { useAppearance } from '@/context/AppearanceContext';
 import { cn } from '@/lib/utils';
 
 // Define tab IDs consistent with HOME_PAGE_TAB_IDS in page.tsx
-const HOMEPAGE_TAB_IDS = ["job-matcher", "job-analyzer", "employmint-plus"];
+const HOMEPAGE_TAB_IDS = ["job-matcher", "job-analyzer", "skillsync-plus"]; // Updated from employmint-plus
 
 const TABS = [
   { href: `/#${HOMEPAGE_TAB_IDS[0]}`, title: "Matcher", icon: Briefcase, id: HOMEPAGE_TAB_IDS[0] },
   { href: `/#${HOMEPAGE_TAB_IDS[1]}`, title: "Analyzer", icon: Brain, id: HOMEPAGE_TAB_IDS[1] },
-  { href: `/#${HOMEPAGE_TAB_IDS[2]}`, title: "EmployMint+", icon: Plus, id: HOMEPAGE_TAB_IDS[2] },
+  { href: `/#${HOMEPAGE_TAB_IDS[2]}`, title: "SkillSync+", icon: Plus, id: HOMEPAGE_TAB_IDS[2] }, // Updated title
   { href: "/profile", title: "Profile", icon: UserCircle, id: "profile" },
 ];
 

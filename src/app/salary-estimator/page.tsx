@@ -87,11 +87,11 @@ export default function SalaryEstimatorPage() {
   const getConfidenceColorClass = (level: 'high' | 'medium' | 'low') => {
     switch (level) {
       case 'high':
-        return 'text-accent'; // Theme's green
+        return 'text-accent'; 
       case 'medium':
-        return 'text-yellow'; // Theme's yellow
+        return 'text-yellow'; 
       case 'low':
-        return 'text-destructive'; // Theme's red
+        return 'text-destructive'; 
       default:
         return 'text-foreground';
     }
@@ -245,7 +245,7 @@ export default function SalaryEstimatorPage() {
         </Card>
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
-        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
+        © {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.
       </footer>
     </div>
   );

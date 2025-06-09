@@ -1,5 +1,5 @@
 
-# EmployMint: AI-Powered Career Advancement Platform
+# SkillSync: AI-Powered Career Advancement Platform
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -7,7 +7,7 @@
     - [Profile Management](#profile-management)
     - [Skill-Based Job Matching](#skill-based-job-matching)
     - [Job-Focused Skill Comparison / Job Fit Analysis](#job-focused-skill-comparison--job-fit-analysis)
-    - [EmployMint+ Features](#employmint-features)
+    - [SkillSync+ Features](#skillsync-features)
         - [Personalized Skill Development Path](#personalized-skill-development-path)
         - [Resume Builder](#resume-builder)
         - [Soft Skill Assessment](#soft-skill-assessment)
@@ -28,7 +28,7 @@
 
 ## Overview
 
-EmployMint is a Next.js web application designed to assist users in their career journey through a suite of AI-powered tools. It helps with skill assessment, job matching, resume building, interview preparation, market trend analysis, and more, aiming to provide a comprehensive platform for career development and advancement. The application primarily uses local browser storage for user data, ensuring privacy and quick access.
+SkillSync is a Next.js web application designed to assist users in their career journey through a suite of AI-powered tools. It helps with skill assessment, job matching, resume building, interview preparation, market trend analysis, and more, aiming to provide a comprehensive platform for career development and advancement. The application primarily uses local browser storage for user data, ensuring privacy and quick access.
 
 ## Main Features
 
@@ -67,7 +67,7 @@ This feature helps users understand how their current skillset aligns with speci
     -   General interview preparation tips and mentorship advice.
     -   A generic skill development roadmap.
 
-### EmployMint+ Features (Main Tab - Collection of sub-features)
+### SkillSync+ Features (Main Tab - Collection of sub-features)
 This section provides access to a variety of specialized tools to further aid in career development.
 
 #### Personalized Skill Development Path (`/personalized-skill-path`)
@@ -77,7 +77,7 @@ This section provides access to a variety of specialized tools to further aid in
 
 #### Resume Builder (`/resume-builder`)
 -   A tool to craft professional resumes. Users can input details across various sections:
-    -   **Personal Details:** Name, contact info, address, professional summary, social/portfolio links (can be pre-filled from the user's EmployMint profile).
+    -   **Personal Details:** Name, contact info, address, professional summary, social/portfolio links (can be pre-filled from the user's SkillSync profile).
     -   **Work Experience:** Job title, company name, location, employment dates, and a list of responsibilities/achievements for each role.
     -   **Education:** Degree, institution, location, graduation date, and any relevant details (GPA, honors, coursework).
     -   **Skills:** Pre-filled from the user's profile but can be customized specifically for the resume.
@@ -120,8 +120,8 @@ This section provides access to a variety of specialized tools to further aid in
 
 #### Social Integration & Networking (`/social-networking`)
 -   A hub for managing professional online presence and community engagement.
--   **Profile Links:** Encourages users to add their professional social media links (LinkedIn, GitHub, etc.) to their EmployMint Profile page, which can then be used by features like the Resume Builder.
--   **Community Access:** Provides a link to the EmployMint Community Forum.
+-   **Profile Links:** Encourages users to add their professional social media links (LinkedIn, GitHub, etc.) to their SkillSync Profile page, which can then be used by features like the Resume Builder.
+-   **Community Access:** Provides a link to the SkillSync Community Forum.
 -   **Future Features:** Mentions that advanced networking features like direct mentor matching and deeper integrations with platforms like LinkedIn are planned for future updates.
 
 #### Community Forum (`/community-forum`)
@@ -170,7 +170,7 @@ Accessible via the settings (cog) icon in the header, allowing users to customiz
 -   Questions are organized by feature categories (e.g., "Skill-Based Job Matching FAQs," "AI Resume Builder FAQs") and presented in an accordion style for easy navigation.
 
 ### Credits (`/credits`)
--   Displays information about the creators of the EmployMint application, including names, roll numbers, and placeholder images.
+-   Displays information about the creators of the SkillSync application, including names, roll numbers, and placeholder images.
 
 ## Key Technologies Used
 
@@ -213,4 +213,4 @@ This application is designed to be developed and run within the Firebase Studio 
 -   Accessibility improvements (WCAG compliance).
 
 ---
-This README aims to provide a comprehensive guide to the EmployMint application.
+This README aims to provide a comprehensive guide to the SkillSync application.

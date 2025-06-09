@@ -45,11 +45,11 @@ export default function ProfilePage() {
   const [showResetConfirmationDialog, setShowResetConfirmationDialog] = useState(false);
 
   const LOCAL_STORAGE_KEYS_TO_RESET = [
-    'employmint-user-profile',
-    'employmint-theme',
-    'employmint-zoom',
-    'employmint-view-mode',
-    'employmint-color-palette',
+    'skillsync-user-profile',
+    'skillsync-theme',
+    'skillsync-zoom',
+    'skillsync-view-mode',
+    'skillsync-color-palette',
     // Add any other app-specific localStorage keys here if they exist.
   ];
 
@@ -111,7 +111,7 @@ export default function ProfilePage() {
       });
       toast({
         title: "App Data Reset",
-        description: "All application data has been cleared. The app will now reload.",
+        description: "All SkillSync application data has been cleared. The app will now reload.",
         variant: "destructive"
       });
       setShowResetConfirmationDialog(false); 
@@ -192,7 +192,7 @@ export default function ProfilePage() {
                 <CardHeader>
                   <CardTitle className="text-destructive flex items-center"><Trash className="mr-2 h-5 w-5" />Reset Application Data</CardTitle>
                   <CardDescription className="text-destructive/80">
-                    This will clear all your profile information, skills, appearance settings, and any other data stored by EmployMint in this browser. This action cannot be undone.
+                    This will clear all your profile information, skills, appearance settings, and any other data stored by SkillSync in this browser. This action cannot be undone.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -228,7 +228,7 @@ export default function ProfilePage() {
                 <Trash className="mr-2 h-5 w-5"/>FINAL WARNING: Confirm Reset
               </AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
-                <p>You are about to permanently erase ALL EmployMint application data from this browser. This includes:</p>
+                <p>You are about to permanently erase ALL SkillSync application data from this browser. This includes:</p>
                 <ul className="list-disc list-inside pl-4 text-sm">
                     <li>Your profile information (name, age, picture)</li>
                     <li>All added skills and their experience levels</li>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
 
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
-        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
+        © {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.
       </footer>
     </div>
   );

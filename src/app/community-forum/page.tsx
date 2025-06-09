@@ -243,7 +243,7 @@ export default function CommunityForumPage() {
             <div className="flex justify-center mb-3">
                 <Users className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="font-headline text-3xl text-primary">EmployMint Community Forum</CardTitle>
+            <CardTitle className="font-headline text-3xl text-primary">SkillSync Community Forum</CardTitle>
             <CardDescription className="text-lg">
               Connect with peers, share experiences, and grow your network.
             </CardDescription>
@@ -371,9 +371,8 @@ export default function CommunityForumPage() {
 
       </main>
        <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
-        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
+        © {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.
       </footer>
     </div>
   );
 }
-

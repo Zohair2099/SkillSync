@@ -4,7 +4,7 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import type { Skill } from '@/components/employmint/SkillInput';
 
-const LOCAL_STORAGE_PROFILE_KEY = 'employmint-user-profile';
+const LOCAL_STORAGE_PROFILE_KEY = 'skillsync-user-profile';
 
 interface SocialLinks {
   linkedin: string;

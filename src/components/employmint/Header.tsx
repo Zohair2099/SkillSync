@@ -17,7 +17,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <Briefcase className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-headline font-bold text-foreground">
-            EmployMint
+            SkillSync
           </h1>
         </Link>
         <div className="flex items-center gap-2">

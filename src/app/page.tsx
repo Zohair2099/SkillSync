@@ -3,7 +3,7 @@
 
 import React, { useState, useTransition, useMemo, useEffect, useContext } from 'react';
 import Link from 'next/link';
-// Removed Image import as it's no longer used for EmployMint+ cards here
+// Removed Image import as it's no longer used for SkillSync+ cards here
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/employmint/Header';
 import { JobRecommendationCard } from '@/components/employmint/JobRecommendationCard';
@@ -88,7 +88,7 @@ const JOB_TITLES_PREDEFINED = [
   "Architect", "Real Estate Agent", "Pilot", "Psychologist", "Surveyor", "Interior Designer"
 ];
 
-const employMintPlusFeatures = [
+const skillSyncPlusFeatures = [
   {
     id: "skill-dev-path",
     icon: Route,
@@ -141,7 +141,7 @@ const employMintPlusFeatures = [
     id: "community-forum",
     icon: Users,
     title: "Community Forum",
-    description: "Join discussions, share tips, and network with other EmployMint users.",
+    description: "Join discussions, share tips, and network with other SkillSync users.",
     href: "/community-forum",
     actionText: "Join the Discussion",
   },
@@ -179,9 +179,9 @@ const employMintPlusFeatures = [
   }
 ];
 
-const HOME_PAGE_TAB_IDS = ["job-matcher", "job-analyzer", "employmint-plus"];
+const HOME_PAGE_TAB_IDS = ["job-matcher", "job-analyzer", "skillsync-plus"];
 
-export default function EmployMintPage() {
+export default function SkillSyncPage() {
   const { profile } = useProfile();
   const userSkills = profile.skills;
   const { viewMode } = useAppearance();
@@ -207,7 +207,7 @@ export default function EmployMintPage() {
   const { toast } = useToast();
   const { jobMatchResults, setJobMatchResults } = useContext(JobResultsContext);
 
-  const [employMintPlusLayout, setEmployMintPlusLayout] = useState<'list' | 'grid'>('grid');
+  const [skillSyncPlusLayout, setSkillSyncPlusLayout] = useState<'list' | 'grid'>('grid');
   
   const [activeTab, setActiveTab] = useState(HOME_PAGE_TAB_IDS[0]);
 
@@ -270,9 +270,9 @@ export default function EmployMintPage() {
 
   useEffect(() => {
     if (viewMode === 'mobile') {
-      setEmployMintPlusLayout('list');
+      setSkillSyncPlusLayout('list');
     } else {
-      setEmployMintPlusLayout('grid');
+      setSkillSyncPlusLayout('grid');
     }
   }, [viewMode]);
 
@@ -376,7 +376,7 @@ export default function EmployMintPage() {
   const desktopTabDefinitions = [
     { value: "job-matcher", title: "Find Matching Jobs", icon: Briefcase },
     { value: "job-analyzer", title: "Analyze Job Fit", icon: Brain },
-    { value: "employmint-plus", title: "EmployMint+", icon: Plus },
+    { value: "skillsync-plus", title: "SkillSync+", icon: Plus },
   ];
 
   return (
@@ -653,12 +653,12 @@ export default function EmployMintPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="employmint-plus">
+          <TabsContent value="skillsync-plus">
             <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="font-headline text-2xl text-foreground flex items-center">
-                    <Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features
+                    <Plus className="mr-2 h-6 w-6 text-primary"/>SkillSync+ Features
                   </CardTitle>
                 </div>
                 <CardDescription>
@@ -667,13 +667,12 @@ export default function EmployMintPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className='grid md:grid-cols-2 gap-6'>
-                  {employMintPlusFeatures.map((feature) => (
+                  {skillSyncPlusFeatures.map((feature) => (
                     <Card
                       key={feature.id}
                       className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
                     >
                       <CardHeader>
-                        {/* Removed image container div */}
                         <CardTitle className="text-lg text-primary flex items-center">
                           <feature.icon className="mr-2 h-5 w-5" />
                           {feature.title}
@@ -830,28 +829,27 @@ export default function EmployMintPage() {
                </Card>
                </div>
             )}
-            {activeTab === 'employmint-plus' && (
+            {activeTab === 'skillsync-plus' && (
               <div key={activeTab}>
                <Card className="shadow-lg rounded-xl animate-fade-in-slide-from-right">
                <CardHeader>
                  <div className="flex justify-between items-center">
-                   <CardTitle className="font-headline text-2xl text-foreground flex items-center"><Plus className="mr-2 h-6 w-6 text-primary"/>EmployMint+ Features</CardTitle>
+                   <CardTitle className="font-headline text-2xl text-foreground flex items-center"><Plus className="mr-2 h-6 w-6 text-primary"/>SkillSync+ Features</CardTitle>
                    <div className="flex gap-1">
-                     <Button variant={employMintPlusLayout === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEmployMintPlusLayout('list')} aria-label="List view" className={employMintPlusLayout === 'list' ? 'bg-primary/20 text-primary' : ''}><List className="h-5 w-5" /></Button>
-                     <Button variant={employMintPlusLayout === 'grid' ? 'secondary' : 'ghost'} size="icon" onClick={() => setEmployMintPlusLayout('grid')} aria-label="Grid view" className={employMintPlusLayout === 'grid' ? 'bg-primary/20 text-primary' : ''}><LayoutGrid className="h-5 w-5" /></Button>
+                     <Button variant={skillSyncPlusLayout === 'list' ? 'secondary' : 'ghost'} size="icon" onClick={() => setSkillSyncPlusLayout('list')} aria-label="List view" className={skillSyncPlusLayout === 'list' ? 'bg-primary/20 text-primary' : ''}><List className="h-5 w-5" /></Button>
+                     <Button variant={skillSyncPlusLayout === 'grid' ? 'secondary' : 'ghost'} size="icon" onClick={() => setSkillSyncPlusLayout('grid')} aria-label="Grid view" className={skillSyncPlusLayout === 'grid' ? 'bg-primary/20 text-primary' : ''}><LayoutGrid className="h-5 w-5" /></Button>
                    </div>
                  </div>
                  <CardDescription>Unlock advanced tools for your career journey.</CardDescription>
                </CardHeader>
                <CardContent className="space-y-6">
-                 <div className={cn(employMintPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}>
-                   {employMintPlusFeatures.map((feature) => (
+                 <div className={cn(skillSyncPlusLayout === 'list' ? 'space-y-4' : 'grid grid-cols-1 gap-4')}>
+                   {skillSyncPlusFeatures.map((feature) => (
                      <Card 
                        key={feature.id} 
                        className="bg-secondary/30 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out flex flex-col"
                      >
                        <CardHeader>
-                          {/* Removed image container div */}
                          <CardTitle className="text-lg text-primary flex items-center"><feature.icon className="mr-2 h-5 w-5" />{feature.title}</CardTitle>
                        </CardHeader>
                        <CardContent className="flex-grow"><p className="text-sm text-muted-foreground">{feature.description}</p></CardContent>
@@ -871,9 +869,8 @@ export default function EmployMintPage() {
         )}
       </main>
       <footer className="text-center p-4 text-sm text-muted-foreground border-t border-border">
-        © {new Date().getFullYear()} EmployMint. AI-Powered Career Advancement.
+        © {new Date().getFullYear()} SkillSync. AI-Powered Career Advancement.
       </footer>
     </div>
   );
 }
-
