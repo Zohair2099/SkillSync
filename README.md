@@ -161,8 +161,10 @@ This section provides access to a variety of specialized tools to further aid in
 ### Appearance Settings (Cog Icon in Header)
 Accessible via the settings (cog) icon in the header, allowing users to customize their viewing experience.
 -   **Dark Mode Toggle:** Switch between light and dark application themes.
+-   **Color Palette:** Choose from multiple color schemes that affect primary, accent, and secondary colors.
 -   **Zoom Level:** Adjust the overall zoom of the application interface (from 50% to 200%).
 -   **View Mode:** Toggle between 'Desktop' and 'Mobile' view simulations. In 'Mobile' mode, for instance, the main navigation tabs move to a fixed bottom bar, and content layouts may adapt.
+-   **Fullscreen (Desktop):** A dedicated button to enter or exit a fullscreen view of the application on desktop devices.
 -   These settings are persisted locally in the browser's local storage.
 
 ### FAQs (`/faqs`)
