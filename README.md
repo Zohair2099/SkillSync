@@ -216,3 +216,4 @@ This application is designed to be developed and run within the Firebase Studio 
 
 ---
 This README aims to provide a comprehensive guide to the SkillSync application.
+# SkillSync
