@@ -23,7 +23,7 @@
     - [FAQs](#faqs)
     - [Credits](#credits)
 3. [Key Technologies Used](#key-technologies-used)
-4. [Getting Started (in Firebase Studio)](#getting-started-in-firebase-studio)
+4. [Getting Started ](#getting-started-)
 5. [Future Enhancements](#future-enhancements)
 
 ## Overview
@@ -192,12 +192,11 @@ Accessible via the settings (cog) icon in the header, allowing users to customiz
     -   **React Context API:** Used for managing global state such as user profile information, job match results, resume data, and appearance settings.
     -   **Browser Local Storage:** For persisting user profile data and application settings on the client-side.
 
-## Getting Started (in Firebase Studio)
+## Getting Started:
 
-This application is designed to be developed and run within the Firebase Studio environment.
-1.  The project dependencies are defined in `package.json` and should be automatically managed by the Firebase Studio setup.
+1.  The project dependencies are defined in `package.json`.
 2.  The main entry point for exploration is the homepage, located at `src/app/page.tsx`.
-3.  Genkit AI flows are located in `src/ai/flows/`. Ensure any necessary API keys for Google AI services are configured, typically managed through environment variables (check `.env` if applicable, though often handled by the Studio).
+3.  Genkit AI flows are located in `src/ai/flows/`. Ensure any necessary API keys for Google AI services are configured, typically managed through environment variables (check `.env` if applicable).
 
 ## Future Enhancements
 
